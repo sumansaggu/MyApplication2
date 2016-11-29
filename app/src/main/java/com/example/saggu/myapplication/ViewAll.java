@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,16 +18,17 @@ import android.widget.Toast;
 public class ViewAll extends AppCompatActivity {
 
     SimpleCursorAdapter simpleCursorAdapter;
-    DbHendler db;
+    DbHendler dbHendler;
     ListView lvProducts;
     TextView textView4;
+    PersonInfo personInfo;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all);
-        db = new DbHendler(this, null, null, 1);
+        dbHendler = new DbHendler(this, null, null, 1);
         lvProducts = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
 
@@ -54,47 +56,34 @@ public class ViewAll extends AppCompatActivity {
     }
 
 
-
-
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         super.onContextItemSelected(item);
         // Get extra info about list item that was long-pressed
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (item.getTitle() == "Delete") {
-            db.deletePerson((int) menuInfo.id);
+            dbHendler.deletePerson((int) menuInfo.id);
             Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
-            //Toast.makeText(getApplicationContext(), "Option 1: ID "+menuInfo.id+", position "+menuInfo.position, Toast.LENGTH_SHORT).show();
-            //If your ListView's content was created by attaching it to a database cursor, the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
+            Toast.makeText(getApplicationContext(), "Option 1: ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
+            //If your ListView's content was created by attaching it to a database cursor,
+            // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
             displayProductList();
-        } else if (item.getTitle() == "Edit") {
 
+
+        } else if (item.getTitle() == "Edit") {
             Toast.makeText(getApplicationContext(), "Edit selcected", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
+            dbHendler.getInfo((int) menuInfo.id);
+
+
 
         }
         return true;
     }
 
 
-
-    public void deleteItem(int id) {
-
-
-    }
-
-
-    public void editItem(int id) {
-
-//your edit code
-
-    }
-
-
     public void displayProductList() {
         try {
-            Cursor cursor = db.getAllProducts();
+            Cursor cursor = dbHendler.getAllProducts();
             if (cursor == null) {
                 textView4.setText("Unable to generate cursor.");
                 return;
