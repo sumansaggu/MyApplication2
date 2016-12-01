@@ -22,6 +22,7 @@ public class ViewAll extends AppCompatActivity {
     ListView lvProducts;
     TextView textView4;
     PersonInfo personInfo;
+    MainActivity activity;
 
 
     @Override
@@ -71,12 +72,19 @@ public class ViewAll extends AppCompatActivity {
 
 
         } else if (item.getTitle() == "Edit") {
-            Toast.makeText(getApplicationContext(), "Edit selcected", Toast.LENGTH_LONG).show();
-            dbHendler.getInfo((int) menuInfo.id);
+            int id = (int) menuInfo.id;
 
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("ID", id);
 
+            startActivity(intent);
 
-        }
+            //PersonInfo personInfo = dbHendler.getInfo((int) menuInfo.id);
+           // String name = personInfo.getName().toString().trim();
+           // String no   = personInfo.getPhoneNumber().toString().trim();
+           // Toast.makeText(getApplicationContext(), "Edit selcected For " + name + " and " + no, Toast.LENGTH_LONG).show();
+
+                   }
         return true;
     }
 
@@ -94,7 +102,7 @@ public class ViewAll extends AppCompatActivity {
                 return;
             }*/
             String[] columns = new String[]{
-                    // DbHendler.KEY_ID,
+                    //DbHendler.KEY_ID,
                     DbHendler.KEY_NAME,
                     DbHendler.KEY_PHONE_NO
             };

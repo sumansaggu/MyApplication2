@@ -59,17 +59,20 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
     // Adding new contact
-    public void addPerson(PersonInfo info) {
+    public void addPerson(PersonInfo personInfo) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, info.getName()); //person name
-        values.put(KEY_PHONE_NO, info.getPhoneNumber());    // phone no.
+        values.put(KEY_NAME, personInfo.getName()); //person name
+        values.put(KEY_PHONE_NO, personInfo.getPhoneNumber());    // phone no.
         //Insert row
         db.insert(TABLE_PERSON_INFO, null, values);
         db.close(); //close database
     }
 
-    //Updating Record //Updating single contact
+
+
+
+    //Updating a Record
     public int updateInfo(PersonInfo info) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -79,6 +82,10 @@ public class DbHendler extends SQLiteOpenHelper {
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?",
                 new String[]{String.valueOf(info.getID())});
     }
+
+
+
+
 
     //
     public void deletePerson(int ID) {
@@ -198,9 +205,6 @@ public class DbHendler extends SQLiteOpenHelper {
             cursor.moveToFirst();
         PersonInfo info = new PersonInfo(Integer.parseInt(cursor.getString(0)),
                 cursor.getString(1),cursor.getString(2));
-
-
-
 
         String name = info.getName().toString().trim();           //only to
         String phone = info.getPhoneNumber().toString().trim();    // show
