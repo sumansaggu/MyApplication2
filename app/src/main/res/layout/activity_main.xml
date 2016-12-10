@@ -21,37 +21,16 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <Button
-        android:text="Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/searchtxt"
-        android:layout_toRightOf="@+id/searchtxt"
-        android:layout_toEndOf="@+id/searchtxt"
-        android:layout_marginLeft="72dp"
-        android:layout_marginStart="72dp"
-        android:id="@+id/searchbtn"
-        android:onClick="searchByID" />
-
-    <EditText
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/searchtxt"
-        android:layout_marginLeft="48dp"
-        android:layout_marginStart="48dp"
-        android:layout_marginBottom="57dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
     <include layout="@layout/content_main"
         android:layout_width="match_parent"
-        android:layout_height="332dp"
-        android:layout_above="@+id/searchtxt"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="35dp" />
+        android:layout_height="500dp"
+        android:layout_marginTop="50dp"
+        android:id="@+id/include"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+
+
+
 
 </RelativeLayout>

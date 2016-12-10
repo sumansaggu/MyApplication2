@@ -6,24 +6,31 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class DbHendler extends SQLiteOpenHelper {
     // All Static variables
     // Database Version
-    private static final int DATABASE_VER = 3;
+    private static final int DATABASE_VER = 7;
+
+
     //DATABASE NAME
     private static final String DATABASE_NAME = "myInfoManager.db";
+
+
     //table name
     private static final String TABLE_PERSON_INFO = "personInfo";
+
     //Table columns names
     public static final String KEY_ID = "_id";
     public static final String KEY_NAME = "name";
     public static final String KEY_PHONE_NO = "phone_no";
+    public static final String KEY_CUST_NO = "cust_no";
+    public static final String KEY_FEES = "fees";
+    public static final String KEY_BALANCE = "balance";
+
 
     public DbHendler(Context context, String name,
                      SQLiteDatabase.CursorFactory factory, int version) {
@@ -33,8 +40,8 @@ public class DbHendler extends SQLiteOpenHelper {
     // Creating Tables
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_PERSON_INFO + "("
-                + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_NAME + " TEXT,"
-                + KEY_PHONE_NO + " TEXT )";
+                + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT,"
+                + KEY_PHONE_NO + " TEXT, " + KEY_CUST_NO + " INTEGER, " + KEY_FEES + " INTEGER, " + KEY_BALANCE + " INTEGER " + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -46,10 +53,11 @@ public class DbHendler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
     public Cursor getAllProducts() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_PERSON_INFO, new String[]{KEY_ID, KEY_NAME,
-                KEY_PHONE_NO}, null, null, KEY_NAME, null, null);
+                KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE}, null, null, KEY_CUST_NO, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
             return cursor;
@@ -64,27 +72,25 @@ public class DbHendler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, personInfo.getName()); //person name
         values.put(KEY_PHONE_NO, personInfo.getPhoneNumber());    // phone no.
+        values.put(KEY_CUST_NO, personInfo.get_cust_no());    // customer no.
+        values.put(KEY_FEES, personInfo.get_fees());    // fees
         //Insert row
         db.insert(TABLE_PERSON_INFO, null, values);
         db.close(); //close database
     }
 
 
-
-
     //Updating a Record
-    public int updateInfo(PersonInfo info) {
+    public int updateInfo(PersonInfo personInfo) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, info.getName());
-        values.put(KEY_PHONE_NO, info.getPhoneNumber());
+        values.put(KEY_NAME, personInfo.getName());
+        values.put(KEY_PHONE_NO, personInfo.getPhoneNumber());
         //updating row
-        return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?",
-                new String[]{String.valueOf(info.getID())});
+
+        return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(personInfo.getID())});
+
     }
-
-
-
 
 
     //
@@ -93,8 +99,6 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_ID + "=\"" + ID + "\";");
         db.close();
     }
-
-
 
 
     // Getting All Contacts
@@ -107,18 +111,54 @@ public class DbHendler extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                PersonInfo contact = new PersonInfo();
-                contact.setID(Integer.parseInt(cursor.getString(0)));
-                contact.setName(cursor.getString(1));
-                contact.setPhoneNumber(cursor.getString(2));
+                PersonInfo personinfo = new PersonInfo();
+                personinfo.setID(Integer.parseInt(cursor.getString(0)));
+                personinfo.setName(cursor.getString(1));
+                personinfo.setPhoneNumber(cursor.getString(2));
+                personinfo.setCustNo(Integer.parseInt(cursor.getString(3)));
+                personinfo.setFees(Integer.parseInt(cursor.getString(4)));
                 // Adding contact to list
-                contactList.add(contact);
+                contactList.add(personinfo);
             } while (cursor.moveToNext());
         }
         // return contact list
         return contactList;
     }
 
+    //Reading a Row  Getting single contact
+    public PersonInfo getInfo(int id) {
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_PERSON_INFO, new String[]{
+                        KEY_ID,
+                        KEY_NAME,
+                        KEY_PHONE_NO,
+                        KEY_CUST_NO,
+                        KEY_FEES,
+
+                },
+                KEY_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+        PersonInfo info = new PersonInfo(Integer.parseInt(cursor.getString(0)),
+                cursor.getString(1), cursor.getString(2));
+
+        String name = info.getName().toString().trim();           //only to
+        String phone = info.getPhoneNumber().toString().trim();
+        int custNo =  info.get_cust_no();
+        int fees =info.get_fees();                          // show
+        Log.d("TAG", name + "  " + phone + " selected for edit");  // the log for selected item
+
+
+        //return info
+        return info;
+    }
+
+
+    
+
+}
 
  /* public String getData(){
 
@@ -187,33 +227,3 @@ public class DbHendler extends SQLiteOpenHelper {
 
 
 
-
-
-
-       //Reading a Row  Getting single contact
-    public PersonInfo getInfo(int id){
-
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(TABLE_PERSON_INFO, new String[]{
-                        KEY_ID,
-                        KEY_NAME,
-                        KEY_PHONE_NO
-                },
-                KEY_ID + "=?",
-                new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-        PersonInfo info = new PersonInfo(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1),cursor.getString(2));
-
-        String name = info.getName().toString().trim();           //only to
-        String phone = info.getPhoneNumber().toString().trim();    // show
-        Log.d("TAG", name + "  " + phone + " selected for edit");  // the log for selected item
-
-
-        //return info
-        return info;
-    }
-
-
-}

@@ -37,14 +37,7 @@ public class ViewAll extends AppCompatActivity {
 
         registerForContextMenu(lvProducts);
 
-       /* lvProducts.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent,
-                                            View view, int position, long id) {
-                        Toast.makeText(getApplicationContext(), "You clicked " + position , Toast.LENGTH_SHORT).show();                    }
-                }
-        );*/
+
 
     }
 
@@ -54,6 +47,7 @@ public class ViewAll extends AppCompatActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Delete");
         menu.add("Edit");
+        menu.add("Information");
     }
 
 
@@ -76,15 +70,18 @@ public class ViewAll extends AppCompatActivity {
 
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("ID", id);
-
             startActivity(intent);
+
+
+        }else if (item.getTitle() == "Information") {
 
             //PersonInfo personInfo = dbHendler.getInfo((int) menuInfo.id);
            // String name = personInfo.getName().toString().trim();
-           // String no   = personInfo.getPhoneNumber().toString().trim();
-           // Toast.makeText(getApplicationContext(), "Edit selcected For " + name + " and " + no, Toast.LENGTH_LONG).show();
+            //String no   = personInfo.getPhoneNumber().toString().trim();
+            Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id , Toast.LENGTH_LONG).show();
 
-                   }
+        }
+
         return true;
     }
 
@@ -123,5 +120,12 @@ public class ViewAll extends AppCompatActivity {
         }
     }
 
-
+ /* lvProducts.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent,
+                                            View view, int position, long id) {
+                        Toast.makeText(getApplicationContext(), "You clicked " + position , Toast.LENGTH_SHORT).show();                    }
+                }
+        );*/
 }
