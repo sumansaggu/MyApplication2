@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,8 +20,7 @@ public class ViewAll extends AppCompatActivity {
     DbHendler dbHendler;
     ListView lvProducts;
     TextView textView4;
-    PersonInfo personInfo;
-    MainActivity activity;
+    String TAG = "MyApp_ViewAll";
 
 
     @Override
@@ -32,22 +30,18 @@ public class ViewAll extends AppCompatActivity {
         dbHendler = new DbHendler(this, null, null, 1);
         lvProducts = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
-
         displayProductList();
-
         registerForContextMenu(lvProducts);
-
-
-
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add("Delete");
-        menu.add("Edit");
+        menu.add("Reciept");
         menu.add("Information");
+        menu.add("Edit");
+        menu.add("Delete");
+
     }
 
 
@@ -59,7 +53,7 @@ public class ViewAll extends AppCompatActivity {
         if (item.getTitle() == "Delete") {
             dbHendler.deletePerson((int) menuInfo.id);
             Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(), "Option 1: ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
             //If your ListView's content was created by attaching it to a database cursor,
             // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
             displayProductList();
@@ -67,24 +61,39 @@ public class ViewAll extends AppCompatActivity {
 
         } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
-
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("ID", id);
             startActivity(intent);
 
 
-        }else if (item.getTitle() == "Information") {
+        } else if (item.getTitle() == "Information") {
 
             //PersonInfo personInfo = dbHendler.getInfo((int) menuInfo.id);
-           // String name = personInfo.getName().toString().trim();
+            // String name = personInfo.getName().toString().trim();
             //String no   = personInfo.getPhoneNumber().toString().trim();
-            Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
+
+        } else if (item.getTitle() == "Reciept") {
+
+            android.app.FragmentManager manager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            Dialog dialog = new Dialog();
+            dialog.setArguments(bundle);
+            int id = (int) menuInfo.id;
+            bundle.putInt("ID", id);
+
+            dialog.show(manager, "dialog");
+
 
         }
 
         return true;
     }
 
+    public void showDialog(View view) {
+
+
+    }
 
     public void displayProductList() {
         try {
@@ -101,12 +110,18 @@ public class ViewAll extends AppCompatActivity {
             String[] columns = new String[]{
                     //DbHendler.KEY_ID,
                     DbHendler.KEY_NAME,
-                    DbHendler.KEY_PHONE_NO
+                    DbHendler.KEY_PHONE_NO,
+                    DbHendler.KEY_CUST_NO,
+                    DbHendler.KEY_FEES,
+                    DbHendler.KEY_BALANCE
             };
             int[] boundTo = new int[]{
                     //R.id.pId,
                     R.id.pName,
-                    R.id.pMob
+                    R.id.pMob,
+                    R.id.cNo,
+                    R.id.cFees,
+                    R.id.cBalance
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this,
                     R.layout.layout_list,

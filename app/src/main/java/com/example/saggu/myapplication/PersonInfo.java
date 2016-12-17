@@ -37,6 +37,15 @@ public class PersonInfo {
         this._balance= balance;
     }
 
+    public PersonInfo(int id, String name, String phone_no, int cust_no, int fees, int balance) {
+        this._id = id;
+        this._name = name;
+        this._phone_no = phone_no;
+        this._cust_no = cust_no;
+        this._fees = fees;
+        this._balance= balance;
+    }
+
     //getting id
     public int getID() {
         return this._id;

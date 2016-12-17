@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button changeButton;
     Button buttonAdd;
     int rowId;
+    String TAG = "MyApp_MainActivity";
 
 
     @Override
@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //region Description
         dbHendler = new DbHendler(this, null, null, 1);
         person_name = (EditText) findViewById(R.id.person_name);
         contact_no = (EditText) findViewById(R.id.contact_no);
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (TextView) findViewById(R.id.balance);
+        //endregion
 
 
         Bundle extras = getIntent().getExtras(); //getting the intent from other activity
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     //add product to a database
     public void addButtonClicked(View view) {
 
+        //region Description
         String name = person_name.getText().toString().trim();
         if (name.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the Name", Toast.LENGTH_LONG).show();
@@ -79,19 +82,23 @@ public class MainActivity extends AppCompatActivity {
         if (Custno.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the Customer No.", Toast.LENGTH_LONG).show();
             return;
-        }        int custNo = Integer.parseInt(Custno);
+        }
+        int custNo = Integer.parseInt(Custno);
 
         String Fees = monthly_fees.getText().toString().trim();
         if (Fees.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the monthly fees", Toast.LENGTH_LONG).show();
             return;
-        }        int fees = Integer.parseInt(Fees);
+        }
+        int fees = Integer.parseInt(Fees);
 
         String Balance = balance_.getText().toString().trim();
         if (Balance.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the balance", Toast.LENGTH_LONG).show();
             return;
-        }        int balance = Integer.parseInt(Balance);
+        }
+        int balance = Integer.parseInt(Balance);
+        //endregion
 
 
         dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance));
@@ -111,38 +118,81 @@ public class MainActivity extends AppCompatActivity {
 
         for (PersonInfo info : personInfos) {
             String log = "Id: " + info.getID() + " ,Name: " + info.getName() + " ,Phone: " + info.getPhoneNumber()
-                    + " Customer " + info.get_cust_no() + " Fees " + info.get_fees();
+                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees();
             // Writing Contacts to log
             Log.d("Name: ", log);
         }
     }
 
-
+    //call to listview
     public void viewAll(View view) {
         Intent i = new Intent(this, ViewAll.class);
         startActivity(i);
     }
 
+    // to edit an item
     public void edit() {
         int id = rowId;
-
-        Log.d("Tagggggggggg", "" + id);
         PersonInfo personInfo = dbHendler.getInfo(id);
         String name = personInfo.getName().toString().trim();
         String no = personInfo.getPhoneNumber().toString().trim();
+        int custNo = personInfo.get_cust_no();
+        String cUSTnO = Integer.toString(custNo);
+        int fees = personInfo.get_fees();
+        String fEES = Integer.toString(fees);
+        int balance = personInfo.get_balance();
+        String bALANCE = Integer.toString(balance);
         Toast.makeText(getApplicationContext(), "Edit selcected For " + name + " and " + no, Toast.LENGTH_LONG).show();
         person_name.setText(name);
         contact_no.setText(no);
+        cust_no.setText(cUSTnO);
+        monthly_fees.setText(fEES);
+        balance_.setText(bALANCE);
+
 
     }
 
+    // to update an item
     public void update(View view) {
         int id = rowId;
         String name = person_name.getText().toString().trim();
+        if (name.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the Name", Toast.LENGTH_LONG).show();
+            return;
+        }
         String no = contact_no.getText().toString().trim();
-        dbHendler.updateInfo(new PersonInfo(id, name, no));
+        if (no.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the Contact No.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String Custno = cust_no.getText().toString().trim();
+        if (Custno.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the Customer No.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int custNo = Integer.parseInt(Custno);
+
+        String Fees = monthly_fees.getText().toString().trim();
+        if (Fees.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the monthly fees", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int fees = Integer.parseInt(Fees);
+
+        String Balance = balance_.getText().toString().trim();
+        if (Balance.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the balance", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int balance = Integer.parseInt(Balance);
+
+
+        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance));
         person_name.setText("");
         contact_no.setText("");
+        cust_no.setText("");
+        monthly_fees.setText("");
+        balance_.setText("");
         changeButton.setEnabled(false);
 
     }
