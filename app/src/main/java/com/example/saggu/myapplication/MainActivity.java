@@ -1,5 +1,6 @@
 package com.example.saggu.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     Button buttonAdd;
     int rowId;
     String TAG = "MyApp_MainActivity";
+
 
 
     @Override
@@ -42,7 +46,10 @@ public class MainActivity extends AppCompatActivity {
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (TextView) findViewById(R.id.balance);
-        //endregion
+        getMonth();
+
+
+
 
 
         Bundle extras = getIntent().getExtras(); //getting the intent from other activity
@@ -52,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         if (extras == null) {
             return;
         }
-
         if (extras != null) {
             rowId = extras.getInt("ID");
             if (rowId > 0) {
@@ -123,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Name: ", log);
         }
     }
+
 
     //call to listview
     public void viewAll(View view) {
@@ -196,6 +203,24 @@ public class MainActivity extends AppCompatActivity {
         changeButton.setEnabled(false);
 
     }
+
+    public void getMonth() {
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        Log.d(TAG, "month is " + month);
+    }
+
+    public void backupDb(){
+        String db ="myInfoManager.db";
+        Log.d(TAG,"called");
+        dbHendler.copyDbToExternalStorage(this.getApplicationContext(),db);
+
+    }
+    public void restoreDB(){
+        String db ="myInfoManager.db";
+        Log.d(TAG,"called");
+        dbHendler.restoreDBfile(this.getApplicationContext(),db);
+    }
+
 
 
 }

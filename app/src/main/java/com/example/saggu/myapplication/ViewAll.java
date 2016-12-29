@@ -3,7 +3,9 @@ package com.example.saggu.myapplication;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +35,7 @@ public class ViewAll extends AppCompatActivity {
         displayProductList();
         registerForContextMenu(lvProducts);
     }
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -68,6 +71,15 @@ public class ViewAll extends AppCompatActivity {
 
         } else if (item.getTitle() == "Information") {
 
+            android.app.FragmentManager manager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            DialogFeesDetail dialogFeesDetail = new DialogFeesDetail();
+            dialogFeesDetail.setArguments(bundle);
+            int id = (int) menuInfo.id;
+            bundle.putInt("ID", id);
+            dialogFeesDetail.show(manager, "FeeDetailDialog");
+
+
             //PersonInfo personInfo = dbHendler.getInfo((int) menuInfo.id);
             // String name = personInfo.getName().toString().trim();
             //String no   = personInfo.getPhoneNumber().toString().trim();
@@ -77,7 +89,7 @@ public class ViewAll extends AppCompatActivity {
 
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
-            Dialog dialog = new Dialog();
+            DialogReciept dialog = new DialogReciept();
             dialog.setArguments(bundle);
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
@@ -88,11 +100,6 @@ public class ViewAll extends AppCompatActivity {
         }
 
         return true;
-    }
-
-    public void showDialog(View view) {
-
-
     }
 
     public void displayProductList() {
@@ -130,10 +137,16 @@ public class ViewAll extends AppCompatActivity {
                     boundTo,
                     0);
             lvProducts.setAdapter(simpleCursorAdapter);
+
         } catch (Exception ex) {
             textView4.setText("There was an error!");
         }
     }
+
+    public void dialogClosed() {
+        displayProductList();
+    }
+
 
  /* lvProducts.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {

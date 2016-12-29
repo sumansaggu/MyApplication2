@@ -46,6 +46,11 @@ public class PersonInfo {
         this._balance= balance;
     }
 
+    public PersonInfo(int id, int balance) {
+        this._id = id;
+        this._balance= balance;
+    }
+
     //getting id
     public int getID() {
         return this._id;
@@ -84,11 +89,6 @@ public class PersonInfo {
     public void setFees(int fees){this._fees = fees;}
   //setting balance
     public void setBalance(int balance){this._balance = balance;}
-
-
-
-
-
 
 
 

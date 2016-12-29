@@ -14,41 +14,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:text="Balance:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView9"
-        android:layout_below="@+id/textView8"
-        android:layout_alignLeft="@+id/textView8"
-        android:layout_alignStart="@+id/textView8"
-        android:layout_marginTop="27dp" />
-
-    <TextView
-        android:text="8888"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/fees_dialog"
-        android:layout_below="@+id/title_dialog"
-        android:layout_toRightOf="@+id/textView9"
-        android:layout_toEndOf="@+id/textView9"
-        android:layout_marginLeft="50dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="19dp" />
-
-    <TextView
-        android:text="Fees:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="22dp"
-        android:layout_marginStart="22dp"
-        android:id="@+id/textView8"
-        android:layout_alignBaseline="@+id/fees_dialog"
-        android:layout_alignBottom="@+id/fees_dialog"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentEnd="true"
+        android:textAlignment="center" />
 
     <TextView
         android:text="8888"
@@ -59,16 +26,68 @@
         android:layout_alignEnd="@+id/fees_dialog"
         android:id="@+id/balance_dialog" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/date"
+        android:textSize="15sp"
+        android:layout_below="@+id/reciept_dialog"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="Balance:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView9"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/textView8"
+        android:layout_alignLeft="@+id/textView8"
+        android:layout_alignStart="@+id/textView8" />
+
+    <TextView
+        android:text="Enter Payment:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView7"
+        android:layout_below="@+id/textView9"
+        android:layout_alignLeft="@+id/textView9"
+        android:layout_alignStart="@+id/textView9"
+        android:layout_marginTop="12dp" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/reciept_dialog"
+        android:textSize="15sp"
+        android:layout_width="60dp"
+        android:hint="Rupees"
+        android:layout_alignBaseline="@+id/textView7"
+        android:layout_alignBottom="@+id/textView7"
+        android:layout_alignLeft="@+id/balance_dialog"
+        android:layout_alignStart="@+id/balance_dialog" />
+
     <Button
         android:text="OK"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonYes"
         android:layout_weight="0.00"
-        android:layout_below="@+id/reciept_dialog"
+        android:layout_below="@+id/date"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="57dp" />
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Date:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/date_diaglog"
+        android:layout_alignBaseline="@+id/date"
+        android:layout_alignBottom="@+id/date"
+        android:layout_alignRight="@+id/textView8"
+        android:layout_alignEnd="@+id/textView8" />
 
     <Button
         android:text="Cancel"
@@ -78,40 +97,26 @@
         android:layout_weight="0.00"
         android:layout_below="@+id/buttonYes"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="15dp" />
+        android:layout_alignParentStart="true" />
 
     <TextView
-        android:text="Enter Payment:"
+        android:text="Fees:"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView7"
-        android:layout_alignBaseline="@+id/reciept_dialog"
-        android:layout_alignBottom="@+id/reciept_dialog"
-        android:layout_alignLeft="@+id/textView9"
-        android:layout_alignStart="@+id/textView9" />
-
-    <EditText
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:ems="10"
-        android:id="@+id/reciept_dialog"
-        android:textSize="15sp"
-        android:layout_marginTop="23dp"
-        android:layout_width="60dp"
-        android:layout_below="@+id/balance_dialog"
-        android:layout_alignLeft="@+id/balance_dialog"
-        android:layout_alignStart="@+id/balance_dialog"
-        android:hint="Rupees" />
+        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:id="@+id/textView8"
+        android:layout_below="@+id/title_dialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
-        android:text="Date:"
+        android:text="8888"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reciept_dialog"
-        android:layout_alignLeft="@+id/textView7"
-        android:layout_alignStart="@+id/textView7"
-        android:layout_marginTop="14dp"
-        android:id="@+id/date_diaglog" />
+        android:id="@+id/fees_dialog"
+        android:layout_below="@+id/title_dialog"
+        android:layout_toRightOf="@+id/textView7"
+        android:layout_toEndOf="@+id/textView7" />
 
 </RelativeLayout>

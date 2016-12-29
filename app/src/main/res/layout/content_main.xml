@@ -38,75 +38,69 @@
 
     <EditText
 
-        android:id="@+id/cust_no"
+        android:id="@+id/balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/contact_no"
-        android:layout_alignStart="@+id/contact_no"
-        android:layout_below="@+id/contact_no"
-        android:layout_marginTop="18dp"
-        android:hint="Customer no."
-        android:inputType="number" />
+        android:hint="Balance"
+        android:inputType="number"
+        android:layout_alignBaseline="@+id/cust_no"
+        android:layout_alignBottom="@+id/cust_no"
+        android:layout_alignRight="@+id/contact_no"
+        android:layout_alignEnd="@+id/contact_no" />
 
     <EditText
 
         android:id="@+id/fees"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cust_no"
-        android:layout_alignStart="@+id/cust_no"
-        android:layout_below="@+id/cust_no"
-        android:layout_marginTop="25dp"
         android:hint="Fees"
-        android:inputType="number" />
-
-    <EditText
-
-        android:id="@+id/balance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cust_no"
-        android:layout_alignStart="@+id/cust_no"
-        android:layout_below="@+id/fees"
-        android:layout_marginTop="25dp"
-        android:layout_toLeftOf="@+id/changeButton"
-        android:layout_toStartOf="@+id/changeButton"
-        android:hint="Balance"
-        android:inputType="number" />
+        android:inputType="number"
+        android:layout_alignBaseline="@+id/balance"
+        android:layout_alignBottom="@+id/balance"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:id="@+id/buttonAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/contact_no"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/contact_no"
         android:onClick="addButtonClicked"
-        android:text="@string/add" />
+        android:text="@string/add"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/cust_no"
+        android:layout_alignStart="@+id/cust_no" />
+
+    <EditText
+
+        android:id="@+id/cust_no"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:hint="Cust No"
+        android:inputType="number"
+        android:layout_below="@+id/contact_no"
+        android:layout_alignLeft="@+id/contact_no"
+        android:layout_alignStart="@+id/contact_no" />
 
     <Button
         android:id="@+id/changeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/buttonAdd"
-        android:layout_alignBottom="@+id/buttonAdd"
-        android:layout_toEndOf="@+id/buttonAdd"
-        android:layout_toRightOf="@+id/buttonAdd"
         android:onClick="update"
         android:text="Change"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:layout_alignBaseline="@+id/buttonAdd"
+        android:layout_alignBottom="@+id/buttonAdd"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:id="@+id/buttonViewAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/buttonAdd"
-        android:layout_alignBottom="@+id/buttonAdd"
-        android:layout_alignEnd="@+id/contact_no"
-        android:layout_alignRight="@+id/contact_no"
-        android:layout_marginEnd="29dp"
-        android:layout_marginRight="29dp"
         android:onClick="viewAll"
-        android:text="@string/view_all" />
+        android:text="@string/view_all"
+        android:layout_alignBaseline="@+id/changeButton"
+        android:layout_alignBottom="@+id/changeButton"
+        android:layout_alignRight="@+id/balance"
+        android:layout_alignEnd="@+id/balance" />
 
 </RelativeLayout>
