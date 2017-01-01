@@ -48,14 +48,11 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         date = (EditText) view.findViewById(R.id.date);
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-        Log.d(TAG, "" + id);
         setCancelable(false); //preventing from cancel when clicking on background
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
-
         return view;
-
     }
 
 

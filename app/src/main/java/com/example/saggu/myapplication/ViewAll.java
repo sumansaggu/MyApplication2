@@ -3,10 +3,11 @@ package com.example.saggu.myapplication;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +21,7 @@ public class ViewAll extends AppCompatActivity {
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
-    ListView lvProducts;
+    ListView listViewCustomers;
     TextView textView4;
     String TAG = "MyApp_ViewAll";
 
@@ -30,10 +31,13 @@ public class ViewAll extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
-        lvProducts = (ListView) findViewById(R.id.listView);
+        listViewCustomers = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("All Customers");
         displayProductList();
-        registerForContextMenu(lvProducts);
+        registerForContextMenu(listViewCustomers);
     }
 
 
@@ -44,9 +48,7 @@ public class ViewAll extends AppCompatActivity {
         menu.add("Information");
         menu.add("Edit");
         menu.add("Delete");
-
     }
-
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -54,23 +56,23 @@ public class ViewAll extends AppCompatActivity {
         // Get extra info about list item that was long-pressed
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (item.getTitle() == "Delete") {
-            dbHendler.deletePerson((int) menuInfo.id);
-            Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
-            //If your ListView's content was created by attaching it to a database cursor,
-            // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
-            displayProductList();
+            //todo   add some code to confirm delete
+            DeleteAlert myAlert = new DeleteAlert();
+            myAlert.show(getFragmentManager(), "DeleteAlert");
+            int id = (int) menuInfo.id;
+            Bundle bundle = new Bundle();
+            myAlert.setArguments(bundle);
+            bundle.putInt("ID", id);
 
 
         } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, AddEditActivity.class);
             intent.putExtra("ID", id);
             startActivity(intent);
 
 
         } else if (item.getTitle() == "Information") {
-
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogFeesDetail dialogFeesDetail = new DialogFeesDetail();
@@ -78,27 +80,17 @@ public class ViewAll extends AppCompatActivity {
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
             dialogFeesDetail.show(manager, "FeeDetailDialog");
-
-
-            //PersonInfo personInfo = dbHendler.getInfo((int) menuInfo.id);
-            // String name = personInfo.getName().toString().trim();
-            //String no   = personInfo.getPhoneNumber().toString().trim();
             Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
 
         } else if (item.getTitle() == "Reciept") {
-
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogReciept dialog = new DialogReciept();
             dialog.setArguments(bundle);
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
-
             dialog.show(manager, "dialog");
-
-
         }
-
         return true;
     }
 
@@ -109,11 +101,10 @@ public class ViewAll extends AppCompatActivity {
                 textView4.setText("Unable to generate cursor.");
                 return;
             }
-            /*if (cursor.getCount() == 0)
-            {
+            if (cursor.getCount() == 0) {
                 textView4.setText("No Products in the Database.");
                 return;
-            }*/
+            }
             String[] columns = new String[]{
                     //DbHendler.KEY_ID,
                     DbHendler.KEY_NAME,
@@ -136,7 +127,7 @@ public class ViewAll extends AppCompatActivity {
                     columns,
                     boundTo,
                     0);
-            lvProducts.setAdapter(simpleCursorAdapter);
+            listViewCustomers.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
             textView4.setText("There was an error!");
@@ -147,13 +138,58 @@ public class ViewAll extends AppCompatActivity {
         displayProductList();
     }
 
+    public void delete(int id) {
 
- /* lvProducts.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent,
-                                            View view, int position, long id) {
-                        Toast.makeText(getApplicationContext(), "You clicked " + position , Toast.LENGTH_SHORT).show();                    }
-                }
-        );*/
+        dbHendler.deletePerson(id);
+        Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
+        //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
+        //If your ListView's content was created by attaching it to a database cursor,
+        // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
+        displayProductList();
+    }
+
+    //region call to backup and restore functions
+    public void backupDb() {
+        String db = "myInfoManager.db";
+        Log.d(TAG, "called");
+        dbHendler.copyDbToExternalStorage(this.getApplicationContext(), db);
+
+    }
+
+    public void restoreDB() {
+        String db = "myInfoManager.db";
+        Log.d(TAG, "called");
+        dbHendler.restoreDBfile(this.getApplicationContext(), db);
+    }
+    //endregion
+
+    //region OptionMenu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.view_all_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.add_customer) {
+            startActivity(new Intent(this, AddEditActivity.class));
+            return true;
+        }
+        if (id == R.id.backup_database) {
+            backupDb();
+
+            return true;
+        }
+        if (id == R.id.restore_database) {
+           RestoreDbAlert restoreDbAlert =new RestoreDbAlert();
+            restoreDbAlert.show(getFragmentManager(),"restoreDbAlert");
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }    //endregion
+
+
 }

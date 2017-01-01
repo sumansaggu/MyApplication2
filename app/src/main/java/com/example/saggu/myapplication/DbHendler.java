@@ -1,5 +1,6 @@
 package com.example.saggu.myapplication;
 
+import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -14,11 +15,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class DbHendler extends SQLiteOpenHelper {
@@ -286,7 +285,6 @@ public class DbHendler extends SQLiteOpenHelper {
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
         String formattedDate = df.format(calender.getTime());
-
         File folder = new File(Environment.getExternalStorageDirectory() + "/MyBackup");
         boolean success = true;
         if (!folder.exists()) {
@@ -315,23 +313,20 @@ public class DbHendler extends SQLiteOpenHelper {
             inputStream.close();
             outputStream.flush();
             outputStream.close();
-            Log.d(TAG,"Backup created at"+ sdcardFile);
+            Toast.makeText(context, "Database backup created at" + sdcardFile, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
+            Toast.makeText(context, "" + e.toString(), Toast.LENGTH_SHORT).show();
             Log.e(TAG, e.toString());
         }
     }
 
     public void restoreDBfile(Context context, String dbName) {
-       // Calendar calender = Calendar.getInstance();
-       // SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-       // String formattedDate = df.format(calender.getTime());
-
-        File fromFolder = new File(Environment.getExternalStorageDirectory() + "/MyBackup");
-
-
+        // Calendar calender = Calendar.getInstance();
+        // SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        // String formattedDate = df.format(calender.getTime());
         try {
             File name = context.getDatabasePath(dbName);
-            File sdcardFile = new File(Environment.getExternalStorageDirectory(), "/MyBackup/" + DbHendler.DATABASE_NAME); //myInfoManager.db
+            File sdcardFile = new File(Environment.getExternalStorageDirectory(), "/" + DbHendler.DATABASE_NAME); //myInfoManager.db
             name.createNewFile();
             InputStream inputStream = null;
             OutputStream outputStream = null;
@@ -345,8 +340,11 @@ public class DbHendler extends SQLiteOpenHelper {
             inputStream.close();
             outputStream.flush();
             outputStream.close();
+            Toast.makeText(context, "Database restored", Toast.LENGTH_LONG).show();
+
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            // Log.e(TAG, e.toString());
+            Toast.makeText(context, " " + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 

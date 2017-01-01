@@ -1,11 +1,12 @@
 package com.example.saggu.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,7 +16,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class AddEditActivity extends AppCompatActivity {
 
     EditText person_name;
     EditText contact_no;
@@ -27,14 +28,14 @@ public class MainActivity extends AppCompatActivity {
     Button buttonAdd;
     int rowId;
     String TAG = "MyApp_MainActivity";
-
+    private Toolbar toolbar;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.add_edit_activity);
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
 
         //region Description
@@ -47,9 +48,6 @@ public class MainActivity extends AppCompatActivity {
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (TextView) findViewById(R.id.balance);
         getMonth();
-
-
-
 
 
         Bundle extras = getIntent().getExtras(); //getting the intent from other activity
@@ -209,18 +207,24 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "month is " + month);
     }
 
-    public void backupDb(){
-        String db ="myInfoManager.db";
-        Log.d(TAG,"called");
-        dbHendler.copyDbToExternalStorage(this.getApplicationContext(),db);
 
-    }
-    public void restoreDB(){
-        String db ="myInfoManager.db";
-        Log.d(TAG,"called");
-        dbHendler.restoreDBfile(this.getApplicationContext(),db);
+
+    //region OptionMenu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+      getMenuInflater().inflate(R.menu.menu_view_all, menu);
+        return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_settings){
+            Toast.makeText(this, "selected", Toast.LENGTH_SHORT).show();
+            return true;
+        }
 
-
+        return super.onOptionsItemSelected(item);
+    }
+    //endregion
 }
