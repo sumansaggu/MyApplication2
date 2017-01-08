@@ -3,9 +3,11 @@ package com.example.saggu.myapplication;
 import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -106,7 +108,6 @@ public class DbHendler extends SQLiteOpenHelper {
             return null;
         }
     }
-
 
     // Getting All Contacts to log
     public List<PersonInfo> getAllContacts() {
@@ -275,6 +276,8 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
 
+    //region backupdatabase
+
     /**
      * Copy the local DB file of an application to the root of external storage directory
      *
@@ -282,20 +285,19 @@ public class DbHendler extends SQLiteOpenHelper {
      * @param dbName  The name of the DB
      */
     public void copyDbToExternalStorage(Context context, String dbName) {
+
+
         Calendar calender = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yy hh-mm-ss");
         String formattedDate = df.format(calender.getTime());
+        Log.d(TAG, "" + formattedDate);
         File folder = new File(Environment.getExternalStorageDirectory() + "/MyBackup");
-        boolean success = true;
+
         if (!folder.exists()) {
-            success = folder.mkdir();
+            folder.mkdir();
             Toast.makeText(context, "Backup Directory Created", Toast.LENGTH_LONG).show();
         }
-        if (success) {
-            // Do something on success
-        } else {
-            // Do something else on failure
-        }
+
 
         try {
             File name = context.getDatabasePath(dbName);
@@ -316,10 +318,14 @@ public class DbHendler extends SQLiteOpenHelper {
             Toast.makeText(context, "Database backup created at" + sdcardFile, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(context, "" + e.toString(), Toast.LENGTH_SHORT).show();
-            Log.e(TAG, e.toString());
+            Log.e(TAG, "ghfhfghfgh" + e.toString());
         }
-    }
 
+
+    }
+    //endregion
+
+    //region Restore database
     public void restoreDBfile(Context context, String dbName) {
         // Calendar calender = Calendar.getInstance();
         // SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
@@ -347,6 +353,53 @@ public class DbHendler extends SQLiteOpenHelper {
             Toast.makeText(context, " " + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
+    //endregion
+
+    //region get total balance
+    public int totalBalance() {
+
+        String selectQuery = "SELECT " + KEY_BALANCE + " FROM " + TABLE_PERSON_INFO;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        int sum = 0;
+        // looping through all rows
+        if (cursor.moveToFirst()) {
+            do {
+                int balanceColumn = cursor.getColumnIndex(KEY_BALANCE);
+                int balance = cursor.getInt(balanceColumn);
+                sum = balance + sum;
+            } while (cursor.moveToNext());
+            Log.d(TAG, "" + sum);
+        }
+        cursor.close();
+        return sum;
+    }
+    //endregion
+
+    //region cellecton between dates
+    public void colectionBwtwoDates() {
+       String selectQuery = "SELECT * FROM " + TABLE_FEES + " WHERE " +KEY_DATE + " BETWEEN '2011-1-23' AND '2017-1-30' ";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows
+        Log.d(TAG,selectQuery);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int datecolumn = cursor.getColumnIndex(KEY_DATE);
+                String date = cursor.getString(datecolumn);
+                int feesColumn = cursor.getColumnIndex(KEY_RECIEPT);
+                int fees = cursor.getInt(feesColumn);
+                Log.d(TAG, "DATE: " + date + " " + "fees: " + fees);
+
+            } while (cursor.moveToNext());
+
+        }
+        cursor.close();
+    }
+    //endregion
 
 }
 

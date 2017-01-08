@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:id="@+id/dailog_fees">
 
     <TextView
         android:text="Enter the fees"
@@ -26,16 +27,6 @@
         android:layout_alignEnd="@+id/fees_dialog"
         android:id="@+id/balance_dialog" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="date"
-        android:ems="10"
-        android:id="@+id/date"
-        android:textSize="15sp"
-        android:layout_below="@+id/reciept_dialog"
-        android:layout_centerHorizontal="true" />
-
     <TextView
         android:text="Balance:"
         android:layout_width="wrap_content"
@@ -55,39 +46,6 @@
         android:layout_alignLeft="@+id/textView9"
         android:layout_alignStart="@+id/textView9"
         android:layout_marginTop="12dp" />
-
-    <EditText
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:ems="10"
-        android:id="@+id/reciept_dialog"
-        android:textSize="15sp"
-        android:layout_width="60dp"
-        android:hint="Rupees"
-        android:layout_alignBaseline="@+id/textView7"
-        android:layout_alignBottom="@+id/textView7"
-        android:layout_alignLeft="@+id/balance_dialog"
-        android:layout_alignStart="@+id/balance_dialog" />
-
-    <Button
-        android:text="OK"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/buttonYes"
-        android:layout_weight="0.00"
-        android:layout_below="@+id/date"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:text="Date:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/date_diaglog"
-        android:layout_alignBaseline="@+id/date"
-        android:layout_alignBottom="@+id/date"
-        android:layout_alignRight="@+id/textView8"
-        android:layout_alignEnd="@+id/textView8" />
 
     <Button
         android:text="Cancel"
@@ -118,5 +76,49 @@
         android:layout_below="@+id/title_dialog"
         android:layout_toRightOf="@+id/textView7"
         android:layout_toEndOf="@+id/textView7" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/reciept_dialog"
+        android:textSize="15sp"
+        android:layout_width="60dp"
+        android:hint="Rupees"
+        android:layout_alignBaseline="@+id/textView7"
+        android:layout_alignBottom="@+id/textView7"
+        android:layout_toRightOf="@+id/balance_dialog"
+        android:layout_toEndOf="@+id/balance_dialog"
+        />
+
+    <Button
+        android:text="OK"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonYes"
+        android:layout_weight="0.00"
+        android:layout_below="@+id/date"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Date:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/date_diaglog"
+        android:layout_alignBaseline="@+id/date"
+        android:layout_alignBottom="@+id/date"
+        android:layout_alignRight="@+id/textView8"
+        android:layout_alignEnd="@+id/textView8" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/date"
+        android:textSize="15sp"
+        android:layout_below="@+id/reciept_dialog"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

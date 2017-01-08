@@ -31,7 +31,9 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     Calendar calendar;
     EditText date;
     DbHendler dbHendler;
+    Button dateChange;
     int id;
+
 
     @Nullable
     @Override
@@ -39,19 +41,32 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.dialog_layout, null);
         Ok = (Button) view.findViewById(R.id.buttonYes);
         Cancel = (Button) view.findViewById(R.id.buttonNo);
+
         Ok.setOnClickListener(this);
         Cancel.setOnClickListener(this);
+
         fees_dailog = (TextView) view.findViewById(R.id.fees_dialog);
         balance_dialog = (TextView) view.findViewById(R.id.balance_dialog);
         reciept_dialog = (EditText) view.findViewById(R.id.reciept_dialog);
         title_dialog = (TextView) view.findViewById(R.id.title_dialog);
         date = (EditText) view.findViewById(R.id.date);
+
+
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
         setCancelable(false); //preventing from cancel when clicking on background
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
+        fees_dailog.requestFocus();
+        date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    pickDate();
+                }
+            }
+        });
         return view;
     }
 
@@ -91,23 +106,26 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         if (Reciept.equals("")) {
             Toast.makeText(this.getActivity(), "Enter the amount", Toast.LENGTH_SHORT).show();
             return;
+        } else {
+            int id = this.id;
+            int reciept = Integer.parseInt(Reciept);
+            String datefromEditText;
+            datefromEditText = date.getText().toString().trim();
+
+            Log.d(TAG, "" + (balance - reciept));
+            int newbalance = balance - reciept;
+            String name = personInfo.getName();
+
+            dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
+            dbHendler.addFees(new Fees(id, reciept, datefromEditText));//fees recieved and date to fees table
+            ViewAll activity = (ViewAll) getActivity();
+            activity.dialogClosed();
+            Toast.makeText(this.getActivity(), "Added Rs. " + reciept + " to " + name, Toast.LENGTH_SHORT).show();
+            reciept_dialog.setText("");
+            Ok.setEnabled(false);
+            Cancel.setText("Back");
+            getinformation();
         }
-        int id = this.id;
-        int reciept = Integer.parseInt(Reciept);
-        String datefromEditText;
-        datefromEditText = date.getText().toString().trim();
-
-        Log.d(TAG, "" + (balance - reciept));
-        int newbalance = balance - reciept;
-
-        dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
-        dbHendler.addFees(new Fees(id, reciept, datefromEditText));//fees recieved and date to fees table
-        ViewAll activity = (ViewAll) getActivity();
-        activity.dialogClosed();
-        reciept_dialog.setText("");
-        Ok.setEnabled(false);
-        Cancel.setText("Back");
-        getinformation();
 
     }
 
@@ -123,10 +141,23 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
     public String getDate() {
         calendar = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String formattedDate = df.format(calendar.getTime());
         date.setText(formattedDate);
         return formattedDate;
 
     }
+
+    public void pickDate() {
+        Log.d(TAG, "date change called");
+        DialogFragment newFragment = new MyDatePicker();
+        newFragment.show(getFragmentManager(), "datepicker");
+    }
+
+    public void changeText(String data) {
+
+        date.setText(data);
+    }
+
+
 }

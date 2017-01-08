@@ -2,7 +2,9 @@ package com.example.saggu.myapplication;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -16,8 +18,8 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-public class ViewAll extends AppCompatActivity {
+// TODO: 1/6/2017 customer with same cust no problem
+public class ViewAll extends AppCompatActivity implements Communicator{
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
@@ -36,8 +38,10 @@ public class ViewAll extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("All Customers");
+        checkApi();
         displayProductList();
         registerForContextMenu(listViewCustomers);
+
     }
 
 
@@ -50,13 +54,13 @@ public class ViewAll extends AppCompatActivity {
         menu.add("Delete");
     }
 
+    //region context menu items
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         super.onContextItemSelected(item);
         // Get extra info about list item that was long-pressed
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (item.getTitle() == "Delete") {
-            //todo   add some code to confirm delete
             DeleteAlert myAlert = new DeleteAlert();
             myAlert.show(getFragmentManager(), "DeleteAlert");
             int id = (int) menuInfo.id;
@@ -93,7 +97,9 @@ public class ViewAll extends AppCompatActivity {
         }
         return true;
     }
+    //endregion
 
+    //region Create List
     public void displayProductList() {
         try {
             Cursor cursor = dbHendler.getAllProducts();
@@ -102,7 +108,7 @@ public class ViewAll extends AppCompatActivity {
                 return;
             }
             if (cursor.getCount() == 0) {
-                textView4.setText("No Products in the Database.");
+                textView4.setText("No Customer in the Database.");
                 return;
             }
             String[] columns = new String[]{
@@ -133,6 +139,7 @@ public class ViewAll extends AppCompatActivity {
             textView4.setText("There was an error!");
         }
     }
+    //endregion
 
     public void dialogClosed() {
         displayProductList();
@@ -173,6 +180,13 @@ public class ViewAll extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (id == R.id.total_balance) {
+           int sum= dbHendler.totalBalance();
+
+        }
+        if (id == R.id.colection_btw_two_dates) {
+            dbHendler.colectionBwtwoDates();
+        }
         if (id == R.id.add_customer) {
             startActivity(new Intent(this, AddEditActivity.class));
             return true;
@@ -183,13 +197,29 @@ public class ViewAll extends AppCompatActivity {
             return true;
         }
         if (id == R.id.restore_database) {
-           RestoreDbAlert restoreDbAlert =new RestoreDbAlert();
-            restoreDbAlert.show(getFragmentManager(),"restoreDbAlert");
+            RestoreDbAlert restoreDbAlert = new RestoreDbAlert();
+            restoreDbAlert.show(getFragmentManager(), "restoreDbAlert");
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }    //endregion
 
+    public int checkApi() {
+        String currntVersion = Build.VERSION.RELEASE;
+        int currentRealease = Build.VERSION.SDK_INT;
+        Log.d(TAG, "OS:" + currntVersion + " API:" + currentRealease);
+        return currentRealease;
+    }
 
+
+    @Override
+    public void respond(String date) {
+
+        android.app.FragmentManager manager = getFragmentManager();
+       DialogReciept dialogReciept= (DialogReciept) manager.findFragmentByTag("dialog");
+
+        dialogReciept.changeText(date);
+
+    }
 }
