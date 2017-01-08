@@ -9,7 +9,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Calendar;
 
 public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
-
+    EditText date;
     Communicator comm;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -41,14 +40,21 @@ public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnD
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        String selectedDate = sdf.format(view.getCalendarView().getDate());
-        Log.d("datepicker",selectedDate);
         // do some stuff for example write on log and update TextField on activity
-       comm.respond(selectedDate);
-        dismiss();
+        int month= monthOfYear+1;
+        String fm=""+month;
+        String fd=""+dayOfMonth;
+        if(month<10){
+            fm ="0"+month;
+        }
+        if (dayOfMonth<10){
+            fd="0"+dayOfMonth;
+        }
+        String date= ""+year+"-"+fm+"-"+fd;
+        Log.d("tag",""+date);
+
+       comm.respond(date);
+
 
     }
 

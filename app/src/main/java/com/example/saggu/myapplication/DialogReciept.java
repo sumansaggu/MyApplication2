@@ -58,6 +58,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
+        date.setInputType(0);
         fees_dailog.requestFocus();
         date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override

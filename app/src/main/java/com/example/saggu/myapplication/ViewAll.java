@@ -214,12 +214,12 @@ public class ViewAll extends AppCompatActivity implements Communicator{
 
 
     @Override
-    public void respond(String date) {
+    public void respond(String data) {
 
         android.app.FragmentManager manager = getFragmentManager();
        DialogReciept dialogReciept= (DialogReciept) manager.findFragmentByTag("dialog");
 
-        dialogReciept.changeText(date);
+        dialogReciept.changeText(data);
 
     }
 }
