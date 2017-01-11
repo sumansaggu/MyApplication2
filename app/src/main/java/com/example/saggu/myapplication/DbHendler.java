@@ -23,7 +23,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class DbHendler extends SQLiteOpenHelper {
-    // All Static variables
+
+    //region All Static variables
     // Database Version
     String TAG = "MyApp_dbhendler";
     private static final int DATABASE_VER = 11;
@@ -55,6 +56,7 @@ public class DbHendler extends SQLiteOpenHelper {
     String CREATE_CONTACTS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PERSON_INFO + "("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT,"
             + KEY_PHONE_NO + " TEXT, " + KEY_CUST_NO + " INTEGER, " + KEY_FEES + " INTEGER, " + KEY_BALANCE + " INTEGER " + ")";
+    //endregion
 
 
     public DbHendler(Context context, String name,
@@ -79,9 +81,11 @@ public class DbHendler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
     // getting to list view
     public Cursor getAllProducts() {
         SQLiteDatabase db = this.getReadableDatabase();
+
         Cursor cursor = db.query(TABLE_PERSON_INFO, new String[]{KEY_ID, KEY_NAME,
                 KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE}, null, null, KEY_CUST_NO, null, null);
         if (cursor != null) {
@@ -92,6 +96,60 @@ public class DbHendler extends SQLiteOpenHelper {
         }
     }
 
+    //region serarch person to list
+    public Cursor searchPersonToList(String namesearch) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor;
+        } else {
+            return null;
+        }
+    }
+
+    //endregion
+    //region serarch person to list
+    public Cursor getLargerBalance() {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PERSON_INFO + " ORDER BY " + KEY_BALANCE + " DESC ;";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor;
+        } else {
+            return null;
+        }
+    }
+    //endregion
+
+
+    //region serarch person
+    public List<PersonInfo> searchPerson() {
+        List<PersonInfo> list = new ArrayList<>();
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_NAME + "  LIKE '%yy%';";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            do {
+                PersonInfo personinfo = new PersonInfo();
+                personinfo.setID(Integer.parseInt(cursor.getString(0)));
+                personinfo.setName(cursor.getString(1));
+                personinfo.setPhoneNumber(cursor.getString(2));
+                personinfo.setCustNo(Integer.parseInt(cursor.getString(3)));
+                personinfo.setFees(Integer.parseInt(cursor.getString(4)));
+                // Adding contact to list
+                list.add(personinfo);
+
+            } while (cursor.moveToNext());
+        }
+        return list;
+    }
+    //endregion
+
+    //region getFeesToList
     public Cursor getFeesToList(int id) {
         String custmor = "" + id;
         Log.d(TAG, custmor);
@@ -108,52 +166,10 @@ public class DbHendler extends SQLiteOpenHelper {
             return null;
         }
     }
+    //endregion
 
-    // Getting All Contacts to log
-    public List<PersonInfo> getAllContacts() {
-        List<PersonInfo> contactList = new ArrayList<>();
-        // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO + " ORDER BY " + KEY_CUST_NO + " ASC";
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                PersonInfo personinfo = new PersonInfo();
-                personinfo.setID(Integer.parseInt(cursor.getString(0)));
-                personinfo.setName(cursor.getString(1));
-                personinfo.setPhoneNumber(cursor.getString(2));
-                personinfo.setCustNo(Integer.parseInt(cursor.getString(3)));
-                personinfo.setFees(Integer.parseInt(cursor.getString(4)));
-                // Adding contact to list
-                contactList.add(personinfo);
-            } while (cursor.moveToNext());
-        }
-        // return contact list
-        return contactList;
-    }
 
-    public List<Fees> viewFees() {
-        List<Fees> feeslist = new ArrayList<Fees>();
-        String selectQuery = "SELECT  * FROM " + TABLE_FEES;
-        SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            do {
-                Fees fees = new Fees();
-                fees.setNo(Integer.parseInt(cursor.getString(0)));
-                fees.setID(Integer.parseInt(cursor.getString(1)));
-                fees.setFees(Integer.parseInt(cursor.getString(2)));
-                fees.setDate(cursor.getString(3));
-                // Adding fees to list
-                feeslist.add(fees);
-            } while (cursor.moveToNext());
-        }
-        // return contact list
-        return feeslist;
-    }
-
-    // Adding new contact
+    //region addingh new person
     public void addPerson(PersonInfo personInfo) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -166,9 +182,9 @@ public class DbHendler extends SQLiteOpenHelper {
         db.insert(TABLE_PERSON_INFO, null, values);
         db.close(); //close database
     }
+    //endregion
 
-
-    // ADD FEES TO FEES TABLE
+    //region ADD FEES TO FEES TABLE
     public void addFees(Fees fees) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -179,9 +195,9 @@ public class DbHendler extends SQLiteOpenHelper {
         db.close();
         Log.d(TAG, "fees addedddd");
     }
+    //endregion
 
-
-    //Updating a Record
+    //region Updating a Record
     public int updateInfo(PersonInfo personInfo) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -194,9 +210,9 @@ public class DbHendler extends SQLiteOpenHelper {
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(personInfo.getID())});
 
     }
+    //endregion
 
-
-    //Updating a Record
+    //region Updating Balance
     public int updateBalance(PersonInfo personInfo) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -204,18 +220,20 @@ public class DbHendler extends SQLiteOpenHelper {
         //updating row
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(personInfo.getID())});
     }
+    //endregion
 
+    //region delete a person
 
-    // delete a person
     public void deletePerson(int ID) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_ID + "=\"" + ID + "\";");
         db.execSQL("DELETE FROM " + TABLE_FEES + " WHERE " + KEY_ID + "=\"" + ID + "\"");
         db.close();
     }
+    //endregion
 
+    //region Reading a Row  Getting single contact
 
-    //Reading a Row  Getting single contact
     public PersonInfo getInfo(int id) {
 
         SQLiteDatabase db = getReadableDatabase();
@@ -245,8 +263,10 @@ public class DbHendler extends SQLiteOpenHelper {
         //return info
         return info;
     }
+    //endregion
 
 
+    //region end of month
     public void endOfMonth() {
         String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO;
         SQLiteDatabase db = this.getWritableDatabase();
@@ -271,10 +291,8 @@ public class DbHendler extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         cursor.close();
-
-
     }
-
+    //endregion
 
     //region backupdatabase
 
@@ -377,14 +395,15 @@ public class DbHendler extends SQLiteOpenHelper {
     //endregion
 
     //region cellecton between dates
-    public void colectionBwtwoDates() {
-       String selectQuery = "SELECT * FROM " + TABLE_FEES + " WHERE " +KEY_DATE + " BETWEEN '2011-1-23' AND '2017-1-30' ";
+    public int colectionBwtwoDates(String from, String to) {
+        String selectQuery = "SELECT * FROM " + TABLE_FEES + " WHERE " + KEY_DATE + " BETWEEN '" + from + "' AND '" + to + "' ";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         // looping through all rows
-        Log.d(TAG,selectQuery);
+        Log.d(TAG, selectQuery);
+        int sum = 0;
 
         if (cursor.moveToFirst()) {
             do {
@@ -393,86 +412,64 @@ public class DbHendler extends SQLiteOpenHelper {
                 int feesColumn = cursor.getColumnIndex(KEY_RECIEPT);
                 int fees = cursor.getInt(feesColumn);
                 Log.d(TAG, "DATE: " + date + " " + "fees: " + fees);
+                sum = fees + sum;
 
             } while (cursor.moveToNext());
+            Log.d(TAG, "" + sum);
 
         }
         cursor.close();
+        return sum;
+    }
+
+    //endregion
+    //region Getting All Contacts to log
+    public List<PersonInfo> getAllContacts() {
+        List<PersonInfo> contactList = new ArrayList<>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO + " ORDER BY " + KEY_CUST_NO + " ASC";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                PersonInfo personinfo = new PersonInfo();
+                personinfo.setID(Integer.parseInt(cursor.getString(0)));
+                personinfo.setName(cursor.getString(1));
+                personinfo.setPhoneNumber(cursor.getString(2));
+                personinfo.setCustNo(Integer.parseInt(cursor.getString(3)));
+                personinfo.setFees(Integer.parseInt(cursor.getString(4)));
+                // Adding contact to list
+                contactList.add(personinfo);
+            } while (cursor.moveToNext());
+        }
+        // return contact list
+        return contactList;
     }
     //endregion
 
+    //region view fees table to log
+    public List<Fees> viewFees() {
+        List<Fees> feeslist = new ArrayList<Fees>();
+        String selectQuery = "SELECT  * FROM " + TABLE_FEES;
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Fees fees = new Fees();
+                fees.setNo(Integer.parseInt(cursor.getString(0)));
+                fees.setID(Integer.parseInt(cursor.getString(1)));
+                fees.setFees(Integer.parseInt(cursor.getString(2)));
+                fees.setDate(cursor.getString(3));
+                // Adding fees to list
+                feeslist.add(fees);
+            } while (cursor.moveToNext());
+        }
+        // return contact list
+        return feeslist;
+    }
+    //endregion
+
+
 }
-
- /* public String getData(){
-
-        String [] colums = new String[]{KEY_ID, KEY_NAME, KEY_PHONE_NO};
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.query(TABLE_PERSON_INFO, colums, null, null, null, null, null);
-        String result = "";
-
-        int iRow = c.getColumnIndex(KEY_ID);
-        int iName = c.getColumnIndex(KEY_NAME);
-        int iContact = c.getColumnIndex(KEY_PHONE_NO);
-
-        for (c.moveToFirst();!c.isAfterLast(); c.moveToNext()){
-            result = result + c.getString(iRow) + " " + c.getString(iName) + " " + c.getString(iContact) + "\n";
-        }
-        db.close();
-        return result;
-    }
-*/
-
-
-/*
-// Getting contacts Count
-    public int getCount(){
-        String counttotal = "SELECT * FROM "+ TABLE_PERSON_INFO;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(counttotal, null);
-        cursor.close();
-        //return count
-        return cursor.getCount();
-    }*/
-
-
-/*
-// Deleting single record
-    public void deletePerson(PersonInfo info){
-        SQLiteDatabase db = getWritableDatabase();
-
-        db.delete(TABLE_PERSON_INFO, KEY_ID + "=?",
-                new String[]{String.valueOf(info.getID())});
-        db.close();
-    }
-
-*/
-
-
-/*//print the database as string
-    public String databaseToString() {
-        String dbString = "";
-        SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_PERSON_INFO + "WHERE 1";
-
-
-        //CURSOR POINT TO LOCATION IN RESULT
-        Cursor c = db.rawQuery(query, null);
-        c.moveToFirst();
-        while (!c.isAfterLast()) {
-            if (c.getString(c.getColumnIndex("name")) != null) ;{
-
-            }
-        }
-        db.close();
-       return dbString;
-
-    }*/
-/*public void deleteallfees() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_FEES);
-        db.close();
-        Log.d(TAG, "deleted");
-    }*/
-
-
 

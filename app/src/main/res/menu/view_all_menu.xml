@@ -2,10 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/total_balance"
-        android:orderInCategory="90"
-        android:title="Get Total Balance"
+        android:id="@+id/large_balance"
+        android:orderInCategory="80"
+        android:title="By Large Balance"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/by_number"
+        android:orderInCategory="90"
+        android:title="By Number" />
     <item
         android:id="@+id/colection_btw_two_dates"
         android:orderInCategory="91"

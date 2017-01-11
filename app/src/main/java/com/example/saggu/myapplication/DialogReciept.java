@@ -31,7 +31,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     Calendar calendar;
     EditText date;
     DbHendler dbHendler;
-    Button dateChange;
+
     int id;
 
 
@@ -54,7 +54,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-        setCancelable(false); //preventing from cancel when clicking on background
+      //  setCancelable(false); //preventing from cancel when clicking on background
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
@@ -65,6 +65,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     pickDate();
+                    date.clearFocus();
                 }
             }
         });
@@ -153,10 +154,14 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         Log.d(TAG, "date change called");
         DialogFragment newFragment = new MyDatePicker();
         newFragment.show(getFragmentManager(), "datepicker");
+        Bundle bundle = new Bundle();
+        bundle.putInt("id", 1);
+        newFragment.setArguments(bundle);
+
+
     }
 
     public void changeText(String data) {
-
         date.setText(data);
     }
 

@@ -7,25 +7,34 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 // TODO: 1/6/2017 customer with same cust no problem
-public class ViewAll extends AppCompatActivity implements Communicator{
+// TODO: 1/11/2017  add search button for customer // partialy done
+public class ViewAll extends AppCompatActivity implements Communicator {
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
     ListView listViewCustomers;
     TextView textView4;
     String TAG = "MyApp_ViewAll";
+    EditText searchBox;
+
+    String searchItem;
 
 
     @Override
@@ -35,16 +44,38 @@ public class ViewAll extends AppCompatActivity implements Communicator{
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
+        searchBox = (EditText) findViewById(R.id.search_box);
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                displaySearchList();
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (searchBox.getText().toString().equals("")) {
+                    displayProductList();
+                }
+
+            }
+        });
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("All Customers");
         checkApi();
         displayProductList();
         registerForContextMenu(listViewCustomers);
-
     }
 
 
+    //region context menu items
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -54,7 +85,7 @@ public class ViewAll extends AppCompatActivity implements Communicator{
         menu.add("Delete");
     }
 
-    //region context menu items
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         super.onContextItemSelected(item);
@@ -99,7 +130,7 @@ public class ViewAll extends AppCompatActivity implements Communicator{
     }
     //endregion
 
-    //region Create List
+    //region Create all List
     public void displayProductList() {
         try {
             Cursor cursor = dbHendler.getAllProducts();
@@ -139,12 +170,103 @@ public class ViewAll extends AppCompatActivity implements Communicator{
             textView4.setText("There was an error!");
         }
     }
+
     //endregion
 
+    //region Create Search  List
+    public void displaySearchList() {
+        searchItem = searchBox.getText().toString();
+        try {
+            Cursor cursor = dbHendler.searchPersonToList(searchItem);
+            if (cursor == null) {
+                textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                textView4.setText("No Customer Found");
+                return;
+            } else {
+                textView4.setText("");
+                String[] columns = new String[]{
+                        //DbHendler.KEY_ID,
+                        DbHendler.KEY_NAME,
+                        DbHendler.KEY_PHONE_NO,
+                        DbHendler.KEY_CUST_NO,
+                        DbHendler.KEY_FEES,
+                        DbHendler.KEY_BALANCE
+                };
+                int[] boundTo = new int[]{
+                        //R.id.pId,
+                        R.id.pName,
+                        R.id.pMob,
+                        R.id.cNo,
+                        R.id.cFees,
+                        R.id.cBalance
+                };
+                simpleCursorAdapter = new SimpleCursorAdapter(this,
+                        R.layout.layout_list,
+                        cursor,
+                        columns,
+                        boundTo,
+                        0);
+                listViewCustomers.setAdapter(simpleCursorAdapter);
+            }
+        } catch (Exception ex) {
+            textView4.setText("There was an error!");
+        }
+    }
+
+    //endregion
+    //region larger balance list
+    public void getLargerBalance() {
+        try {
+            Cursor cursor = dbHendler.getLargerBalance();
+            if (cursor == null) {
+                textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                textView4.setText("No Customer in the Database.");
+                return;
+            }
+            String[] columns = new String[]{
+                    //DbHendler.KEY_ID,
+                    DbHendler.KEY_NAME,
+                    DbHendler.KEY_PHONE_NO,
+                    DbHendler.KEY_CUST_NO,
+                    DbHendler.KEY_FEES,
+                    DbHendler.KEY_BALANCE
+            };
+            int[] boundTo = new int[]{
+                    //R.id.pId,
+                    R.id.pName,
+                    R.id.pMob,
+                    R.id.cNo,
+                    R.id.cFees,
+                    R.id.cBalance
+            };
+            simpleCursorAdapter = new SimpleCursorAdapter(this,
+                    R.layout.layout_list,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listViewCustomers.setAdapter(simpleCursorAdapter);
+
+        } catch (Exception ex) {
+            textView4.setText("There was an error!");
+        }
+    }
+
+    //endregion
+
+    //region recreate list on dialog closed
     public void dialogClosed() {
         displayProductList();
     }
+    //endregion
 
+    //region delete person
     public void delete(int id) {
 
         dbHendler.deletePerson(id);
@@ -154,6 +276,7 @@ public class ViewAll extends AppCompatActivity implements Communicator{
         // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
         displayProductList();
     }
+    //endregion
 
     //region call to backup and restore functions
     public void backupDb() {
@@ -180,12 +303,17 @@ public class ViewAll extends AppCompatActivity implements Communicator{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.total_balance) {
-           int sum= dbHendler.totalBalance();
+        if (id == R.id.large_balance) {
+            getLargerBalance();
+        }
+        if (id == R.id.by_number) {
+           // int sum = dbHendler.totalBalance();
+            displayProductList();
 
         }
         if (id == R.id.colection_btw_two_dates) {
-            dbHendler.colectionBwtwoDates();
+            Intent intent = new Intent(this, BtwTwoDates.class);
+            startActivity(intent);
         }
         if (id == R.id.add_customer) {
             startActivity(new Intent(this, AddEditActivity.class));
@@ -205,6 +333,38 @@ public class ViewAll extends AppCompatActivity implements Communicator{
         return super.onOptionsItemSelected(item);
     }    //endregion
 
+
+    //region Reading searched item to log
+    public void search() {
+
+
+        Log.d("Reading: ", "Reading searched item..");
+        List<PersonInfo> personInfos = dbHendler.searchPerson();
+
+        for (PersonInfo info : personInfos) {
+            String log = "Id: " + info.getID() + " ,Name: " + info.getName() + " ,Phone: " + info.getPhoneNumber()
+                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees();
+            // Writing Contacts to log
+            Log.d("Name: ", log);
+        }
+    }
+    //endregion
+
+
+    @Override
+    public void respond(String data) {
+
+        android.app.FragmentManager manager = getFragmentManager();
+        DialogReciept dialogReciept = (DialogReciept) manager.findFragmentByTag("dialog");
+        dialogReciept.changeText(data);
+
+    }
+
+    @Override
+    public void respond2(String date2) {
+
+    }
+
     public int checkApi() {
         String currntVersion = Build.VERSION.RELEASE;
         int currentRealease = Build.VERSION.SDK_INT;
@@ -213,13 +373,4 @@ public class ViewAll extends AppCompatActivity implements Communicator{
     }
 
 
-    @Override
-    public void respond(String data) {
-
-        android.app.FragmentManager manager = getFragmentManager();
-       DialogReciept dialogReciept= (DialogReciept) manager.findFragmentByTag("dialog");
-
-        dialogReciept.changeText(data);
-
-    }
 }

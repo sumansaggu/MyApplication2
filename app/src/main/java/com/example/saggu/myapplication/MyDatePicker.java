@@ -17,10 +17,18 @@ import java.util.Calendar;
 
 public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
-    EditText date;
+
     Communicator comm;
+    int id;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Bundle bundle =getArguments();
+        if (bundle !=null){
+             id = bundle.getInt("id");
+            Log.d("tag",""+id);
+        }
+
         // Use the current date as the default date in the picker
         final Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
@@ -31,32 +39,51 @@ public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnD
         // Create a new instance of DatePickerDialog and return it
         return new DatePickerDialog(getActivity(), this, year, month, day);
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        comm= (Communicator) getActivity();
+        comm = (Communicator) getActivity();
     }
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        if(id==1){
 
-        // do some stuff for example write on log and update TextField on activity
-        int month= monthOfYear+1;
-        String fm=""+month;
-        String fd=""+dayOfMonth;
-        if(month<10){
-            fm ="0"+month;
-        }
-        if (dayOfMonth<10){
-            fd="0"+dayOfMonth;
-        }
-        String date= ""+year+"-"+fm+"-"+fd;
-        Log.d("tag",""+date);
+            int month = monthOfYear + 1;
+            String fm = "" + month;
+            String fd = "" + dayOfMonth;
+            if (month < 10) {
+                fm = "0" + month;
+            }
+            if (dayOfMonth < 10) {
+                fd = "0" + dayOfMonth;
+            }
+            String date = "" + year + "-" + fm + "-" + fd;
+            Log.d("tag", "" + date);
+            comm.respond(date);
 
-       comm.respond(date);
+        }else {
+
+            int month = monthOfYear + 1;
+            String fm = "" + month;
+            String fd = "" + dayOfMonth;
+            if (month < 10) {
+                fm = "0" + month;
+            }
+            if (dayOfMonth < 10) {
+                fd = "0" + dayOfMonth;
+            }
+            String date = "" + year + "-" + fm + "-" + fd;
+            Log.d("tag", "" + date);
+            comm.respond2(date);
+
+
+        }
+
+
+
 
 
     }
-
-
 }

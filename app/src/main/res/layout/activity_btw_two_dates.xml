@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_btw_two_dates"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:focusableInTouchMode="true"
+    tools:context="com.example.saggu.myapplication.BtwTwoDates">
+    <include android:id="@+id/app_bar"
+        layout="@layout/app_bar"
+        />
+
+    <TextView
+        android:text="To Date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView14"
+        android:layout_alignBaseline="@+id/date_to"
+        android:layout_alignBottom="@+id/date_to"
+        android:layout_alignLeft="@+id/textView13"
+        android:layout_alignStart="@+id/textView13" />
+
+    <TextView
+        android:text="From Date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView13"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_alignBaseline="@+id/date_from"
+        android:layout_alignBottom="@+id/date_from"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Collection Rs."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView15"
+        android:textSize="18sp"
+        android:layout_above="@+id/date_from"
+        android:layout_alignLeft="@+id/textView13"
+        android:layout_alignStart="@+id/textView13"
+        android:layout_marginBottom="14dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/from_to_textview"
+        android:textSize="18sp"
+        android:layout_alignBaseline="@+id/textView15"
+        android:layout_alignBottom="@+id/textView15"
+        android:layout_alignLeft="@+id/date_from"
+        android:layout_alignStart="@+id/date_from"
+        android:layout_marginLeft="51dp"
+        android:layout_marginStart="51dp"
+        android:text="8888" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/date_from"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/textView15"
+        android:layout_toEndOf="@+id/textView15"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/date_to"
+        android:layout_below="@+id/date_from"
+        android:layout_alignLeft="@+id/date_from"
+        android:layout_alignStart="@+id/date_from" />
+</RelativeLayout>
