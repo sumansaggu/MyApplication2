@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BtwTwoDates" />
+        <activity android:name=".STBRecord"></activity>
     </application>
 
 </manifest>

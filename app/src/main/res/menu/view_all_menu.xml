@@ -21,6 +21,12 @@
         android:title="Add Customer"
         app:showAsAction="never" />
     <item
+        android:id="@+id/manage_stb"
+        android:orderInCategory="100"
+        android:title="Manage STB"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/backup_database"
         android:orderInCategory="200"
         android:title="Backup Database"

@@ -14,93 +14,117 @@
     tools:layout_height="wrap_content"
     tools:showIn="@layout/add_edit_activity">
 
-    <EditText
-        android:id="@+id/person_name"
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+
+        <Button
+            android:id="@+id/buttonViewAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="@string/view_all"
+
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="14dp"
+            android:layout_marginEnd="14dp" />
+
+        <Button
+            android:id="@+id/buttonAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp"
+            android:layout_alignBaseline="@+id/buttonViewAll"
+            android:layout_alignBottom="@+id/buttonViewAll"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/changeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="update"
+            android:text="Change"
+            android:visibility="invisible"
+            android:layout_alignBaseline="@+id/buttonAdd"
+            android:layout_alignBottom="@+id/buttonAdd"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="28dp"
-        android:hint="Name"
-        android:minWidth="300dp" />
+        android:layout_centerHorizontal="true">
 
-    <EditText
-        android:id="@+id/contact_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:hint="Mobile No"
-        android:inputType="numberDecimal"
-        android:minWidth="300dp"
-        android:layout_below="@+id/person_name"
-        android:layout_alignLeft="@+id/person_name"
-        android:layout_alignStart="@+id/person_name" />
+        <EditText
+            android:id="@+id/contact_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:hint="Mobile No"
+            android:inputType="numberDecimal"
+            android:minWidth="300dp"
+            android:layout_below="@+id/person_name"
+            android:layout_alignLeft="@+id/person_name"
+            android:layout_alignStart="@+id/person_name" />
 
-    <EditText
+        <EditText
 
-        android:id="@+id/balance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="Balance"
-        android:inputType="number"
-        android:layout_alignBaseline="@+id/cust_no"
-        android:layout_alignBottom="@+id/cust_no"
-        android:layout_alignRight="@+id/contact_no"
-        android:layout_alignEnd="@+id/contact_no" />
+            android:id="@+id/balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Balance"
+            android:inputType="number"
+            android:layout_alignBaseline="@+id/cust_no"
+            android:layout_alignBottom="@+id/cust_no"
+            android:layout_alignRight="@+id/contact_no"
+            android:layout_alignEnd="@+id/contact_no" />
 
-    <EditText
+        <EditText
 
-        android:id="@+id/fees"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="Fees"
-        android:inputType="number"
-        android:layout_alignBaseline="@+id/balance"
-        android:layout_alignBottom="@+id/balance"
-        android:layout_centerHorizontal="true" />
+            android:id="@+id/fees"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Fees"
+            android:inputType="number"
+            android:layout_alignBaseline="@+id/balance"
+            android:layout_alignBottom="@+id/balance"
+            android:layout_centerHorizontal="true" />
 
-    <Button
-        android:id="@+id/buttonAdd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="addButtonClicked"
-        android:text="@string/add"
-        android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/cust_no"
-        android:layout_alignStart="@+id/cust_no" />
+        <EditText
 
-    <EditText
+            android:id="@+id/cust_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:hint="Cust No"
+            android:inputType="number"
+            android:layout_below="@+id/contact_no"
+            android:layout_alignLeft="@+id/contact_no"
+            android:layout_alignStart="@+id/contact_no" />
 
-        android:id="@+id/cust_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:hint="Cust No"
-        android:inputType="number"
-        android:layout_below="@+id/contact_no"
-        android:layout_alignLeft="@+id/contact_no"
-        android:layout_alignStart="@+id/contact_no" />
+        <EditText
+            android:id="@+id/person_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="27dp"
+            android:hint="Name"
+            android:minWidth="300dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
-    <Button
-        android:id="@+id/changeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="update"
-        android:text="Change"
-        android:visibility="invisible"
-        android:layout_alignBaseline="@+id/buttonAdd"
-        android:layout_alignBottom="@+id/buttonAdd"
-        android:layout_centerHorizontal="true" />
+    </RelativeLayout>
 
-    <Button
-        android:id="@+id/buttonViewAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="viewAll"
-        android:text="@string/view_all"
-        android:layout_alignBaseline="@+id/changeButton"
-        android:layout_alignBottom="@+id/changeButton"
-        android:layout_alignRight="@+id/balance"
-        android:layout_alignEnd="@+id/balance" />
 
 </RelativeLayout>

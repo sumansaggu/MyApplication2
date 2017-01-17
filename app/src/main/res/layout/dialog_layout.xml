@@ -79,7 +79,7 @@
 
     <EditText
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
+        android:inputType="numberSigned|numberDecimal"
         android:ems="10"
         android:id="@+id/reciept_dialog"
         android:textSize="15sp"

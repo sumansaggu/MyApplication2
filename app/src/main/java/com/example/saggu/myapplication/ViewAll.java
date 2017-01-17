@@ -1,5 +1,6 @@
 package com.example.saggu.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -23,8 +24,11 @@ import android.widget.Toast;
 
 import java.util.List;
 
-// TODO: 1/6/2017 customer with same cust no problem
+// TODO: 1/6/2017 customer with same cust no problem// important
 // TODO: 1/11/2017  add search button for customer // partialy done
+// TODO: 1/12/2017  fees adjustment needed // done but with negetive entry
+// TODO: 1/16/2017  screen size issue
+// TODO: 1/16/2017  prevent reverse engineering
 public class ViewAll extends AppCompatActivity implements Communicator {
 
     SimpleCursorAdapter simpleCursorAdapter;
@@ -33,7 +37,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     TextView textView4;
     String TAG = "MyApp_ViewAll";
     EditText searchBox;
-
+    int backpress;
     String searchItem;
 
 
@@ -63,7 +67,14 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                 if (searchBox.getText().toString().equals("")) {
                     displayProductList();
                 }
-
+                if (searchBox.getText().toString().equals("checkmonth")) {
+                    dbHendler.checkmonthchange(getApplicationContext());
+                    searchBox.setText("");
+                }
+                if (searchBox.getText().toString().equals("@endofmonth@")) {
+                    dbHendler.endOfMonth(getApplicationContext());
+                    searchBox.setText("");
+                }
             }
         });
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -217,6 +228,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     }
 
     //endregion
+
     //region larger balance list
     public void getLargerBalance() {
         try {
@@ -305,23 +317,29 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         int id = item.getItemId();
         if (id == R.id.large_balance) {
             getLargerBalance();
+            return true;
         }
         if (id == R.id.by_number) {
-           // int sum = dbHendler.totalBalance();
+            // int sum = dbHendler.totalBalance();
             displayProductList();
-
+            return true;
         }
         if (id == R.id.colection_btw_two_dates) {
             Intent intent = new Intent(this, BtwTwoDates.class);
             startActivity(intent);
+            return true;
         }
         if (id == R.id.add_customer) {
             startActivity(new Intent(this, AddEditActivity.class));
             return true;
         }
+        if (id == R.id.manage_stb) {
+            Intent intent = new Intent(this, STBRecord.class);
+            startActivity(intent);
+            return true;
+        }
         if (id == R.id.backup_database) {
             backupDb();
-
             return true;
         }
         if (id == R.id.restore_database) {
@@ -329,10 +347,16 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             restoreDbAlert.show(getFragmentManager(), "restoreDbAlert");
             return true;
         }
+        if (id == R.id.add_stb) {
+            Intent intent = new Intent(this, AddEditActivity.class);
+            intent.putExtra("addstb", R.id.add_stb);
+            Log.d(TAG, "add stb" + R.id.add_stb);
+            startActivity(intent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }    //endregion
-
 
     //region Reading searched item to log
     public void search() {
@@ -373,4 +397,21 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        backpress = 0;
+    }
+
+    @Override
+    public void onBackPressed() {
+        backpress = (backpress + 1);
+        if (backpress == 1) {
+            Toast.makeText(getApplicationContext(), " Press Back again to Exit ", Toast.LENGTH_SHORT).show();
+        }
+        if (backpress > 1) {
+            this.finishAffinity();
+            super.onBackPressed();
+        }
+    }
 }

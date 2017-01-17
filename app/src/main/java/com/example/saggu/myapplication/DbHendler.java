@@ -27,7 +27,7 @@ public class DbHendler extends SQLiteOpenHelper {
     //region All Static variables
     // Database Version
     String TAG = "MyApp_dbhendler";
-    private static final int DATABASE_VER = 11;
+    private static final int DATABASE_VER = 18;
 
 
     //DATABASE NAME
@@ -37,25 +37,44 @@ public class DbHendler extends SQLiteOpenHelper {
     //table name
     private static final String TABLE_PERSON_INFO = "personInfo";
     private static final String TABLE_FEES = "fees";
+    private static final String TABLE_STB = "stbRecord";
+    public static final String TABLE_EXTRAS = "extras";
 
     //Table columns names
-    public static final String KEY_ID = "_id";           //common for customer and fees table
+    public static final String KEY_ID = "_id";           //common for customer, fees, extras table
+
     public static final String KEY_NAME = "name";
     public static final String KEY_PHONE_NO = "phone_no";
     public static final String KEY_CUST_NO = "cust_no";
     public static final String KEY_FEES = "fees";
     public static final String KEY_BALANCE = "balance";
-    public static final String KEY_NO = "NO";                //for
-    public static final String KEY_RECIEPT = "reciept";       //fees
-    public static final String KEY_DATE = "recieved_on";      //table
+    public static final String KEY_AREA = "area";
 
-    String CREATE_FEES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FEES + "("
-            + KEY_NO + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_ID + " INTEGER, " +
-            KEY_RECIEPT + " INTEGER, " + KEY_DATE + " DATETIME " + ")";
+    public static final String KEY_SN = "serialNo";// stb record
+    public static final String KEY_VC = "vcNo";
+
+
+    public static final String KEY_NO = "NO";                //for fees table
+    public static final String KEY_RECIEPT = "reciept";
+    public static final String KEY_DATE = "recieved_on";
+    public static final String KEY_REMARK = "remark";
+
+    public static final String KEY_MONTH_ENDED = "month";   //table extra
+
 
     String CREATE_CONTACTS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PERSON_INFO + "("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT,"
-            + KEY_PHONE_NO + " TEXT, " + KEY_CUST_NO + " INTEGER, " + KEY_FEES + " INTEGER, " + KEY_BALANCE + " INTEGER " + ")";
+            + KEY_PHONE_NO + " TEXT, " + KEY_CUST_NO + " INTEGER, " + KEY_FEES + " INTEGER, " + KEY_BALANCE + " INTEGER, " + KEY_AREA + " INTEGER " + ")";
+
+    String CREATE_FEES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FEES + "("
+            + KEY_NO + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_ID + " INTEGER, " +
+            KEY_RECIEPT + " INTEGER, " + KEY_DATE + " DATETIME, " + KEY_REMARK + " TEXT " + ")";
+
+    String CREATE_STB_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_STB + "("
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_SN + " TEXT, "+ KEY_VC+ " TEXT " + ")";
+
+    String CREATE_EXTRAS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_EXTRAS + "("
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_MONTH_ENDED + " DATETIME " + ")";
     //endregion
 
 
@@ -68,26 +87,62 @@ public class DbHendler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_CONTACTS_TABLE);
         db.execSQL(CREATE_FEES_TABLE);
+        db.execSQL(CREATE_STB_TABLE);
+        db.execSQL(CREATE_EXTRAS_TABLE);
+
     }
 
     // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // db.execSQL("DROP TABLE FEES_TABLE" );
+        db.execSQL(CREATE_CONTACTS_TABLE);
+        db.execSQL(CREATE_FEES_TABLE);
+        db.execSQL(CREATE_EXTRAS_TABLE);
+        db.execSQL(CREATE_STB_TABLE);
+
+        db.execSQL("ALTER TABLE " + TABLE_PERSON_INFO + " RENAME TO TempOldTablePerson"); // rename temporary
+        db.execSQL("ALTER TABLE " + TABLE_FEES + " RENAME TO TempOldTableFees");
+        db.execSQL("ALTER TABLE " + TABLE_STB + " RENAME TO TempOldTableSTB");
+        db.execSQL("ALTER TABLE " + TABLE_EXTRAS + " RENAME TO TempOldTableExtras");
+
+        db.execSQL(CREATE_CONTACTS_TABLE);
+        db.execSQL(CREATE_FEES_TABLE);
+        db.execSQL(CREATE_EXTRAS_TABLE);
+        db.execSQL(CREATE_STB_TABLE);
+
+        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "(" + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ") " +
+                                                  "SELECT " + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + " FROM TempOldTablePerson");
+
+        db.execSQL("INSERT INTO " + TABLE_FEES + "(" + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ") " +
+                                           "SELECT " + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + "  FROM TempOldTableFees");
+
+        db.execSQL("INSERT INTO " + TABLE_STB + "(" + KEY_ID + ", " + KEY_SN  +", " + KEY_VC + ") " +
+                                         "SELECT " + KEY_ID + ", " + KEY_SN  + ", " + KEY_VC + "  FROM TempOldTableSTB");
+
+        db.execSQL("INSERT INTO " + TABLE_EXTRAS + "(" + KEY_ID + ", " + KEY_MONTH_ENDED  + ") " +
+                                             "SELECT " + KEY_ID + ", " + KEY_MONTH_ENDED  + "  FROM TempOldTableExtras");
+
+
+
+        db.execSQL("DROP TABLE TempOldTablePerson" );
+        db.execSQL("DROP TABLE TempOldTableFees" );
+        db.execSQL("DROP TABLE TempOldTableSTB" );
+        db.execSQL("DROP TABLE TempOldTableExtras" );
         //  Log.d(TAG," table deleted");
         //  db.execSQL(CREATE_FEES_TABLE);
         //  Log.d(TAG,"table created");
         // Create tables again
-        onCreate(db);
+           onCreate(db);
     }
 
 
     // getting to list view
     public Cursor getAllProducts() {
         SQLiteDatabase db = this.getReadableDatabase();
+        String columns[]={KEY_ID, KEY_NAME, KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE};
+        Cursor cursor = db.query(TABLE_PERSON_INFO, columns , null, null,null , null, KEY_CUST_NO);
 
-        Cursor cursor = db.query(TABLE_PERSON_INFO, new String[]{KEY_ID, KEY_NAME,
-                KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE}, null, null, KEY_CUST_NO, null, null);
+
         if (cursor != null) {
             cursor.moveToFirst();
             return cursor;
@@ -95,6 +150,22 @@ public class DbHendler extends SQLiteOpenHelper {
             return null;
         }
     }
+
+    // getting to list view
+    public Cursor getAllSTBs() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String columns[]={KEY_ID, KEY_SN,KEY_VC};
+        Cursor cursor = db.query(TABLE_STB, columns , null, null,null , null, KEY_ID);
+
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor;
+        } else {
+            return null;
+        }
+    }
+
 
     //region serarch person to list
     public Cursor searchPersonToList(String namesearch) {
@@ -184,6 +255,17 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+    public void AddNewStb(String sn,String vc){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_SN, sn);
+        values.put(KEY_VC, vc);
+
+        db.insert(TABLE_STB, null,values);
+        db.close();
+
+    }
+
     //region ADD FEES TO FEES TABLE
     public void addFees(Fees fees) {
         SQLiteDatabase db = getWritableDatabase();
@@ -266,8 +348,10 @@ public class DbHendler extends SQLiteOpenHelper {
     //endregion
 
 
+
+
     //region end of month
-    public void endOfMonth() {
+    public void endOfMonth(Context context) {
         String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -289,24 +373,46 @@ public class DbHendler extends SQLiteOpenHelper {
                 contentValues.put(KEY_BALANCE, k);
                 db.update(TABLE_PERSON_INFO, contentValues, KEY_ID + "=?", new String[]{String.valueOf(id)});
             } while (cursor.moveToNext());
+            Toast.makeText(context, "Month ended fees updated for all", Toast.LENGTH_LONG).show();
+               entryTomonthTable();
         }
+
         cursor.close();
+    }
+
+    public void entryTomonthTable(){
+        Calendar calender = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = df.format(calender.getTime());
+        ContentValues values = new ContentValues();
+        String selectQuery = "SELECT  * FROM " + TABLE_EXTRAS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        //int id_column = cursor.getColumnIndex(KEY_ID);
+       // int id = cursor.getInt(id_column);
+        values.put(KEY_MONTH_ENDED, formattedDate);
+        db.insert(TABLE_EXTRAS,null,values);
+        Log.d(TAG,"add to extra table");
+    }
+
+    public void checkmonthchange(Context Context){
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_EXTRAS ;
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.moveToLast()) {
+            int id = (Integer.parseInt(cursor.getString(0)));
+            String month=(cursor.getString(1));
+            Toast.makeText(Context, "Month was ended at: "+month, Toast.LENGTH_LONG).show();
+        }cursor.close();
+
     }
     //endregion
 
     //region backupdatabase
 
-    /**
-     * Copy the local DB file of an application to the root of external storage directory
-     *
-     * @param context the Context of application
-     * @param dbName  The name of the DB
-     */
     public void copyDbToExternalStorage(Context context, String dbName) {
-
-
         Calendar calender = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yy hh-mm-ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         String formattedDate = df.format(calender.getTime());
         Log.d(TAG, "" + formattedDate);
         File folder = new File(Environment.getExternalStorageDirectory() + "/MyBackup");
