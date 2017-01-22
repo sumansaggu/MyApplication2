@@ -89,13 +89,6 @@ public class STBRecord extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
-        if (id == R.id.scan_stb) {
-            Intent intent = new Intent(this, ScannerActivity.class);
-            //intent.putExtra("addstb", R.id.add_stb);
-           // Log.d(TAG, "add stb" +R.id.add_stb);
-            startActivity(intent);
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }

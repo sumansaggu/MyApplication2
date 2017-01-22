@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:hint="Cust No"
-            android:inputType="number"
+            android:inputType="number|numberDecimal"
             android:layout_below="@+id/contact_no"
             android:layout_alignLeft="@+id/contact_no"
             android:layout_alignStart="@+id/contact_no" />
