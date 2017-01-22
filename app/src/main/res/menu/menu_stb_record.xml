@@ -6,10 +6,5 @@
         android:orderInCategory="100"
         android:title="Add STB"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/by_number"
-        android:orderInCategory="200"
-        android:title="Edit STB"
-        />
 
 </menu>

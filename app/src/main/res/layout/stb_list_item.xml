@@ -1,17 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="70dip">
-
-    <TextView
-        android:text="Serial No."
-        android:layout_width="match_parent"
-        android:layout_height="35dip"
-        android:id="@+id/stb_sn" />
+    android:padding="5dip"
+    android:layout_height="60dip">
 
     <TextView
         android:text="VC No."
-        android:layout_width="match_parent"
-        android:layout_height="35dip"
-        android:id="@+id/stb_vc" />
-</LinearLayout>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/stb_vc"
+        android:textSize="14sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Serial No."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/stb_sn"
+        android:textSize="14sp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Serial No."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView17"
+        android:textSize="14sp"
+        android:textAllCaps="false" />
+
+    <TextView
+        android:text="MAC/VC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView18"
+        android:textSize="14sp" />
+</RelativeLayout>

@@ -49,9 +49,12 @@ public class DbHendler extends SQLiteOpenHelper {
     public static final String KEY_FEES = "fees";
     public static final String KEY_BALANCE = "balance";
     public static final String KEY_AREA = "area";
+    public static final String KEY_STBID = "stbid";
 
     public static final String KEY_SN = "serialNo";// stb record
     public static final String KEY_VC = "vcNo";
+    public static final String KEY_STATUS = "status";
+    public static final String KEY_CUSTID = "custid";
 
 
     public static final String KEY_NO = "NO";                //for fees table

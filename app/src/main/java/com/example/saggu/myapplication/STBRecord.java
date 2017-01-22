@@ -6,8 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ public class STBRecord extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Manage STBs");
+        registerForContextMenu(listViewStb);
         displaySTBList();
     }
 
@@ -85,11 +89,41 @@ public class STBRecord extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
-
-
-
+        if (id == R.id.scan_stb) {
+            Intent intent = new Intent(this, ScannerActivity.class);
+            //intent.putExtra("addstb", R.id.add_stb);
+           // Log.d(TAG, "add stb" +R.id.add_stb);
+            startActivity(intent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
     //endregion
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add("Edit");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        super.onContextItemSelected(item);
+        // Get extra info about list item that was long-pressed
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if (item.getTitle() == "Edit") {
+
+            /*DeleteAlert myAlert = new DeleteAlert();
+            myAlert.show(getFragmentManager(), "DeleteAlert");
+            int id = (int) menuInfo.id;
+            Bundle bundle = new Bundle();
+            myAlert.setArguments(bundle);
+            bundle.putInt("ID", id);*/
+
+
+        }
+        return true;
+    }
 }

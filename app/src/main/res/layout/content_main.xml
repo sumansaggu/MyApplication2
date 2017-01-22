@@ -4,11 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:elevation="1dp"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.saggu.myapplication.AddEditActivity"
     tools:layout_height="wrap_content"
@@ -16,53 +11,10 @@
 
 
     <RelativeLayout
+        android:id="@+id/layoutedittext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-
-        <Button
-            android:id="@+id/buttonViewAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:text="@string/view_all"
-
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="14dp"
-            android:layout_marginEnd="14dp" />
-
-        <Button
-            android:id="@+id/buttonAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add"
-            android:layout_marginLeft="22dp"
-            android:layout_marginStart="22dp"
-            android:layout_alignBaseline="@+id/buttonViewAll"
-            android:layout_alignBottom="@+id/buttonViewAll"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <Button
-            android:id="@+id/changeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="update"
-            android:text="Change"
-            android:visibility="invisible"
-            android:layout_alignBaseline="@+id/buttonAdd"
-            android:layout_alignBottom="@+id/buttonAdd"
-            android:layout_centerHorizontal="true" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
@@ -124,6 +76,91 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layoutButtons1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layoutedittext"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+
+        <Button
+            android:id="@+id/buttonViewAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_all"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="14dp"
+            android:layout_marginEnd="14dp" />
+
+        <Button
+            android:id="@+id/buttonAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add"
+            android:layout_marginLeft="22dp"
+            android:layout_marginStart="22dp"
+            android:layout_alignBaseline="@+id/buttonViewAll"
+            android:layout_alignBottom="@+id/buttonViewAll"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/changeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="update"
+            android:text="Change"
+            android:visibility="invisible"
+            android:layout_alignBaseline="@+id/buttonAdd"
+            android:layout_alignBottom="@+id/buttonAdd"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layoutButtons2"
+        android:layout_width="match_parent"
+        android:layout_height="60dip"
+        android:layout_below="@+id/layoutButtons1"
+        android:layout_alignLeft="@+id/relativeLayout5"
+        android:layout_alignStart="@+id/relativeLayout5">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan SN"
+            android:id="@+id/btnScanSN"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="25dp"
+            android:layout_marginStart="25dp"
+            android:visibility="invisible" />
+
+        <Button
+            android:text="SCAN VC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnScanVC"
+            android:visibility="invisible"
+            android:layout_alignBaseline="@+id/btnScanSN"
+            android:layout_alignBottom="@+id/btnScanSN"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View STBs"
+            android:id="@+id/btn_stb_record"
+            android:visibility="invisible"
+            android:layout_alignBaseline="@+id/btnScanVC"
+            android:layout_alignBottom="@+id/btnScanVC"
+            android:layout_toRightOf="@+id/btnScanVC"
+            android:layout_toEndOf="@+id/btnScanVC" />
     </RelativeLayout>
 
 
