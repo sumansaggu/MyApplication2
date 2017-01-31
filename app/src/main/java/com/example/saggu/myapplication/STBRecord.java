@@ -15,11 +15,15 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 public class STBRecord extends AppCompatActivity {
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
     ListView listViewStb;
+    TextView totalSTBs;
+    int stbcount;
     String TAG = "MyApp_STBRecord";
 
     @Override
@@ -29,10 +33,13 @@ public class STBRecord extends AppCompatActivity {
         dbHendler = new DbHendler(this, null, null, 1);
         listViewStb = (ListView) findViewById(R.id.list_view_stb);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        totalSTBs = (TextView) findViewById(R.id.total_stbs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Manage STBs");
         registerForContextMenu(listViewStb);
         displaySTBList();
+        stbcount= dbHendler.countSTBs;
+        totalSTBs.setText("Total STBs: "+stbcount);
     }
 
 
@@ -41,20 +48,22 @@ public class STBRecord extends AppCompatActivity {
         try {
             Cursor cursor = dbHendler.getAllSTBs();
             if (cursor == null) {
-              //  textView4.setText("Unable to generate cursor.");
+                //  textView4.setText("Unable to generate cursor.");
                 return;
             }
             if (cursor.getCount() == 0) {
-             //   textView4.setText("No Customer in the Database.");
+                //   textView4.setText("No Customer in the Database.");
                 return;
             }
             String[] columns = new String[]{
                     DbHendler.KEY_SN,
-                    DbHendler.KEY_VC
+                    DbHendler.KEY_VC,
+                    DbHendler.KEY_STATUS
             };
             int[] boundTo = new int[]{
                     R.id.stb_sn,
-                    R.id.stb_vc
+                    R.id.stb_vc,
+                    R.id.stb_status
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this,
                     R.layout.stb_list_item,
@@ -65,7 +74,7 @@ public class STBRecord extends AppCompatActivity {
             listViewStb.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
-         //   textView4.setText("There was an error!");
+            //   textView4.setText("There was an error!");
         }
     }
     //endregion
@@ -83,9 +92,9 @@ public class STBRecord extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.add_stb) {
-            Intent intent = new Intent(this, AddEditActivity.class);
-            intent.putExtra("addstb", R.id.add_stb);
-            Log.d(TAG, "add stb" +R.id.add_stb);
+            Intent intent = new Intent(this, StbAddEditActivity.class);
+            intent.putExtra("add_stb", R.id.add_stb);
+          //  Log.d(TAG, "add stb" + R.id.add_stb);
             startActivity(intent);
             return true;
         }
@@ -107,16 +116,18 @@ public class STBRecord extends AppCompatActivity {
         // Get extra info about list item that was long-pressed
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (item.getTitle() == "Edit") {
-
-            /*DeleteAlert myAlert = new DeleteAlert();
-            myAlert.show(getFragmentManager(), "DeleteAlert");
             int id = (int) menuInfo.id;
-            Bundle bundle = new Bundle();
-            myAlert.setArguments(bundle);
-            bundle.putInt("ID", id);*/
-
+            Intent intent = new Intent(this, StbAddEditActivity.class);
+            intent.putExtra("ID", id);
+            Log.d(TAG,"" +id);
+            startActivity(intent);
 
         }
         return true;
+    }
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(this, ViewAll.class);
+        startActivity(i);
     }
 }

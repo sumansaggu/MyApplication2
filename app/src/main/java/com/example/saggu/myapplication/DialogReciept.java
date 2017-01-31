@@ -86,7 +86,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     }
 
     public void getinformation() {
-        PersonInfo personInfo = dbHendler.getInfo(id);
+        PersonInfo personInfo = dbHendler.getCustInfo(id);
         String name = personInfo.getName().toString().trim();
         title_dialog.setText(name);
         int fees = personInfo.get_fees();
@@ -100,7 +100,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
 
     public void updateReciept() {
-        PersonInfo personInfo = dbHendler.getInfo(id);
+        PersonInfo personInfo = dbHendler.getCustInfo(id);
         int balance = personInfo.get_balance();
         Log.d(TAG, "" + balance);
 

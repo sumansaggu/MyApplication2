@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_stb_add_edit"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.saggu.myapplication.StbAddEditActivity">
+
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar" />
+
+
+    <RelativeLayout
+        android:id="@+id/stbEdittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/app_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingRight="14dip"
+        android:paddingLeft="14dip"
+       >
+
+        <Button
+            android:id="@+id/btnScanSN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan SN"
+            android:visibility="visible"
+            android:layout_marginRight="11dp"
+            android:layout_marginEnd="11dp"
+            android:layout_below="@+id/app_bar"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="28dp" />
+
+        <EditText
+            android:id="@+id/stbVC_editText"
+            android:layout_width="200dip"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/stbSN_editText"
+            android:layout_marginTop="34dp"
+            android:hint="Enter VC" />
+
+        <Button
+            android:id="@+id/btnScanVC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SCAN VC"
+            android:visibility="visible"
+            android:layout_alignTop="@+id/stbVC_editText"
+            android:layout_alignLeft="@+id/btnScanSN"
+            android:layout_alignStart="@+id/btnScanSN" />
+
+        <EditText
+            android:id="@+id/stbSN_editText"
+            android:layout_width="200dip"
+            android:layout_height="wrap_content"
+
+            android:hint="Enter SN"
+            android:layout_alignBaseline="@+id/btnScanSN"
+            android:layout_alignBottom="@+id/btnScanSN"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutButtons2"
+        android:layout_below="@+id/layoutButtons1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="18dp">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/add_stb"
+            android:text="ADD"
+            android:layout_marginLeft="75dp"
+            android:layout_marginStart="75dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:id="@+id/btn_stb_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View STBs"
+            android:visibility="visible"
+            android:layout_marginLeft="41dp"
+            android:layout_marginStart="41dp"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/add_stb"
+            android:layout_toEndOf="@+id/add_stb" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layoutButtons1"
+        android:layout_width="match_parent"
+        android:layout_height="60dip"
+        android:layout_marginTop="17dp"
+        android:layout_below="@+id/stbEdittext"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <Switch
+            android:text="STB Status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="36dp"
+            android:layout_marginEnd="36dp"
+            android:id="@+id/status_switch"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

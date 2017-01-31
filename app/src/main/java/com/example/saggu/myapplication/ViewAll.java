@@ -1,11 +1,9 @@
 package com.example.saggu.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -22,13 +20,16 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import java.util.List;
 
-// TODO: 1/6/2017 customer with same cust no problem// important
-// TODO: 1/11/2017  add search button for customer // partialy done
+
 // TODO: 1/12/2017  fees adjustment needed // done but with negetive entry
-// TODO: 1/16/2017  screen size issue
 // TODO: 1/16/2017  prevent reverse engineering
+// TODO: 1/25/2017  email support to be added 
+// TODO: 1/25/2017 problem with decimal entry
+// TODO: 1/30/2017 problem with stb status change
 public class ViewAll extends AppCompatActivity implements Communicator {
 
     SimpleCursorAdapter simpleCursorAdapter;
@@ -39,12 +40,16 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     EditText searchBox;
     int backpress;
     String searchItem;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Obtain the FirebaseAnalytics instance.
+      mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         setContentView(R.layout.activity_view_all);
+
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
@@ -91,7 +96,8 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Reciept");
-        menu.add("Information");
+        menu.add("Detail");
+        menu.add("Other Information");
         menu.add("Edit");
         menu.add("Delete");
     }
@@ -113,12 +119,13 @@ public class ViewAll extends AppCompatActivity implements Communicator {
 
         } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
-            Intent intent = new Intent(this, AddEditActivity.class);
+            Intent intent = new Intent(this, CustAddEditActivity.class);
+            intent.putExtra("editcustomer","editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
 
 
-        } else if (item.getTitle() == "Information") {
+        } else if (item.getTitle() == "Detail") {
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogFeesDetail dialogFeesDetail = new DialogFeesDetail();
@@ -127,6 +134,13 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             bundle.putInt("ID", id);
             dialogFeesDetail.show(manager, "FeeDetailDialog");
             Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
+
+        }else if(item.getTitle()=="Other Information"){
+            android.app.FragmentManager manager= getFragmentManager();
+            Bundle bundle = new Bundle();
+            DialogSTB dialogSTB = new DialogSTB();
+            dialogSTB.show(manager,"DialogSTB");
+
 
         } else if (item.getTitle() == "Reciept") {
             android.app.FragmentManager manager = getFragmentManager();
@@ -330,7 +344,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             return true;
         }
         if (id == R.id.add_customer) {
-            startActivity(new Intent(this, AddEditActivity.class));
+            startActivity(new Intent(this, CustAddEditActivity.class));
             return true;
         }
         if (id == R.id.manage_stb) {
@@ -348,7 +362,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             return true;
         }
         if (id == R.id.add_stb) {
-            Intent intent = new Intent(this, AddEditActivity.class);
+            Intent intent = new Intent(this, CustAddEditActivity.class);
             intent.putExtra("addstb", R.id.add_stb);
             Log.d(TAG, "add stb" + R.id.add_stb);
             startActivity(intent);

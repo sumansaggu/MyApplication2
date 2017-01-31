@@ -22,7 +22,8 @@ public class Fees {
         this._fees = fees;
         this._date = date;
     }
-    public Fees( int id, int fees, String date) {
+
+    public Fees(int id, int fees, String date) {
 
         this._id = id;
         this._fees = fees;
@@ -30,13 +31,19 @@ public class Fees {
     }
 
     //getters
-    public int getNo(){return this._no;};
+    public int getNo() {
+        return this._no;
+    }
+
+
     public int getId() {
         return this._id;
     }
+
     public int getFees() {
         return this._fees;
     }
+
     public String getDate() {
         return this._date;
     }
@@ -46,12 +53,15 @@ public class Fees {
     public void setNo(int no) {
         this._no = no;
     }
+
     public void setID(int id) {
         this._id = id;
     }
+
     public void setFees(int fees) {
         this._fees = fees;
     }
+
     public void setDate(String date) {
         this._date = date;
     }

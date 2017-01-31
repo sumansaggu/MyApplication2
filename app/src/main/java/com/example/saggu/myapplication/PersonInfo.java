@@ -5,7 +5,7 @@ public class PersonInfo {
     private int _id;
     private String _name;
     private String _phone_no;
-    private int _cust_no;
+    private float _cust_no;
     private int _fees;
     private int _balance;
 
@@ -29,7 +29,7 @@ public class PersonInfo {
     }
 
     //Constructor
-    public PersonInfo(String name, String phone_no, int cust_no, int fees, int balance) {
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance) {
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
@@ -37,7 +37,7 @@ public class PersonInfo {
         this._balance= balance;
     }
 
-    public PersonInfo(int id, String name, String phone_no, int cust_no, int fees, int balance) {
+    public PersonInfo(int id, String name, String phone_no, float cust_no, int fees, int balance) {
         this._id = id;
         this._name = name;
         this._phone_no = phone_no;
@@ -64,7 +64,7 @@ public class PersonInfo {
         return this._phone_no;
     }
     //geeting custmer no
-    public int get_cust_no(){return this._cust_no;}
+    public float get_cust_no(){return this._cust_no;}
     //geeting fees
     public int get_fees(){return this._fees;}
     //getting balance
@@ -84,7 +84,7 @@ public class PersonInfo {
         this._phone_no = phone_no;
     }
     //settin customer no
-    public void setCustNo(int cust_no){this._cust_no=cust_no;}
+    public void setCustNo(float cust_no){this._cust_no=cust_no;}
     //seeting fees
     public void setFees(int fees){this._fees = fees;}
   //setting balance
