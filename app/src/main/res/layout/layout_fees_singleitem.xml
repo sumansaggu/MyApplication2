@@ -6,57 +6,65 @@
 
     <RelativeLayout
         android:layout_height="40dp"
-
-        android:layout_width="100dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
-
-        <TextView
-            android:text="         OnDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/dateInList"
-
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_height="40dp"
-        android:layout_width="100dp"
+        android:layout_width="80dip"
+        android:id="@+id/feesbox"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
         <TextView
-            android:text="Rs."
+            android:text="  Rs."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textView11"
             android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_height="40dp"
-        android:layout_width="150dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:text="Fees"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/feesInList"
+            android:layout_alignBaseline="@+id/textView11"
+            android:layout_alignBottom="@+id/textView11"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_height="40dp"
+        android:layout_width="100dp"
+        android:id="@+id/datebox"
+        android:layout_toEndOf="@+id/feesbox"
+       >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dateInList"
+
+            android:text="Date"
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginLeft="15dp"
-            android:layout_marginStart="15dp" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_toEndOf="@+id/datebox"
+        >
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+
+            android:text="Remark"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/remarkInList" />
     </RelativeLayout>
 
 

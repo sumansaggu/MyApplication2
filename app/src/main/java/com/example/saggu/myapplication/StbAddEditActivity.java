@@ -155,8 +155,6 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
                 if (buttonID == R.id.btnScanSN) {
                     String contents = intent.getStringExtra("SCAN_RESULT");
                     String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-                    //  Toast toast = Toast.makeText(this, "Content SN:" + contents + " Format:" + format, Toast.LENGTH_LONG);
-                    //   toast.show();
                     stbSN.setText(contents);
                 }
                 if (buttonID == R.id.btnScanVC) {
@@ -175,10 +173,11 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.add_stb && buttonAddSTB.getText().equals("ADD")) {
+            Log.d(TAG,"addclicked");
             addNewStb();
         }
         if (v.getId() == R.id.add_stb && buttonAddSTB.getText().equals("Change")) {
-            Log.d(TAG, "change");
+            Log.d(TAG,"change clicked");
             update();
 
         }
@@ -206,11 +205,11 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
     public void editSTB() {
         int id = extra;
         Log.d(TAG, "" + id);
+        String status="";
         STB stb = dbHendler.getSTBInfo(id);
-        String sn = stb.getSerialNo().toString().trim();
-        String vc = stb.getVcNo().toString().trim();
-        String status = stb.getStatus().toString();
-        Log.d(TAG, "" + status);
+        String sn = String.valueOf(stb.getSerialNo());   // valueOf is used instead of toString methhod it is recomended
+        String vc = String.valueOf(stb.getVcNo());
+        status = String.valueOf(stb.getStatus());
         stbSN.setText(sn);
         stbVC.setText(vc);
         if (status.equals("ON")) {

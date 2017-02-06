@@ -1,5 +1,7 @@
 package com.example.saggu.myapplication;
 
+import android.util.Log;
+
 public class PersonInfo {
     //Private variables
     private int _id;
@@ -37,7 +39,7 @@ public class PersonInfo {
         this._balance= balance;
     }
 
-    public PersonInfo(int id, String name, String phone_no, float cust_no, int fees, int balance) {
+    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance) {
         this._id = id;
         this._name = name;
         this._phone_no = phone_no;
@@ -65,6 +67,8 @@ public class PersonInfo {
     }
     //geeting custmer no
     public float get_cust_no(){return this._cust_no;}
+
+
     //geeting fees
     public int get_fees(){return this._fees;}
     //getting balance

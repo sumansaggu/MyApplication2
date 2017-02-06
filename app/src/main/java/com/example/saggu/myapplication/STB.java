@@ -1,5 +1,7 @@
 package com.example.saggu.myapplication;
 
+import android.content.Intent;
+
 /**
  * Created by Saggu on 1/23/2017.
  */
@@ -9,6 +11,7 @@ public class STB {
     private String _serialNo;
     private String _vcNo;
     private String _status;
+    private int _assigned;
 
     //empty cunstuctor
     public STB() {
@@ -42,6 +45,10 @@ public class STB {
         this._vcNo = vc;
         this._status = stbStatus;
     }
+    public STB( int stbID,int assigned){
+        this._id= stbID;
+        this._assigned = assigned;
+    }
 
 
     //getters
@@ -60,6 +67,8 @@ public class STB {
     public String getStatus() {
         return this._status;
     }
+
+    public int getAssigned(){return this._assigned;}
 
 
     //setting id

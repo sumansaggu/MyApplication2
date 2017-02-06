@@ -24,7 +24,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
     EditText monthly_fees;
     TextView balance_;
     DbHendler dbHendler;
-    Button changeButton, buttonAdd, viewAll, buttonScanSn, buttonScanVC, buttonViewSTBs;
+    Button stbButton, buttonAdd, viewAll;
 
     int extra;
     int extra2;
@@ -43,7 +43,8 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         dbHendler = new DbHendler(this, null, null, 1);
         person_name = (EditText) findViewById(R.id.person_name);
         contact_no = (EditText) findViewById(R.id.contact_no);
-        changeButton = (Button) findViewById(R.id.changeButton);
+       stbButton = (Button) findViewById(R.id.stbButton);
+        stbButton.setOnClickListener(this);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(this);
         viewAll = (Button) findViewById(R.id.buttonViewAll);
@@ -51,7 +52,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
-
+       Log.d(TAG,"jfghjgfhjg"+buttonAdd.getText()) ;
 
         Bundle extras = getIntent().getExtras(); //getting the intent from other activity
        /*checking if bundle
@@ -67,8 +68,9 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             Log.d(TAG, "extra " + extra);
 
             if (extra > 0) {
-                buttonAdd.setVisibility(View.INVISIBLE);
-                changeButton.setVisibility(View.VISIBLE);
+                // buttonAdd.setVisibility(View.INVISIBLE);
+                buttonAdd.setText("Change");
+                //changeButton.setVisibility(View.VISIBLE);
                 getIntent().removeExtra("ID");
                 editCustomer();
             } else return;
@@ -141,7 +143,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         String name = personInfo.getName().toString().trim();
         String no = personInfo.getPhoneNumber().toString().trim();
         float custNo = personInfo.get_cust_no();
-        String cUSTnO = Float.toString(custNo);
+        String cUSTnO = String.valueOf(custNo);
         int fees = personInfo.get_fees();
         String fEES = Integer.toString(fees);
         int balance = personInfo.get_balance();
@@ -155,7 +157,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     // to update an item
-    public void update(View view) {
+    public void update() {
         int id = extra;
         String name = person_name.getText().toString().trim();
         if (name.equals("")) {
@@ -195,7 +197,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         cust_no.setText("");
         monthly_fees.setText("");
         balance_.setText("");
-        changeButton.setEnabled(false);
+        //changeButton.setEnabled(false);
         viewAll();
 
     }
@@ -237,9 +239,21 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             Intent i = new Intent(this, ViewAll.class);
             startActivity(i);
         }
-        if (v.getId() == R.id.buttonAdd) {
+        if (v.getId() == R.id.buttonAdd && buttonAdd.getText().equals("Add")) {
             addButtonClicked();
-        } else {
+
+        }
+        if (v.getId() == R.id.buttonAdd && buttonAdd.getText().equals("Change")) {
+            update();
+            Log.d(TAG, "change clicked");
+
+        }if (v.getId()==R.id.stbButton){
+            android.app.FragmentManager manager= getFragmentManager();
+            Bundle bundle = new Bundle();
+            DialogSTB dialogSTB = new DialogSTB();
+            dialogSTB.show(manager,"DialogSTB");
+
+        }else {
 
         }
     }

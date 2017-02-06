@@ -30,6 +30,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     TextView title_dialog;
     Calendar calendar;
     EditText date;
+    EditText remark;
     DbHendler dbHendler;
 
     int id;
@@ -50,11 +51,12 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         reciept_dialog = (EditText) view.findViewById(R.id.reciept_dialog);
         title_dialog = (TextView) view.findViewById(R.id.title_dialog);
         date = (EditText) view.findViewById(R.id.date);
+        remark = (EditText) view.findViewById(R.id.remarksEditText);
 
 
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-      //  setCancelable(false); //preventing from cancel when clicking on background
+        //  setCancelable(false); //preventing from cancel when clicking on background
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
@@ -111,15 +113,15 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         } else {
             int id = this.id;
             int reciept = Integer.parseInt(Reciept);
-            String datefromEditText;
-            datefromEditText = date.getText().toString().trim();
-
+            String datefromEditText = date.getText().toString().trim();
             Log.d(TAG, "" + (balance - reciept));
             int newbalance = balance - reciept;
             String name = personInfo.getName();
+            String remark = this.remark.getText().toString();
 
             dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
-            dbHendler.addFees(new Fees(id, reciept, datefromEditText));//fees recieved and date to fees table
+            dbHendler.addFees(new Fees(id, reciept, datefromEditText,remark));//fees recieved and date to fees table
+            Log.d(TAG,""+remark);
             ViewAll activity = (ViewAll) getActivity();
             activity.dialogClosed();
             Toast.makeText(this.getActivity(), "Added Rs. " + reciept + " to " + name, Toast.LENGTH_SHORT).show();

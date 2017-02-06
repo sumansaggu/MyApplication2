@@ -9,6 +9,7 @@ public class Fees {
     private int _no;
     private int _fees;
     private String _date;
+    private String _remark;
 
     //empty cunstuctor
     public Fees() {
@@ -30,11 +31,18 @@ public class Fees {
         this._date = date;
     }
 
+    public Fees(int id, int fees, String datefromEditText, String remark) {
+        this._id = id;
+        this._fees = fees;
+        this._date = datefromEditText;
+        this._remark = remark;
+    }
+
+
     //getters
     public int getNo() {
         return this._no;
     }
-
 
     public int getId() {
         return this._id;
@@ -46,6 +54,10 @@ public class Fees {
 
     public String getDate() {
         return this._date;
+    }
+
+    public String getRemark() {
+        return this._remark;
     }
 
 

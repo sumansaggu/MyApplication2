@@ -60,12 +60,14 @@ public class DialogFeesDetail extends DialogFragment {
                     //  DbHendler.KEY_PHONE_NO,
 
                     DbHendler.KEY_RECIEPT,
-                    DbHendler.KEY_DATE
+                    DbHendler.KEY_DATE,
+                    DbHendler.KEY_REMARK
             };
             int[] boundTo = new int[]{
 
                     R.id.feesInList,
-                    R.id.dateInList
+                    R.id.dateInList,
+                    R.id.remarkInList
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this.getActivity(),
                     R.layout.layout_fees_singleitem,

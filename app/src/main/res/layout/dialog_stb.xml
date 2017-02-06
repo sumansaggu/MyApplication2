@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:weightSum="1">
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/stb_list_dialog" />
+        android:layout_height="458dp"
+        android:id="@+id/stb_list_dialog"
+        android:layout_weight="0.74" />
+
+    <TextView
+        android:text="Total:"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:id="@+id/totalStbsUnAssigned"
+        android:textSize="18sp" />
 </LinearLayout>

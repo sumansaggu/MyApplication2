@@ -25,11 +25,9 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.List;
 
 
-// TODO: 1/12/2017  fees adjustment needed // done but with negetive entry
+
 // TODO: 1/16/2017  prevent reverse engineering
-// TODO: 1/25/2017  email support to be added 
-// TODO: 1/25/2017 problem with decimal entry
-// TODO: 1/30/2017 problem with stb status change
+// TODO: 1/25/2017  email support to be added
 public class ViewAll extends AppCompatActivity implements Communicator {
 
     SimpleCursorAdapter simpleCursorAdapter;
@@ -47,9 +45,9 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Obtain the FirebaseAnalytics instance.
+
       mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         setContentView(R.layout.activity_view_all);
-
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
         textView4 = (TextView) findViewById(R.id.textView4);
@@ -139,7 +137,12 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             android.app.FragmentManager manager= getFragmentManager();
             Bundle bundle = new Bundle();
             DialogSTB dialogSTB = new DialogSTB();
+            dialogSTB.setArguments(bundle);
+            int id = (int) menuInfo.id;
+            bundle.putInt("CUSTID", id);
+
             dialogSTB.show(manager,"DialogSTB");
+
 
 
         } else if (item.getTitle() == "Reciept") {
@@ -374,8 +377,6 @@ public class ViewAll extends AppCompatActivity implements Communicator {
 
     //region Reading searched item to log
     public void search() {
-
-
         Log.d("Reading: ", "Reading searched item..");
         List<PersonInfo> personInfos = dbHendler.searchPerson();
 

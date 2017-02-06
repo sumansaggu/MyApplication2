@@ -23,12 +23,11 @@
 
 
         <Button
-            android:id="@+id/changeButton"
+            android:id="@+id/stbButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="update"
-            android:text="Change"
-            android:visibility="invisible"
+            android:text="STB"
+            android:visibility="visible"
             android:layout_alignBaseline="@+id/buttonAdd"
             android:layout_alignBottom="@+id/buttonAdd"
             android:layout_centerHorizontal="true" />
@@ -43,7 +42,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginLeft="23dp"
-            android:layout_marginStart="23dp" />
+            android:layout_marginStart="23dp"
+            android:textAllCaps="false" />
 
         <Button
             android:id="@+id/buttonViewAll"
