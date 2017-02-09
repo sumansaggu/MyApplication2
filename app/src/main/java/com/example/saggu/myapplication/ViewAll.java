@@ -25,7 +25,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.List;
 
 
-
 // TODO: 1/16/2017  prevent reverse engineering
 // TODO: 1/25/2017  email support to be added
 public class ViewAll extends AppCompatActivity implements Communicator {
@@ -39,6 +38,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     int backpress;
     String searchItem;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private Cursor mCursor;
 
 
     @Override
@@ -46,7 +46,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         super.onCreate(savedInstanceState);
         // Obtain the FirebaseAnalytics instance.
 
-      mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
@@ -84,6 +84,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("All Customers");
         checkApi();
+        // dbHendler.getAllFromCustAndSTB();
         displayProductList();
         registerForContextMenu(listViewCustomers);
     }
@@ -95,9 +96,10 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Reciept");
         menu.add("Detail");
-        menu.add("Other Information");
+        menu.add("STB");
         menu.add("Edit");
         menu.add("Delete");
+        menu.add("Unassign STB");
     }
 
 
@@ -118,7 +120,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, CustAddEditActivity.class);
-            intent.putExtra("editcustomer","editcustomer");
+            intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
 
@@ -133,16 +135,15 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             dialogFeesDetail.show(manager, "FeeDetailDialog");
             Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
 
-        }else if(item.getTitle()=="Other Information"){
-            android.app.FragmentManager manager= getFragmentManager();
+        } else if (item.getTitle() == "STB") {
+            android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogSTB dialogSTB = new DialogSTB();
             dialogSTB.setArguments(bundle);
             int id = (int) menuInfo.id;
             bundle.putInt("CUSTID", id);
 
-            dialogSTB.show(manager,"DialogSTB");
-
+            dialogSTB.show(manager, "DialogSTB");
 
 
         } else if (item.getTitle() == "Reciept") {
@@ -153,6 +154,14 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
             dialog.show(manager, "dialog");
+        } else if (item.getTitle() == "Unassign STB") {
+            int custId = (int) menuInfo.id;
+            String stbSN = dbHendler.getAssignedSN(custId);
+            dbHendler.unAssignSTB(stbSN); //from stb table
+            dbHendler.unSetId(custId);    //From cust table
+            dialogClosed();
+            Toast.makeText(this, "Unassigned cust: " + custId+"STB SN: "+stbSN, Toast.LENGTH_SHORT).show();
+
         }
         return true;
     }
@@ -161,7 +170,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     //region Create all List
     public void displayProductList() {
         try {
-            Cursor cursor = dbHendler.getAllProducts();
+            Cursor cursor = dbHendler.getAllFromCustAndSTB();
             if (cursor == null) {
                 textView4.setText("Unable to generate cursor.");
                 return;
@@ -176,7 +185,8 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                     DbHendler.KEY_PHONE_NO,
                     DbHendler.KEY_CUST_NO,
                     DbHendler.KEY_FEES,
-                    DbHendler.KEY_BALANCE
+                    DbHendler.KEY_BALANCE,
+                    DbHendler.KEY_SN
             };
             int[] boundTo = new int[]{
                     //R.id.pId,
@@ -184,7 +194,8 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                     R.id.pMob,
                     R.id.cNo,
                     R.id.cFees,
-                    R.id.cBalance
+                    R.id.cBalance,
+                    R.id.vc_mac
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this,
                     R.layout.layout_list,
@@ -291,7 +302,10 @@ public class ViewAll extends AppCompatActivity implements Communicator {
 
     //region recreate list on dialog closed
     public void dialogClosed() {
-        displayProductList();
+        mCursor = dbHendler.getAllFromCustAndSTB();
+        simpleCursorAdapter.swapCursor(mCursor);
+        // displayProductList();
+
     }
     //endregion
 

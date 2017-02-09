@@ -121,5 +121,13 @@
 
     </RelativeLayout>
 
+    <TextView
+        android:text="S/N"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/vc_mac"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
 
 </RelativeLayout>

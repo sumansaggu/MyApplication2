@@ -116,8 +116,11 @@ public class DialogSTB extends DialogFragment {
                 Toast.makeText(this.getActivity(), "Already Assigned STB", Toast.LENGTH_LONG).show();
             } else {
                 dbHendler.assignSTB(new STB(stbId, assigned));
-                dbHendler.stbID(custId, stbId);
+                dbHendler.SetStbID(custId, stbId);
                 Toast.makeText(this.getActivity(), "Now Assigned STB", Toast.LENGTH_LONG).show();
+                ViewAll activity = (ViewAll) getActivity();
+                activity.dialogClosed();
+                dismiss();
             }
 
 
