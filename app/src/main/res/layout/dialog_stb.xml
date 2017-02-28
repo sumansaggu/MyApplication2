@@ -1,19 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+ >
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="458dp"
+        android:layout_height="350dip"
         android:id="@+id/stb_list_dialog"
-        android:layout_weight="0.74" />
 
-    <TextView
-        android:text="Total:"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:id="@+id/totalStbsUnAssigned"
-        android:textSize="18sp" />
-</LinearLayout>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
+    <Button
+        android:text="UnAssign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/unassign_button"
+
+        android:textAllCaps="false"
+        android:layout_below="@+id/stb_list_dialog"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/stb_ok" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/searchboxstb"
+        android:hint="Search STB"
+        android:layout_below="@+id/stb_list_dialog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/stb_ok"
+        android:layout_toStartOf="@+id/stb_ok" />
+
+    <Button
+        android:text="OK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/stb_ok"
+        android:enabled="false"
+        android:layout_toLeftOf="@+id/unassign_button"
+        android:layout_toStartOf="@+id/unassign_button"
+        android:layout_alignBottom="@+id/searchboxstb"
+        android:layout_below="@+id/stb_list_dialog" />
+</RelativeLayout>

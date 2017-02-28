@@ -121,7 +121,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
             dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
             dbHendler.addFees(new Fees(id, reciept, datefromEditText,remark));//fees recieved and date to fees table
-            Log.d(TAG,""+remark);
+
             ViewAll activity = (ViewAll) getActivity();
             activity.dialogClosed();
             Toast.makeText(this.getActivity(), "Added Rs. " + reciept + " to " + name, Toast.LENGTH_SHORT).show();

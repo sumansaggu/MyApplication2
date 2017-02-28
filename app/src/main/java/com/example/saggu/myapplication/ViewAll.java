@@ -1,7 +1,9 @@
 package com.example.saggu.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,20 +16,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 // TODO: 1/16/2017  prevent reverse engineering
 // TODO: 1/25/2017  email support to be added
-public class ViewAll extends AppCompatActivity implements Communicator {
+// TODO: 2/13/2017 start and stop date needed( cut option)
+// TODO: 2/14/2017  duplicate entry in stb table
+public class ViewAll extends AppCompatActivity implements Communicator,AdapterView.OnItemSelectedListener {
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
@@ -39,6 +46,11 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     String searchItem;
     private FirebaseAnalytics mFirebaseAnalytics;
     private Cursor mCursor;
+    Spinner spinner;
+    List<Area> areas;
+    List<String>items = new ArrayList<>();
+    int areaId;
+
 
 
     @Override
@@ -50,7 +62,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
-        textView4 = (TextView) findViewById(R.id.textView4);
+
         searchBox = (EditText) findViewById(R.id.search_box);
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -60,9 +72,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 displaySearchList();
-
             }
 
             @Override
@@ -77,6 +87,12 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                 if (searchBox.getText().toString().equals("@endofmonth@")) {
                     dbHendler.endOfMonth(getApplicationContext());
                     searchBox.setText("");
+                }if (searchBox.getText().toString().equals("logcust")){
+                    custmersToLog();
+                    searchBox.setText("");
+                }if (searchBox.getText().toString().equals("logstb")){
+                    stbToLog();
+                    searchBox.setText("");
                 }
             }
         });
@@ -87,6 +103,9 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         // dbHendler.getAllFromCustAndSTB();
         displayProductList();
         registerForContextMenu(listViewCustomers);
+        spinner = (Spinner) findViewById(R.id.spinnerByArea);
+        spinner.setOnItemSelectedListener(this);
+        loadSpinnerData();
     }
 
 
@@ -96,13 +115,11 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Reciept");
         menu.add("Detail");
-        menu.add("STB");
         menu.add("Edit");
+        menu.add("STB");
         menu.add("Delete");
-        menu.add("Unassign STB");
+        menu.add("Call");
     }
-
-
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         super.onContextItemSelected(item);
@@ -116,13 +133,22 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             myAlert.setArguments(bundle);
             bundle.putInt("ID", id);
 
-
         } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, CustAddEditActivity.class);
             intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
+        }else if(item.getTitle()=="STB"){
+            int id = (int) menuInfo.id;
+            android.app.FragmentManager manager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            bundle.putInt("CUSTID", id);
+            DialogSTB dialogSTB = new DialogSTB();
+            dialogSTB.setArguments(bundle);
+            dialogSTB.show(manager, "DialogSTB");
+
+
 
 
         } else if (item.getTitle() == "Detail") {
@@ -135,18 +161,7 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             dialogFeesDetail.show(manager, "FeeDetailDialog");
             Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
 
-        } else if (item.getTitle() == "STB") {
-            android.app.FragmentManager manager = getFragmentManager();
-            Bundle bundle = new Bundle();
-            DialogSTB dialogSTB = new DialogSTB();
-            dialogSTB.setArguments(bundle);
-            int id = (int) menuInfo.id;
-            bundle.putInt("CUSTID", id);
-
-            dialogSTB.show(manager, "DialogSTB");
-
-
-        } else if (item.getTitle() == "Reciept") {
+        }  else if (item.getTitle() == "Reciept") {
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogReciept dialog = new DialogReciept();
@@ -154,13 +169,15 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
             dialog.show(manager, "dialog");
-        } else if (item.getTitle() == "Unassign STB") {
+
+        } else if (item.getTitle() == "Call") {
             int custId = (int) menuInfo.id;
-            String stbSN = dbHendler.getAssignedSN(custId);
-            dbHendler.unAssignSTB(stbSN); //from stb table
-            dbHendler.unSetId(custId);    //From cust table
-            dialogClosed();
-            Toast.makeText(this, "Unassigned cust: " + custId+"STB SN: "+stbSN, Toast.LENGTH_SHORT).show();
+            PersonInfo info = dbHendler.getCustInfo(custId);
+            String contact= info.getPhoneNumber();
+            Log.d(TAG,contact);
+            Intent i = new Intent(Intent.ACTION_DIAL);
+            i.setData(Uri.parse("tel:" + "+91"+contact));
+            startActivity(i);
 
         }
         return true;
@@ -204,9 +221,9 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                     boundTo,
                     0);
             listViewCustomers.setAdapter(simpleCursorAdapter);
-
         } catch (Exception ex) {
-            textView4.setText("There was an error!");
+            ex.printStackTrace();
+            Toast.makeText(this, ""+ex, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -218,21 +235,22 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         try {
             Cursor cursor = dbHendler.searchPersonToList(searchItem);
             if (cursor == null) {
-                textView4.setText("Unable to generate cursor.");
+            //    textView4.setText("Unable to generate cursor.");
                 return;
             }
             if (cursor.getCount() == 0) {
-                textView4.setText("No Customer Found");
+              //  textView4.setText("No Customer Found");
                 return;
             } else {
-                textView4.setText("");
+             //   textView4.setText("");
                 String[] columns = new String[]{
                         //DbHendler.KEY_ID,
                         DbHendler.KEY_NAME,
                         DbHendler.KEY_PHONE_NO,
                         DbHendler.KEY_CUST_NO,
                         DbHendler.KEY_FEES,
-                        DbHendler.KEY_BALANCE
+                        DbHendler.KEY_BALANCE,
+                     //   DbHendler.KEY_SN
                 };
                 int[] boundTo = new int[]{
                         //R.id.pId,
@@ -240,7 +258,8 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                         R.id.pMob,
                         R.id.cNo,
                         R.id.cFees,
-                        R.id.cBalance
+                        R.id.cBalance,
+                    //    R.id.vc_mac
                 };
                 simpleCursorAdapter = new SimpleCursorAdapter(this,
                         R.layout.layout_list,
@@ -251,7 +270,8 @@ public class ViewAll extends AppCompatActivity implements Communicator {
                 listViewCustomers.setAdapter(simpleCursorAdapter);
             }
         } catch (Exception ex) {
-            textView4.setText("There was an error!");
+            Log.d(TAG,""+ex);
+//            textView4.setText("There was an error!");
         }
     }
 
@@ -302,9 +322,10 @@ public class ViewAll extends AppCompatActivity implements Communicator {
 
     //region recreate list on dialog closed
     public void dialogClosed() {
+        Log.d(TAG,"dialg closed");
         mCursor = dbHendler.getAllFromCustAndSTB();
         simpleCursorAdapter.swapCursor(mCursor);
-        // displayProductList();
+
 
     }
     //endregion
@@ -335,6 +356,28 @@ public class ViewAll extends AppCompatActivity implements Communicator {
         dbHendler.restoreDBfile(this.getApplicationContext(), db);
     }
     //endregion
+
+    /**
+     * Function to load the spinner data from SQLite database
+     */
+    private void loadSpinnerData() {
+
+        // Spinner Drop down elements
+        areas = dbHendler.getAllAreas();
+        for (Area area: areas){
+            String singleitem= area.get_areaName();
+            items.add(singleitem);
+        }
+
+        // Creating adapter for spinner
+        ArrayAdapter<String > dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+    }
 
     //region OptionMenu
     @Override
@@ -384,6 +427,9 @@ public class ViewAll extends AppCompatActivity implements Communicator {
             Log.d(TAG, "add stb" + R.id.add_stb);
             startActivity(intent);
             return true;
+        }if(id==R.id.area){
+            Intent intent = new Intent(this,AreaList.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -403,7 +449,45 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     }
     //endregion
 
+    public void custmersToLog(){
+        // Reading all contacts
+        Log.d("Reading: ", "Reading all customer..");
+        List<PersonInfo> personInfos = dbHendler.getAllContacts();
 
+        for (PersonInfo info : personInfos) {
+            String log = "Id: " + info.getID() + " ,Name: " + info.getName() + " ,Phone: " + info.getPhoneNumber()
+                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees()+" Balance: "+ info.get_balance()+" Area: "+info.get_area();
+            // Writing Contacts to log
+            Log.d("Name: ", log);
+        }
+    }
+    public void stbToLog(){
+        // Reading all contacts
+        Log.d("Reading: ", "Reading all stbs..");
+        List<STB> stbs = dbHendler.getAllStbs();
+
+        for (STB stb : stbs) {
+            String log = "Id: " + stb.getId() + " ,SN: " + stb.getSerialNo() + " ,VC: " + stb.getVcNo();
+
+            // Writing Contacts to log
+            Log.d("STB ", log);
+        }
+    }
+
+
+
+
+    @Override
+    public void onBackPressed() {
+        backpress = (backpress + 1);
+        if (backpress == 1) {
+            Toast.makeText(getApplicationContext(), " Press Back again to Exit ", Toast.LENGTH_SHORT).show();
+        }
+        if (backpress > 1) {
+            this.finishAffinity();
+            super.onBackPressed();
+        }
+    }
     @Override
     public void respond(String data) {
 
@@ -433,14 +517,15 @@ public class ViewAll extends AppCompatActivity implements Communicator {
     }
 
     @Override
-    public void onBackPressed() {
-        backpress = (backpress + 1);
-        if (backpress == 1) {
-            Toast.makeText(getApplicationContext(), " Press Back again to Exit ", Toast.LENGTH_SHORT).show();
-        }
-        if (backpress > 1) {
-            this.finishAffinity();
-            super.onBackPressed();
-        }
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        String item = parent.getItemAtPosition(position).toString();
+        areaId=  dbHendler.getAreaID(item);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

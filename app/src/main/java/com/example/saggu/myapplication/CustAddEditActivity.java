@@ -8,15 +8,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CustAddEditActivity extends AppCompatActivity implements View.OnClickListener {
+public class CustAddEditActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     EditText person_name;
     EditText contact_no;
@@ -25,25 +29,29 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
     TextView balance_;
     DbHendler dbHendler;
     Button stbButton, buttonAdd, viewAll;
+    List<Area> areas;
+    List<String>items = new ArrayList<>();
 
-    int extra;
+    int id;
     int extra2;
     String TAG = "MyApp_MainActivity";
     private Toolbar toolbar;
-
+    Spinner spinner;
+    int areaId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_edit_activity);
+        setContentView(R.layout.cust_add_edit_activity);
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Add Customer");
 
         //region Description
         dbHendler = new DbHendler(this, null, null, 1);
         person_name = (EditText) findViewById(R.id.person_name);
         contact_no = (EditText) findViewById(R.id.contact_no);
-       stbButton = (Button) findViewById(R.id.stbButton);
+        stbButton = (Button) findViewById(R.id.stbButton);
         stbButton.setOnClickListener(this);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(this);
@@ -52,8 +60,12 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
-       Log.d(TAG,"jfghjgfhjg"+buttonAdd.getText()) ;
+        spinner = (Spinner) findViewById(R.id.spinner_area);
+        spinner.setOnItemSelectedListener(this);
+        loadSpinnerData();
 
+
+        //region get extra data from bundle
         Bundle extras = getIntent().getExtras(); //getting the intent from other activity
        /*checking if bundle
        object have data
@@ -63,18 +75,21 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         }
         if (extras != null) {
 
-            extra = extras.getInt("ID");
+            id = extras.getInt("ID");
             extra2 = extras.getInt("addstb");
-            Log.d(TAG, "extra " + extra);
 
-            if (extra > 0) {
+
+            if (id > 0) {
                 // buttonAdd.setVisibility(View.INVISIBLE);
                 buttonAdd.setText("Change");
+             //   stbButton.setVisibility(View.VISIBLE);
+                getSupportActionBar().setTitle("Edit Customer");
                 //changeButton.setVisibility(View.VISIBLE);
                 getIntent().removeExtra("ID");
                 editCustomer();
             } else return;
         }
+        //endregion
     }
 
     //add product to a database
@@ -111,23 +126,40 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         }
         int balance = Integer.parseInt(Balance);
         //endregion
-        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance));
+        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
         monthly_fees.setText("");
         balance_.setText("");
         Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
-        // Reading all contacts
-        Log.d("Reading: ", "Reading all contacts..");
-        List<PersonInfo> personInfos = dbHendler.getAllContacts();
 
-        for (PersonInfo info : personInfos) {
-            String log = "Id: " + info.getID() + " ,Name: " + info.getName() + " ,Phone: " + info.getPhoneNumber()
-                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees();
-            // Writing Contacts to log
-            Log.d("Name: ", log);
+
+
+    }
+
+
+
+    /**
+     * Function to load the spinner data from SQLite database
+     */
+    private void loadSpinnerData() {
+
+        // Spinner Drop down elements
+        areas = dbHendler.getAllAreas();
+        for (Area area: areas){
+            String singleitem= area.get_areaName();
+            items.add(singleitem);
         }
+
+        // Creating adapter for spinner
+        ArrayAdapter<String > dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
     }
 
     //call to listview
@@ -138,7 +170,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
 
     // to edit an item
     public void editCustomer() {
-        int id = extra;
+        int id = this.id;
         PersonInfo personInfo = dbHendler.getCustInfo(id);
         String name = personInfo.getName().toString().trim();
         String no = personInfo.getPhoneNumber().toString().trim();
@@ -148,17 +180,24 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         String fEES = Integer.toString(fees);
         int balance = personInfo.get_balance();
         String bALANCE = Integer.toString(balance);
+        int areaID = personInfo.get_area();
+        String area = dbHendler.getAreaName(areaID);
+        Log.d(TAG,"aream name "+area);
         Toast.makeText(getApplicationContext(), "Edit selcected For " + name + " and " + no, Toast.LENGTH_LONG).show();
         person_name.setText(name);
         contact_no.setText(no);
         cust_no.setText(cUSTnO);
         monthly_fees.setText(fEES);
         balance_.setText(bALANCE);
+        // retrieving the index of element u
+        int retval=items.indexOf(area);
+
+       spinner.setSelection(retval);
     }
 
     // to update an item
     public void update() {
-        int id = extra;
+        int id = this.id;
         String name = person_name.getText().toString().trim();
         if (name.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the Name", Toast.LENGTH_LONG).show();
@@ -191,7 +230,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         int balance = Integer.parseInt(Balance);
 
 
-        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance));
+        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
@@ -247,16 +286,37 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             update();
             Log.d(TAG, "change clicked");
 
-        }if (v.getId()==R.id.stbButton){
-            android.app.FragmentManager manager= getFragmentManager();
+        }
+        if (v.getId() == R.id.stbButton) {
+            android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
+            bundle.putInt("CUSTID", this.id);
+            Log.d(TAG, "hjhjgfhjfgjh" + this.id);
             DialogSTB dialogSTB = new DialogSTB();
-            dialogSTB.show(manager,"DialogSTB");
-
-        }else {
+            dialogSTB.setArguments(bundle);
+            dialogSTB.show(manager, "DialogSTB");
+        } else {
 
         }
     }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        String item = parent.getItemAtPosition(position).toString();
+       areaId=  dbHendler.getAreaID(item);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
+
+    }
+
+
+
 
 
 }

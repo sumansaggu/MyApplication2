@@ -18,12 +18,17 @@
     <item
         android:id="@+id/add_customer"
         android:orderInCategory="100"
-        android:title="Add Customer"
+        android:title="Customer"
         app:showAsAction="never" />
     <item
         android:id="@+id/manage_stb"
         android:orderInCategory="100"
-        android:title="Manage STB"
+        android:title="STBs"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/area"
+        android:orderInCategory="100"
+        android:title="Areas"
         app:showAsAction="never" />
 
     <item

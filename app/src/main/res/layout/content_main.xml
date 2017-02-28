@@ -7,55 +7,8 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.saggu.myapplication.CustAddEditActivity"
     tools:layout_height="wrap_content"
-    tools:showIn="@layout/add_edit_activity">
+    tools:showIn="@layout/cust_add_edit_activity">
 
-
-    <RelativeLayout
-        android:id="@+id/layoutButtons1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:padding="5dip"
-        android:layout_marginTop="19dp"
-        android:layout_below="@+id/layoutedittext"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-
-        <Button
-            android:id="@+id/stbButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="STB"
-            android:visibility="visible"
-            android:layout_alignBaseline="@+id/buttonAdd"
-            android:layout_alignBottom="@+id/buttonAdd"
-            android:layout_centerHorizontal="true" />
-
-        <Button
-            android:id="@+id/buttonAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add"
-
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="23dp"
-            android:layout_marginStart="23dp"
-            android:textAllCaps="false" />
-
-        <Button
-            android:id="@+id/buttonViewAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/view_all"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="21dp"
-            android:layout_marginEnd="21dp" />
-    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/layoutedittext"
@@ -122,19 +75,74 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
-        <EditText
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layoutButtons1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:padding="5dip"
+        android:layout_below="@+id/spinner_area"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="21dp">
+
+
+        <Button
+            android:id="@+id/stbButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AREA"
-            android:ems="10"
-            android:id="@+id/editText2"
-            android:layout_below="@+id/balance"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="17dp"
-            android:inputType="number"
-            android:textAlignment="center" />
+            android:text="STB"
+            android:visibility="invisible"
+            android:layout_alignBaseline="@+id/buttonAdd"
+            android:layout_alignBottom="@+id/buttonAdd"
+            android:layout_centerHorizontal="true" />
 
+        <Button
+            android:id="@+id/buttonAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add"
+
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="23dp"
+            android:layout_marginStart="23dp"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/buttonViewAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_all"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="21dp"
+            android:layout_marginEnd="21dp" />
     </RelativeLayout>
+
+    <Spinner
+        android:layout_width="200dip"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner_area"
+        android:layout_centerVertical="true"
+        android:layout_alignRight="@+id/layoutedittext"
+        android:layout_alignEnd="@+id/layoutedittext" />
+
+    <TextView
+        android:text="Area"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView16"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/layoutedittext"
+        android:layout_alignStart="@+id/layoutedittext"
+        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:textSize="18sp" />
 
 
 </RelativeLayout>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_area_add_edit"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="com.example.saggu.myapplication.AreaAddEdit">
+    <include android:id="@+id/app_bar"
+        layout="@layout/app_bar"
+        />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:ems="10"
+        android:id="@+id/editTextAreaName"
+        android:hint="Area Name"
+        android:layout_marginTop="26dp"
+        android:layout_below="@+id/editTextAreaNo"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:text="Add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnAreaAddEdit"
+        android:layout_marginTop="42dp"
+        android:layout_below="@+id/editTextAreaName"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:id="@+id/editTextAreaNo"
+        android:hint="Area No."
+        android:inputType="number"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/app_bar"
+        android:layout_alignLeft="@+id/editTextAreaName"
+        android:layout_alignStart="@+id/editTextAreaName" />
+</RelativeLayout>

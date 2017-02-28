@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:allowBackup="true"
@@ -29,24 +30,24 @@
         <activity android:name=".BtwTwoDates" />
         <activity android:name=".STBRecord" />
         <activity android:name=".ScannerActivity" />
-        <activity android:name=".StbAddEditActivity">
+        <activity android:name=".StbAddEditActivity" />
 
-        </activity>
-        <service
-            android:name=".MessagingService">
+        <service android:name=".MessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".FirebaseInstanceID">
+        <service android:name=".FirebaseInstanceID">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+
+        <activity android:name=".AreaAddEdit" />
+        <activity
+            android:name=".AreaList"
+            android:label="@string/title_activity_area_list"
+            android:theme="@style/AppTheme"></activity>
     </application>
-
-
-
 
 </manifest>

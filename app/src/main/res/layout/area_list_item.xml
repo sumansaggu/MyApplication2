@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="50dip">
+
+    <TextView
+        android:text="NAME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/areaNameInList"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="81dp"
+        android:layout_marginEnd="81dp" />
+
+    <TextView
+        android:text="NO."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/areaNoInList"
+        android:layout_alignBaseline="@+id/areaNameInList"
+        android:layout_alignBottom="@+id/areaNameInList"
+        android:layout_toLeftOf="@+id/areaNameInList"
+        android:layout_toStartOf="@+id/areaNameInList"
+        android:layout_marginRight="60dp"
+        android:layout_marginEnd="60dp" />
+
+    <TextView
+        android:text="ID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp"
+        android:id="@+id/areaId" />
+</RelativeLayout>

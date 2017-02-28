@@ -10,6 +10,7 @@ public class PersonInfo {
     private float _cust_no;
     private int _fees;
     private int _balance;
+    private int _area;
 
     // Empty Consturctor
     public PersonInfo() {
@@ -31,26 +32,38 @@ public class PersonInfo {
     }
 
     //Constructor
-    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance) {
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, int area) {
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
         this._fees = fees;
         this._balance= balance;
+        this._area=area;
     }
 
-    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance) {
+    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance,int area) {
         this._id = id;
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
         this._fees = fees;
         this._balance= balance;
+        this._area = area;
     }
 
     public PersonInfo(int id, int balance) {
         this._id = id;
         this._balance= balance;
+    }
+
+    public PersonInfo(int id, String name, String phone_no, float cust_no, int fees, int balance) {
+        this._id = id;
+        this._name = name;
+        this._phone_no = phone_no;
+        this._cust_no = cust_no;
+        this._fees = fees;
+        this._balance= balance;
+
     }
 
     //getting id
@@ -73,6 +86,7 @@ public class PersonInfo {
     public int get_fees(){return this._fees;}
     //getting balance
     public int get_balance(){return this._balance;}
+    public int get_area() {return this._area; }
 
 
     //setting id
@@ -93,6 +107,7 @@ public class PersonInfo {
     public void setFees(int fees){this._fees = fees;}
   //setting balance
     public void setBalance(int balance){this._balance = balance;}
+    public void setArea(int area){this._area =area;}
 
 
 
