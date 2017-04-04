@@ -1,5 +1,6 @@
 package com.example.saggu.myapplication;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,21 +17,26 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CustAddEditActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+import static com.example.saggu.myapplication.R.id.date;
+
+public class CustAddEditActivity extends AppCompatActivity implements Communicator, View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     EditText person_name;
     EditText contact_no;
     EditText cust_no;
     EditText monthly_fees;
+    TextView startdate;
     TextView balance_;
     DbHendler dbHendler;
     Button stbButton, buttonAdd, viewAll;
     List<Area> areas;
-    List<String>items = new ArrayList<>();
+    List<String> items = new ArrayList<>();
+    Calendar calendar;
 
     int id;
     int extra2;
@@ -60,8 +66,11 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
+        startdate = (TextView) findViewById(R.id.date_txtview);
+        startdate.setOnClickListener(this);
         spinner = (Spinner) findViewById(R.id.spinner_area);
         spinner.setOnItemSelectedListener(this);
+        getDate();
         loadSpinnerData();
 
 
@@ -82,7 +91,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             if (id > 0) {
                 // buttonAdd.setVisibility(View.INVISIBLE);
                 buttonAdd.setText("Change");
-             //   stbButton.setVisibility(View.VISIBLE);
+                //   stbButton.setVisibility(View.VISIBLE);
                 getSupportActionBar().setTitle("Edit Customer");
                 //changeButton.setVisibility(View.VISIBLE);
                 getIntent().removeExtra("ID");
@@ -125,8 +134,13 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             return;
         }
         int balance = Integer.parseInt(Balance);
+        String date = startdate.getText().toString().trim();
+        if (startdate.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the Start Date", Toast.LENGTH_LONG).show();
+            return;
+        }
         //endregion
-        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId));
+        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId, date));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
@@ -135,9 +149,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
 
 
-
     }
-
 
 
     /**
@@ -147,13 +159,13 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
 
         // Spinner Drop down elements
         areas = dbHendler.getAllAreas();
-        for (Area area: areas){
-            String singleitem= area.get_areaName();
+        for (Area area : areas) {
+            String singleitem = area.get_areaName();
             items.add(singleitem);
         }
 
         // Creating adapter for spinner
-        ArrayAdapter<String > dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -180,19 +192,19 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         String fEES = Integer.toString(fees);
         int balance = personInfo.get_balance();
         String bALANCE = Integer.toString(balance);
+        String startdate = personInfo.get_startdate();
         int areaID = personInfo.get_area();
         String area = dbHendler.getAreaName(areaID);
-        Log.d(TAG,"aream name "+area);
-        Toast.makeText(getApplicationContext(), "Edit selcected For " + name + " and " + no, Toast.LENGTH_LONG).show();
         person_name.setText(name);
         contact_no.setText(no);
         cust_no.setText(cUSTnO);
         monthly_fees.setText(fEES);
         balance_.setText(bALANCE);
+        this.startdate.setText(startdate);
         // retrieving the index of element u
-        int retval=items.indexOf(area);
+        int retval = items.indexOf(area);
 
-       spinner.setSelection(retval);
+        spinner.setSelection(retval);
     }
 
     // to update an item
@@ -228,9 +240,14 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             return;
         }
         int balance = Integer.parseInt(Balance);
+        String date = startdate.getText().toString().trim();
+        if (startdate.equals("")) {
+            Toast.makeText(getApplicationContext(), "Enter the Start Date", Toast.LENGTH_LONG).show();
+            return;
+        }
 
 
-        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId));
+        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId, date));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
@@ -295,6 +312,10 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
             DialogSTB dialogSTB = new DialogSTB();
             dialogSTB.setArguments(bundle);
             dialogSTB.show(manager, "DialogSTB");
+        }
+        if (v.getId() == R.id.date_txtview) {
+            Toast.makeText(this, "date clicked", Toast.LENGTH_SHORT).show();
+            pickDate();
         } else {
 
         }
@@ -306,7 +327,7 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
         String item = parent.getItemAtPosition(position).toString();
-       areaId=  dbHendler.getAreaID(item);
+        areaId = dbHendler.getAreaID(item);
     }
 
     @Override
@@ -316,7 +337,33 @@ public class CustAddEditActivity extends AppCompatActivity implements View.OnCli
     }
 
 
+    public void pickDate() {
+        //   Log.d(TAG, "date change called");
+        DialogFragment newFragment = new MyDatePicker();
+        newFragment.show(getFragmentManager(), "datepicker");
+        Bundle bundle = new Bundle();
+        bundle.putInt("id", 1);
+        newFragment.setArguments(bundle);
 
 
+    }
+    public String getDate() {
+        calendar = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = df.format(calendar.getTime());
+        startdate.setText(formattedDate);
+        return formattedDate;
 
+    }
+
+
+    @Override
+    public void respond(String date) {
+        startdate.setText(date);
+    }
+
+    @Override
+    public void respond2(String date2) {
+
+    }
 }

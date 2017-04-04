@@ -314,7 +314,7 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
                 swapRefreshCursor();
                 ok.setEnabled(false);
                 ViewAll activity = (ViewAll) getActivity();
-                activity.dialogClosed();
+                activity.refreshListView();
             }
         }
         if (v.getId() == R.id.unassign_button)
@@ -326,7 +326,7 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
                 swapRefreshCursor();
                 stbcount();
                 ViewAll activity = (ViewAll) getActivity();
-                activity.dialogClosed();
+                activity.refreshListView();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -347,7 +347,7 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 
     public void stbcount() {
         stbcountUa = dbHendler.countSTBsUA;
-        stbcountUA.setText("STBs:" + stbcountUa);
+//        stbcountUA.setText("STBs:" + stbcountUa);
     }
 
 

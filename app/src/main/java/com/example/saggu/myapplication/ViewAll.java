@@ -1,11 +1,19 @@
 package com.example.saggu.myapplication;
 
+import android.app.AlarmManager;
+import android.app.DialogFragment;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -17,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -24,17 +33,39 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+
+import me.tatarka.support.job.JobInfo;
+import me.tatarka.support.job.JobScheduler;
 
 
 // TODO: 1/16/2017  prevent reverse engineering
 // TODO: 1/25/2017  email support to be added
-// TODO: 2/13/2017 start and stop date needed( cut option)
-// TODO: 2/14/2017  duplicate entry in stb table
-public class ViewAll extends AppCompatActivity implements Communicator,AdapterView.OnItemSelectedListener {
+// TODO: 2/13/2017 start and stop date needed(cut option)
+// TODO: 3/18/2017 default row need for table month
+public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener//, GoogleApiClient.OnConnectionFailedListener
+{
 
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
@@ -45,24 +76,31 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
     int backpress;
     String searchItem;
     private FirebaseAnalytics mFirebaseAnalytics;
+
     private Cursor mCursor;
     Spinner spinner;
     List<Area> areas;
-    List<String>items = new ArrayList<>();
-    int areaId;
+    List<String> items = new ArrayList<>();
+    int areaId = 1;
+    JobScheduler jobScheduler;
 
+    private PendingIntent pendingIntent;
+    private AlarmManager alarmManager;
+
+    private static int RC_SIGN_IN = 0;
+    private GoogleApiClient mGoogleApiClient;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Obtain the FirebaseAnalytics instance.
+        jobScheduler = JobScheduler.getInstance(this);
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
-
         searchBox = (EditText) findViewById(R.id.search_box);
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,11 +125,17 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
                 if (searchBox.getText().toString().equals("@endofmonth@")) {
                     dbHendler.endOfMonth(getApplicationContext());
                     searchBox.setText("");
-                }if (searchBox.getText().toString().equals("logcust")){
+                }
+                if (searchBox.getText().toString().equals("logcust")) {
                     custmersToLog();
                     searchBox.setText("");
-                }if (searchBox.getText().toString().equals("logstb")){
+                }
+                if (searchBox.getText().toString().equals("logstb")) {
                     stbToLog();
+                    searchBox.setText("");
+                }
+                if (searchBox.getText().toString().equals("logout")) {
+                    //   signOut();
                     searchBox.setText("");
                 }
             }
@@ -99,6 +143,13 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("All Customers");
+
+
+        if (isExternalStorageWritable() == false) {
+            Toast.makeText(this, "SD Card not found", Toast.LENGTH_SHORT).show();
+            toolbar.setTitle("SD Card not found");
+        }
+
         checkApi();
         // dbHendler.getAllFromCustAndSTB();
         displayProductList();
@@ -106,10 +157,187 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
         spinner = (Spinner) findViewById(R.id.spinnerByArea);
         spinner.setOnItemSelectedListener(this);
         loadSpinnerData();
+        scheduleAlarm();
     }
 
 
-    //region context menu items
+
+
+          //<editor-fold desc="Firebase">
+     /*
+           mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+           mAuth = FirebaseAuth.getInstance();
+           mAuthListener = new FirebaseAuth.AuthStateListener() {
+               @Override
+               public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                   FirebaseUser user = firebaseAuth.getCurrentUser();
+                   if (user != null) {
+                       // User is signed in
+                       Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                   } else {
+                       // User is signed out
+                       Log.d(TAG, "onAuthStateChanged:signed_out");
+                   }
+
+               }
+           };
+
+
+           GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                   .requestIdToken(getString(R.string.default_web_client_id))
+                   .requestEmail()
+                   .build();
+
+
+           mGoogleApiClient = new GoogleApiClient.Builder(this)
+                   .enableAutoManage(this, this)
+                   .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                   .build();
+
+
+         //  findViewById(R.id.sign_in_button).setOnClickListener(this);
+        //   findViewById(R.id.sign_out_button).setOnClickListener(this);
+           //</editor-fold>
+
+           signIn();
+       }
+
+
+       @Override
+       public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+           Log.d(TAG, "Connection failed");
+       }
+
+
+       //<editor-fold desc="Activity Life Cycle">
+       @Override
+       protected void onStart() {
+           super.onStart();
+           mAuth.addAuthStateListener(mAuthListener);
+       }
+
+       @Override
+       public void onStop() {
+           super.onStop();
+           if (mAuthListener != null) {
+               mAuth.removeAuthStateListener(mAuthListener);
+           }
+       }
+       //</editor-fold>
+
+
+
+       private void signIn() {
+           Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+           startActivityForResult(signInIntent, RC_SIGN_IN);
+       }
+
+       private void signOut() {
+           FirebaseAuth.getInstance().signOut();
+       }
+
+       @Override
+       protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+           super.onActivityResult(requestCode, resultCode, data);
+           if (requestCode == RC_SIGN_IN) {
+               GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+               if (result.isSuccess()) {
+                   GoogleSignInAccount account = result.getSignInAccount();
+                   firebaseAuthWithGoogle(account);
+
+               } else Log.d(TAG, "Log in failed");
+           }
+       }
+
+       private void firebaseAuthWithGoogle(GoogleSignInAccount accnt) {
+           AuthCredential credential = GoogleAuthProvider.getCredential(accnt.getIdToken(), null);
+           mAuth.signInWithCredential(credential)
+                   .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                       @Override
+                       public void onComplete(@NonNull Task<AuthResult> task) {
+                           Log.d("AUTH", " signInWithCredential:OnComplete: " + task.isSuccessful());
+                           getCurrentUser();
+
+                       }
+                   });
+       }
+       *//*  private void signIn(String email, String password) {
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithEmail:failed", task.getException());
+                            Toast.makeText(ViewAll.this, "Signin with email failed", Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+
+    }
+*//*
+
+    private void getCurrentUser() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Name, email address, and profile photo Url
+            String name = user.getDisplayName();
+            String email = user.getEmail();
+            Uri photoUrl = user.getPhotoUrl();
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getToken() instead.
+            String uid = user.getUid();
+            Toast.makeText(this, "Logged as: " + name, Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+    */
+
+    //</editor-fold>
+
+    public void scheduleAlarm() {
+
+        Calendar calendarNOW = Calendar.getInstance();
+        calendarNOW.getTimeInMillis();
+
+        //  Log.d(TAG, calendarNOW.getTime().toString());
+        int today = Integer.parseInt(getDate(calendarNOW.getTime()));
+        //  Log.d(TAG, "Today is " + today);
+
+        Calendar calendar2 = Calendar.getInstance();
+        //  calendar2.set(Calendar.DAY_OF_MONTH, 6);
+        //   calendar2.set(Calendar.MINUTE,44);
+        //  Log.d(TAG, calendar2.getTime().toString());
+        //  int fd2 = Integer.parseInt(getDate(calendar2.getTime()));
+        //  Log.d(TAG, "day is " + fd2);
+
+        Intent intentAlarm = new Intent(this, AlarmReceiver.class);
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        intentAlarm.putExtra("id", getDate(calendarNOW.getTime()));
+
+        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendarNOW.getTimeInMillis(), pendingIntent);
+    }
+
+    public String getDate(Date time) {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("dd");
+        String formattedDate = df.format(time);
+        return formattedDate;
+    }
+
+
+    //<editor-fold desc="Context Menu">
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -120,6 +348,7 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
         menu.add("Delete");
         menu.add("Call");
     }
+
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         super.onContextItemSelected(item);
@@ -139,7 +368,7 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
             intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
-        }else if(item.getTitle()=="STB"){
+        } else if (item.getTitle() == "STB") {
             int id = (int) menuInfo.id;
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
@@ -147,8 +376,6 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
             DialogSTB dialogSTB = new DialogSTB();
             dialogSTB.setArguments(bundle);
             dialogSTB.show(manager, "DialogSTB");
-
-
 
 
         } else if (item.getTitle() == "Detail") {
@@ -159,35 +386,130 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
             dialogFeesDetail.show(manager, "FeeDetailDialog");
-            Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
+            // Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
 
-        }  else if (item.getTitle() == "Reciept") {
+        } else if (item.getTitle() == "Reciept") {
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogReciept dialog = new DialogReciept();
             dialog.setArguments(bundle);
             int id = (int) menuInfo.id;
             bundle.putInt("ID", id);
+
             dialog.show(manager, "dialog");
 
         } else if (item.getTitle() == "Call") {
             int custId = (int) menuInfo.id;
             PersonInfo info = dbHendler.getCustInfo(custId);
-            String contact= info.getPhoneNumber();
-            Log.d(TAG,contact);
+            String contact = info.getPhoneNumber();
+            Log.d(TAG, contact);
             Intent i = new Intent(Intent.ACTION_DIAL);
-            i.setData(Uri.parse("tel:" + "+91"+contact));
+            i.setData(Uri.parse("tel:" + "+91" + contact));
             startActivity(i);
 
         }
         return true;
     }
-    //endregion
+    //</editor-fold>
+
 
     //region Create all List
     public void displayProductList() {
         try {
-            Cursor cursor = dbHendler.getAllFromCustAndSTB();
+            Cursor cursor = dbHendler.getAllFromCustAndSTB(areaId);
+            if (cursor == null) {
+                Toast.makeText(this, "Unable to generate cursor", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                Toast.makeText(this, "No Customer in the Database", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String[] columns = new String[]{
+                    //DbHendler.KEY_ID,
+                    DbHendler.KEY_NAME,
+                    DbHendler.KEY_PHONE_NO,
+                    DbHendler.KEY_CUST_NO,
+                    DbHendler.KEY_FEES,
+                    DbHendler.KEY_BALANCE,
+                    DbHendler.KEY_SN
+            };
+            int[] boundTo = new int[]{
+                    //R.id.pId,
+                    R.id.pName,
+                    R.id.pMob,
+                    R.id.cNo,
+                    R.id.cFees,
+                    R.id.cBalance,
+                    R.id.vc_mac
+            };
+            simpleCursorAdapter = new SimpleCursorAdapter(this,
+                    R.layout.layout_list,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listViewCustomers.setAdapter(simpleCursorAdapter);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Toast.makeText(this, "" + ex, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    //endregion
+
+    //region Create Search  List
+    public void displaySearchList() {
+        searchItem = searchBox.getText().toString();
+        try {
+            Cursor cursor = dbHendler.searchPersonToList(searchItem);
+            if (cursor == null) {
+                //    textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                //  textView4.setText("No Customer Found");
+                return;
+            } else {
+                //   textView4.setText("");
+                String[] columns = new String[]{
+                        //DbHendler.KEY_ID,
+                        DbHendler.KEY_NAME,
+                        DbHendler.KEY_PHONE_NO,
+                        DbHendler.KEY_CUST_NO,
+                        DbHendler.KEY_FEES,
+                        DbHendler.KEY_BALANCE,
+                        DbHendler.KEY_SN
+                };
+                int[] boundTo = new int[]{
+                        //R.id.pId,
+                        R.id.pName,
+                        R.id.pMob,
+                        R.id.cNo,
+                        R.id.cFees,
+                        R.id.cBalance,
+                        R.id.vc_mac
+                };
+                simpleCursorAdapter = new SimpleCursorAdapter(this,
+                        R.layout.layout_list,
+                        cursor,
+                        columns,
+                        boundTo,
+                        0);
+                listViewCustomers.setAdapter(simpleCursorAdapter);
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, "" + ex);
+//            textView4.setText("There was an error!");
+        }
+    }
+
+    //endregion
+
+    //region larger balance list
+    public void getLargerBalance() {
+        try {
+            Cursor cursor = dbHendler.getLargerBalance();
             if (cursor == null) {
                 textView4.setText("Unable to generate cursor.");
                 return;
@@ -221,97 +543,6 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
                     boundTo,
                     0);
             listViewCustomers.setAdapter(simpleCursorAdapter);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(this, ""+ex, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    //endregion
-
-    //region Create Search  List
-    public void displaySearchList() {
-        searchItem = searchBox.getText().toString();
-        try {
-            Cursor cursor = dbHendler.searchPersonToList(searchItem);
-            if (cursor == null) {
-            //    textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-              //  textView4.setText("No Customer Found");
-                return;
-            } else {
-             //   textView4.setText("");
-                String[] columns = new String[]{
-                        //DbHendler.KEY_ID,
-                        DbHendler.KEY_NAME,
-                        DbHendler.KEY_PHONE_NO,
-                        DbHendler.KEY_CUST_NO,
-                        DbHendler.KEY_FEES,
-                        DbHendler.KEY_BALANCE,
-                     //   DbHendler.KEY_SN
-                };
-                int[] boundTo = new int[]{
-                        //R.id.pId,
-                        R.id.pName,
-                        R.id.pMob,
-                        R.id.cNo,
-                        R.id.cFees,
-                        R.id.cBalance,
-                    //    R.id.vc_mac
-                };
-                simpleCursorAdapter = new SimpleCursorAdapter(this,
-                        R.layout.layout_list,
-                        cursor,
-                        columns,
-                        boundTo,
-                        0);
-                listViewCustomers.setAdapter(simpleCursorAdapter);
-            }
-        } catch (Exception ex) {
-            Log.d(TAG,""+ex);
-//            textView4.setText("There was an error!");
-        }
-    }
-
-    //endregion
-
-    //region larger balance list
-    public void getLargerBalance() {
-        try {
-            Cursor cursor = dbHendler.getLargerBalance();
-            if (cursor == null) {
-                textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                textView4.setText("No Customer in the Database.");
-                return;
-            }
-            String[] columns = new String[]{
-                    //DbHendler.KEY_ID,
-                    DbHendler.KEY_NAME,
-                    DbHendler.KEY_PHONE_NO,
-                    DbHendler.KEY_CUST_NO,
-                    DbHendler.KEY_FEES,
-                    DbHendler.KEY_BALANCE
-            };
-            int[] boundTo = new int[]{
-                    //R.id.pId,
-                    R.id.pName,
-                    R.id.pMob,
-                    R.id.cNo,
-                    R.id.cFees,
-                    R.id.cBalance
-            };
-            simpleCursorAdapter = new SimpleCursorAdapter(this,
-                    R.layout.layout_list,
-                    cursor,
-                    columns,
-                    boundTo,
-                    0);
-            listViewCustomers.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
             textView4.setText("There was an error!");
@@ -321,9 +552,9 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
     //endregion
 
     //region recreate list on dialog closed
-    public void dialogClosed() {
-        Log.d(TAG,"dialg closed");
-        mCursor = dbHendler.getAllFromCustAndSTB();
+    public void refreshListView() {
+        Log.d(TAG, "dialg closed");
+        mCursor = dbHendler.getAllFromCustAndSTB(areaId);
         simpleCursorAdapter.swapCursor(mCursor);
 
 
@@ -332,7 +563,6 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
 
     //region delete person
     public void delete(int id) {
-
         dbHendler.deletePerson(id);
         Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
         //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
@@ -345,32 +575,28 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
     //region call to backup and restore functions
     public void backupDb() {
         String db = "myInfoManager.db";
-        Log.d(TAG, "called");
-        dbHendler.copyDbToExternalStorage(this.getApplicationContext(), db);
+        dbHendler.copyDbToExternalStorage(this.getApplicationContext());
 
     }
 
     public void restoreDB() {
         String db = "myInfoManager.db";
-        Log.d(TAG, "called");
         dbHendler.restoreDBfile(this.getApplicationContext(), db);
     }
     //endregion
 
-    /**
-     * Function to load the spinner data from SQLite database
-     */
+
     private void loadSpinnerData() {
 
         // Spinner Drop down elements
         areas = dbHendler.getAllAreas();
-        for (Area area: areas){
-            String singleitem= area.get_areaName();
+        for (Area area : areas) {
+            String singleitem = area.get_areaName();
             items.add(singleitem);
         }
 
         // Creating adapter for spinner
-        ArrayAdapter<String > dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -427,8 +653,9 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
             Log.d(TAG, "add stb" + R.id.add_stb);
             startActivity(intent);
             return true;
-        }if(id==R.id.area){
-            Intent intent = new Intent(this,AreaList.class);
+        }
+        if (id == R.id.area) {
+            Intent intent = new Intent(this, AreaList.class);
             startActivity(intent);
         }
 
@@ -449,19 +676,20 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
     }
     //endregion
 
-    public void custmersToLog(){
+    public void custmersToLog() {
         // Reading all contacts
         Log.d("Reading: ", "Reading all customer..");
         List<PersonInfo> personInfos = dbHendler.getAllContacts();
 
         for (PersonInfo info : personInfos) {
             String log = "Id: " + info.getID() + " ,Name: " + info.getName() + " ,Phone: " + info.getPhoneNumber()
-                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees()+" Balance: "+ info.get_balance()+" Area: "+info.get_area();
+                    + " Customer: " + info.get_cust_no() + " Fees: " + info.get_fees() + " Balance: " + info.get_balance() + " Area: " + info.get_area();
             // Writing Contacts to log
             Log.d("Name: ", log);
         }
     }
-    public void stbToLog(){
+
+    public void stbToLog() {
         // Reading all contacts
         Log.d("Reading: ", "Reading all stbs..");
         List<STB> stbs = dbHendler.getAllStbs();
@@ -475,8 +703,6 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
     }
 
 
-
-
     @Override
     public void onBackPressed() {
         backpress = (backpress + 1);
@@ -488,6 +714,7 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
             super.onBackPressed();
         }
     }
+
     @Override
     public void respond(String data) {
 
@@ -516,16 +743,52 @@ public class ViewAll extends AppCompatActivity implements Communicator,AdapterVi
         backpress = 0;
     }
 
+
+
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
         String item = parent.getItemAtPosition(position).toString();
-        areaId=  dbHendler.getAreaID(item);
+        areaId = dbHendler.getAreaID(item);
+        displayProductList();
+        Log.d(TAG, "" + areaId);
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    /* Checks if external storage is available to at least read */
+    public boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public File getAlbumStorageDir(String albumName) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), albumName);
+        if (!file.mkdirs()) {
+            Log.e(TAG, "Directory not created");
+        }
+        return file;
+    }
+
 }

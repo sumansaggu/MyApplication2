@@ -1,13 +1,17 @@
 package com.example.saggu.myapplication;
 
-import android.app.Dialog;
+
 import android.app.DialogFragment;
+
 import android.database.Cursor;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -26,16 +30,24 @@ public class DialogFeesDetail extends DialogFragment {
 
 
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.dialog_fees_detail, null);
         dbHendler = new DbHendler(this.getActivity(), null, null, 1);
         listViewFees = (ListView) view.findViewById(R.id.fees_list);
 
+
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
+        String name= dbHendler.personName(id);
+
+        getDialog().setTitle(name);
+
         displayFeeDeatail();
+
 
 
         return view;
@@ -44,6 +56,7 @@ public class DialogFeesDetail extends DialogFragment {
 
     public void displayFeeDeatail() {
         try {
+
             Cursor cursor = dbHendler.getFeesToList(id);
             if (cursor == null) {
                 textview.setText("Unable to generate cursor.");
@@ -78,7 +91,8 @@ public class DialogFeesDetail extends DialogFragment {
             listViewFees.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
-            textview.setText("There was an error!");
+            Log.d(TAG,"error");
+          //  textview.setText("There was an error!");
         }
     }
 }

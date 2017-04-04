@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "780961708981",
+    "firebase_url": "https://myapplication2-ec148.firebaseio.com",
+    "project_id": "myapplication2-ec148",
+    "storage_bucket": "myapplication2-ec148.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780961708981:android:dd37e206b24eca35",
+        "android_client_info": {
+          "package_name": "com.example.saggu.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780961708981-ml5ruro6m44081qnrbfma5pnd44p3gpa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.saggu.myapplication",
+            "certificate_hash": "b3d6526a119e0faf4ae770f7c29a4abf7f9ab984"
+          }
+        },
+        {
+          "client_id": "780961708981-5va8fee9e79sdjeu7m4nfbraahobipgg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.saggu.myapplication",
+            "certificate_hash": "5921271cfc4ff6e093a32e06a9db2fb205edd624"
+          }
+        },
+        {
+          "client_id": "780961708981-aren8j1629q4ciumhclid82q8u8b8t24.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZBANMurUxCLbt_I0Ah5qZ2GymN95POso"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780961708981-aren8j1629q4ciumhclid82q8u8b8t24.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

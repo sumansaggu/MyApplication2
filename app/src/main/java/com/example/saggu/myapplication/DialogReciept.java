@@ -29,7 +29,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     EditText reciept_dialog;
     TextView title_dialog;
     Calendar calendar;
-    EditText date;
+    TextView date;
     EditText remark;
     DbHendler dbHendler;
 
@@ -50,7 +50,8 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         balance_dialog = (TextView) view.findViewById(R.id.balance_dialog);
         reciept_dialog = (EditText) view.findViewById(R.id.reciept_dialog);
         title_dialog = (TextView) view.findViewById(R.id.title_dialog);
-        date = (EditText) view.findViewById(R.id.date);
+        date = (TextView) view.findViewById(R.id.date);
+        date.setOnClickListener(this);
         remark = (EditText) view.findViewById(R.id.remarksEditText);
 
 
@@ -60,7 +61,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
-        date.setInputType(0);
+       /* date.setInputType(0);
         fees_dailog.requestFocus();
         date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -70,7 +71,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
                     date.clearFocus();
                 }
             }
-        });
+        });*/
         return view;
     }
 
@@ -82,9 +83,14 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             getinformation();
             viewfeestable();
 
-        } else {
-            dismiss();// cancel the dialog
+
+        }if(v.getId()==R.id.date){
+            pickDate();
+        }if(v.getId()==R.id.buttonNo){
+            dismiss();
         }
+
+
     }
 
     public void getinformation() {
@@ -123,7 +129,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             dbHendler.addFees(new Fees(id, reciept, datefromEditText,remark));//fees recieved and date to fees table
 
             ViewAll activity = (ViewAll) getActivity();
-            activity.dialogClosed();
+            activity.refreshListView();
             Toast.makeText(this.getActivity(), "Added Rs. " + reciept + " to " + name, Toast.LENGTH_SHORT).show();
             reciept_dialog.setText("");
             Ok.setEnabled(false);

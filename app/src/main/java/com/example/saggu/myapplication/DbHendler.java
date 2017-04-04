@@ -19,15 +19,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class DbHendler extends SQLiteOpenHelper {
+
 
     //region All Static variables
     // Database Version
     String TAG = "MyApp_dbhendler";
     private static final int DATABASE_VER = 31;
 
-
+    private static final File DATABASE_FILE_PATH = Environment.getExternalStorageDirectory();
     //DATABASE NAME
     private static final String DATABASE_NAME = "myInfoManager.db";
 
@@ -50,6 +52,11 @@ public class DbHendler extends SQLiteOpenHelper {
     public static final String KEY_BALANCE = "balance";
     public static final String KEY_AREA = "area";
     public static final String KEY_STBID = "stbid";
+    public static final String KEY_STARTDATE = "startdate";
+    public static final String KEY_STOPDATE = "stopdate";
+    public static final String KEY_CONSTATUS = "constatus";
+    public static final String KEY_NOC = "no_connections";
+
 
     public static final String KEY_SN = "serialNo";// stb record
     public static final String KEY_VC = "vcNo";
@@ -67,32 +74,64 @@ public class DbHendler extends SQLiteOpenHelper {
     public static final String KEY_AREANO = "no";
     public static final String KEY_AREANAME = "area_name";
 
+    private static final String TABLE_MONTH_END = "month";
+    private static final String KEY_MONTH_STATUS = "monthstatus";
+
 
     String CREATE_CONTACTS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PERSON_INFO + "("
-            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT,"
-            + KEY_PHONE_NO + " TEXT, " + KEY_CUST_NO + " REAL, " + KEY_FEES + " INTEGER, " + KEY_BALANCE + " INTEGER, " + KEY_AREA + " INTEGER, " + KEY_STBID + " INTEGER, " + " FOREIGN KEY ( " + KEY_STBID + " ) REFERENCES " + TABLE_STB + " ( " + KEY_ID + ") " + " )";
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_NAME + " TEXT,"
+            + KEY_PHONE_NO + " TEXT, "
+            + KEY_CUST_NO + " REAL, "
+            + KEY_FEES + " INTEGER, "
+            + KEY_BALANCE + " INTEGER, "
+            + KEY_AREA + " INTEGER, "
+            + KEY_STBID + " INTEGER, "
+            + KEY_STARTDATE + " DATETIME , "
+            + KEY_STOPDATE + " DATETIME , "
+            + KEY_CONSTATUS + " TEXT DEFAULT 'ACTIVE', "
+            + KEY_NOC + " INTEGER, "
+            + " FOREIGN KEY ( " + KEY_STBID + " ) REFERENCES " + TABLE_STB + " ( " + KEY_ID + ") ON DELETE SET NULL " + " )";
 
 
     String CREATE_FEES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FEES + "("
-            + KEY_NO + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_ID + " INTEGER, " +
-            KEY_RECIEPT + " INTEGER, " + KEY_DATE + " DATETIME, " + KEY_REMARK + " TEXT " + ")";
+            + KEY_NO + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_ID + " INTEGER, "
+            + KEY_RECIEPT + " INTEGER, "
+            + KEY_DATE + " DATETIME, "
+            + KEY_REMARK + " TEXT " + ")";
 
     String CREATE_STB_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_STB + "("
-            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_SN + " TEXT, " + KEY_VC + " TEXT, " + KEY_STATUS + " TEXT, " + KEY_ASSIGNED + " INTEGER DEFAULT 0, UNIQUE("+KEY_SN+", "+KEY_VC+") " + ")";
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_SN + " TEXT, "
+            + KEY_VC + " TEXT, "
+            + KEY_STATUS + " TEXT, "
+            + KEY_ASSIGNED + " INTEGER DEFAULT 0,    " +
+            " UNIQUE(" + KEY_SN + ", " + KEY_VC + ") " + ")";
 
     String CREATE_EXTRAS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_EXTRAS + "("
-            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_MONTH_ENDED + " DATETIME " + ")";
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_MONTH_ENDED + " DATETIME " + ")";
 
     String CREATE_AREA_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_AREA + "("
-            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_AREANO + " INTEGER, " + KEY_AREANAME + " TEXT " + ")";
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_AREANO + " INTEGER, "
+            + KEY_AREANAME + " TEXT " + ")";
 
+    String CREATE_MONTHEND_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MONTH_END + "("
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_MONTH_STATUS + " TEXT  )";
+    String DEFAULT_ROW_FOR_MONTH_TABLE = "INSERT INTO " + TABLE_MONTH_END + " VALUES(1,'DONE')";
+    String DEFAULT_ROW_FOR_AREA_TABLE = " INSERT INTO " + TABLE_AREA + " VALUES(1,1, 'All')";
+
+    private static String path = externalStrorage() + "/myInfoManager.db";
     //endregion
 
 
-    public DbHendler(Context context, String name,
-                     SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, DATABASE_NAME, factory, DATABASE_VER);
+    public DbHendler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, path, factory, DATABASE_VER);
     }
+
 
     @Override
     public void onOpen(SQLiteDatabase db) {
@@ -103,6 +142,7 @@ public class DbHendler extends SQLiteOpenHelper {
         }
     }
 
+
     // Creating Tables
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_CONTACTS_TABLE);
@@ -110,7 +150,9 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL(CREATE_STB_TABLE);
         db.execSQL(CREATE_EXTRAS_TABLE);
         db.execSQL(CREATE_AREA_TABLE);
-
+        db.execSQL(CREATE_MONTHEND_TABLE);
+        db.execSQL(DEFAULT_ROW_FOR_MONTH_TABLE);
+        db.execSQL(DEFAULT_ROW_FOR_AREA_TABLE);
     }
 
     // Upgrading database
@@ -142,7 +184,7 @@ public class DbHendler extends SQLiteOpenHelper {
                 "SELECT " + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + "  FROM TempOldTableFees");
 
         db.execSQL("INSERT INTO " + TABLE_STB + "(" + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + ") " +
-                 "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + "  FROM TempOldTableSTB");
+                "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + "  FROM TempOldTableSTB");
 
         db.execSQL("INSERT INTO " + TABLE_EXTRAS + "(" + KEY_ID + ", " + KEY_MONTH_ENDED + ") " +
                 "SELECT " + KEY_ID + ", " + KEY_MONTH_ENDED + "  FROM TempOldTableExtras");
@@ -163,6 +205,30 @@ public class DbHendler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    private static String externalStrorage() {
+        File folder = new File(Environment.getExternalStorageDirectory() + "/MyCableData");
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        String path = new String(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyCableData");
+        return path;
+    }
+
+    public String monthFlag() {
+        String flag = "";
+        SQLiteDatabase db = this.getReadableDatabase();
+        String columns[] = {KEY_ID, KEY_MONTH_STATUS};
+        Cursor cursor = db.query(TABLE_MONTH_END, columns, null, null, null, null, null);
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                flag = cursor.getString(cursor.getColumnIndex(KEY_MONTH_STATUS));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return flag;
+    }
 
     // getting to list view
     public Cursor getAllProducts() {
@@ -177,10 +243,14 @@ public class DbHendler extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor getAllFromCustAndSTB() {
+    public Cursor getAllFromCustAndSTB(int areaId) {
         SQLiteDatabase db = this.getReadableDatabase();
         // String query = "SELECT " + TABLE_PERSON_INFO+"."+KEY_ID + ", " + KEY_NAME + " FROM" + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON " + TABLE_STB + "." + KEY_ID + " = " + TABLE_PERSON_INFO + "." + KEY_STBID + "; ";
-        String query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
+        String query;
+        if (areaId == 1) {
+            query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
+        } else
+            query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID WHERE personInfo.area = " + areaId + " ORDER BY cust_no ASC ";
         Log.d(TAG, "" + query);
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
@@ -244,7 +314,7 @@ public class DbHendler extends SQLiteOpenHelper {
     //region serarch person to list
     public Cursor searchPersonToList(String namesearch) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT * FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID  WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -255,7 +325,6 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
     //endregion
-
 
     //region serarch person to list
     public Cursor searchSTBToList(String STBsearch) {
@@ -275,7 +344,7 @@ public class DbHendler extends SQLiteOpenHelper {
     public Cursor getLargerBalance() {
         SQLiteDatabase db = getWritableDatabase();
 
-        String query = "SELECT * FROM " + TABLE_PERSON_INFO + " ORDER BY " + KEY_BALANCE + " DESC ;";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID ORDER BY " + KEY_BALANCE + " DESC ;";
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -309,10 +378,25 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+    public String personName(int id) {
+        String name = "";
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {KEY_ID, KEY_NAME};
+        Cursor cursor = db.query(TABLE_PERSON_INFO, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
+        }
+
+        return name;
+
+
+    }
+
     //region getFeesToList
     public Cursor getFeesToList(int id) {
         String custmor = "" + id;
-        Log.d(TAG, custmor);
+        //  Log.d(TAG, custmor);
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {KEY_NO, KEY_ID, KEY_RECIEPT, KEY_DATE, KEY_REMARK};
         // String[] selArgs = {custmor};
@@ -339,6 +423,7 @@ public class DbHendler extends SQLiteOpenHelper {
         values.put(KEY_FEES, personInfo.get_fees());
         values.put(KEY_BALANCE, personInfo.get_balance());
         values.put(KEY_AREA, personInfo.get_area());
+        values.put(KEY_STARTDATE, personInfo.get_startdate());
         //Insert row
         db.insert(TABLE_PERSON_INFO, null, values);
         db.close(); //close database
@@ -389,11 +474,19 @@ public class DbHendler extends SQLiteOpenHelper {
         values.put(KEY_FEES, personInfo.get_fees());
         values.put(KEY_BALANCE, personInfo.get_balance());
         values.put(KEY_AREA, personInfo.get_area());
+        values.put(KEY_STARTDATE, personInfo.get_startdate());
         //updating row
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(personInfo.getID())});
-
     }
     //endregion
+
+    public void monthFlagChange(String flag) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_MONTH_STATUS, flag);
+        db.update(TABLE_MONTH_END, values, KEY_ID + "=?", new String[]{String.valueOf(1)});
+    }
+
 
     public int updateStbRecord(STB stb) {
         SQLiteDatabase db = getWritableDatabase();
@@ -478,11 +571,18 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+    public void deleteSTB(int stbId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_STB + " WHERE " + KEY_ID + "=\"" + stbId + "\";");
+        db.close();
+    }
+
+
     //region Reading a Row  Getting single contact
 
     public PersonInfo getCustInfo(int id) {
         SQLiteDatabase db = getReadableDatabase();
-        String columns[] = {KEY_ID, KEY_NAME, KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE, KEY_AREA};
+        String columns[] = {KEY_ID, KEY_NAME, KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE, KEY_AREA, KEY_STARTDATE};
         Cursor cursor = db.query(TABLE_PERSON_INFO, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
@@ -492,7 +592,9 @@ public class DbHendler extends SQLiteOpenHelper {
                 cursor.getFloat(cursor.getColumnIndex(KEY_CUST_NO)),
                 cursor.getInt(cursor.getColumnIndex(KEY_FEES)),
                 cursor.getInt(cursor.getColumnIndex(KEY_BALANCE)),
-                cursor.getInt(cursor.getColumnIndex(KEY_AREA)));
+                cursor.getInt(cursor.getColumnIndex(KEY_AREA)),
+                cursor.getString(cursor.getColumnIndex(KEY_STARTDATE))
+        );
         return info;
     }
     //endregion
@@ -546,10 +648,9 @@ public class DbHendler extends SQLiteOpenHelper {
                 contentValues.put(KEY_BALANCE, k);
                 db.update(TABLE_PERSON_INFO, contentValues, KEY_ID + "=?", new String[]{String.valueOf(id)});
             } while (cursor.moveToNext());
-            Toast.makeText(context, "Month ended fees updated for all", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Fees updated for all", Toast.LENGTH_LONG).show();
             entryTomonthTable();
         }
-
         cursor.close();
     }
 
@@ -582,14 +683,16 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+
     //region backupdatabase
 
-    public void copyDbToExternalStorage(Context context, String dbName) {
+    public void copyDbToExternalStorage(Context context) {
         Calendar calender = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         String formattedDate = df.format(calender.getTime());
         Log.d(TAG, "" + formattedDate);
         File folder = new File(Environment.getExternalStorageDirectory() + "/MyBackup");
+
 
         if (!folder.exists()) {
             folder.mkdir();
@@ -598,7 +701,7 @@ public class DbHendler extends SQLiteOpenHelper {
 
 
         try {
-            File name = context.getDatabasePath(dbName);
+            File name = new File(Environment.getExternalStorageDirectory(), "/MyCableData/" + DbHendler.DATABASE_NAME);
             File sdcardFile = new File(Environment.getExternalStorageDirectory(), "/MyBackup/" + formattedDate);//The name of output file
             sdcardFile.createNewFile();
             InputStream inputStream = null;
@@ -616,7 +719,7 @@ public class DbHendler extends SQLiteOpenHelper {
             Toast.makeText(context, "Database backup created at" + sdcardFile, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(context, "" + e.toString(), Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "ghfhfghfgh" + e.toString());
+            Log.e(TAG, "ghfhfghfgh " + e.toString());
         }
 
 
@@ -629,13 +732,13 @@ public class DbHendler extends SQLiteOpenHelper {
         // SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
         // String formattedDate = df.format(calender.getTime());
         try {
-            File name = context.getDatabasePath(dbName);
+            File db = new File(Environment.getExternalStorageDirectory(), "/MyCableData/" + DbHendler.DATABASE_NAME);
             File sdcardFile = new File(Environment.getExternalStorageDirectory(), "/" + DbHendler.DATABASE_NAME); //myInfoManager.db
-            name.createNewFile();
+            db.createNewFile();
             InputStream inputStream = null;
             OutputStream outputStream = null;
             inputStream = new FileInputStream(sdcardFile);
-            outputStream = new FileOutputStream(name);
+            outputStream = new FileOutputStream(db);
             byte[] buffer = new byte[1024];
             int read;
             while ((read = inputStream.read(buffer)) != -1) {
@@ -703,6 +806,7 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
     //endregion
+
     //region Getting All Contacts to log
     public List<PersonInfo> getAllContacts() {
         List<PersonInfo> contactList = new ArrayList<>();
@@ -728,12 +832,15 @@ public class DbHendler extends SQLiteOpenHelper {
         // return contact list
         return contactList;
     }
+
     //endregion
-    //region Getting All Contacts to log
+
+    //region Getting All STB to log
     public List<STB> getAllStbs() {
+        Log.d(TAG, "callled");
         List<STB> stbList = new ArrayList<>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_STB ;
+        String selectQuery = "SELECT  * FROM " + TABLE_STB;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
@@ -777,14 +884,15 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
     //endregion
+
     public String getAreaName(int areaID) {
         String areaname = null;
-        String query = " SELECT * FROM " + TABLE_AREA + " WHERE " + KEY_ID + " = "+areaID ;
+        String query = " SELECT * FROM " + TABLE_AREA + " WHERE " + KEY_ID + " = " + areaID;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         if (cursor.moveToFirst()) {
             do {
-              areaname=  (cursor.getString(cursor.getColumnIndex(KEY_AREANAME)));
+                areaname = (cursor.getString(cursor.getColumnIndex(KEY_AREANAME)));
             } while (cursor.moveToNext());
         }
         cursor.close();

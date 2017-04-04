@@ -1,6 +1,7 @@
 package com.example.saggu.myapplication;
 
 import android.util.Log;
+import android.widget.EditText;
 
 public class PersonInfo {
     //Private variables
@@ -11,37 +12,28 @@ public class PersonInfo {
     private int _fees;
     private int _balance;
     private int _area;
+    private String _date;
+
 
     // Empty Consturctor
     public PersonInfo() {
     }
 
     //Constructor
-    public PersonInfo(int id, String name, String phone_no) {
-        this._id = id;
-        this._name = name;
-        this._phone_no = phone_no;
-    }
-    //Constructor
-    public PersonInfo(String name, String phone_no, int cust_no, int fees) {
-        this._name = name;
-        this._phone_no = phone_no;
-        this._cust_no = cust_no;
-        this._fees = fees;
 
-    }
 
-    //Constructor
-    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, int area) {
+    //Constructors
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, int area, String date) {
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
         this._fees = fees;
         this._balance= balance;
         this._area=area;
+        this._date= date;
     }
 
-    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance,int area) {
+    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance,int area, String date) {
         this._id = id;
         this._name = name;
         this._phone_no = phone_no;
@@ -49,6 +41,8 @@ public class PersonInfo {
         this._fees = fees;
         this._balance= balance;
         this._area = area;
+        this._date= date;
+
     }
 
     public PersonInfo(int id, int balance) {
@@ -56,37 +50,30 @@ public class PersonInfo {
         this._balance= balance;
     }
 
-    public PersonInfo(int id, String name, String phone_no, float cust_no, int fees, int balance) {
-        this._id = id;
-        this._name = name;
-        this._phone_no = phone_no;
-        this._cust_no = cust_no;
-        this._fees = fees;
-        this._balance= balance;
 
-    }
 
-    //getting id
+
+    //getters
     public int getID() {
         return this._id;
     }
-    //getting name
+
     public String getName() {
         return this._name;
     }
-    // getting phone number
+
     public String getPhoneNumber() {
         return this._phone_no;
     }
-    //geeting custmer no
+
     public float get_cust_no(){return this._cust_no;}
 
 
-    //geeting fees
     public int get_fees(){return this._fees;}
-    //getting balance
+
     public int get_balance(){return this._balance;}
     public int get_area() {return this._area; }
+    public String get_startdate(){return  this._date;}
 
 
     //setting id
@@ -108,6 +95,7 @@ public class PersonInfo {
   //setting balance
     public void setBalance(int balance){this._balance = balance;}
     public void setArea(int area){this._area =area;}
+    public void setStartDate(String date){this._date = date;}
 
 
 

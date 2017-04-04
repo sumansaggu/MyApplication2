@@ -4,6 +4,7 @@ package com.example.saggu.myapplication;
  * Created by Saggu on 2/13/2017.
  */
 
+
 public class Area {
     private int _id;
     private int _areaNo;

@@ -18,6 +18,17 @@
         android:layout_centerHorizontal="true">
 
         <EditText
+            android:id="@+id/person_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="27dp"
+            android:hint="Name"
+            android:minWidth="300dp" />
+
+        <EditText
             android:id="@+id/contact_no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,6 +42,29 @@
 
         <EditText
 
+            android:id="@+id/cust_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/contact_no"
+            android:layout_alignStart="@+id/contact_no"
+            android:layout_below="@+id/contact_no"
+            android:layout_marginTop="15dp"
+            android:hint="Cust No"
+            android:inputType="number|numberDecimal" />
+
+        <EditText
+
+            android:id="@+id/fees"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/balance"
+            android:layout_alignBottom="@+id/balance"
+            android:layout_centerHorizontal="true"
+            android:hint="Fees"
+            android:inputType="number" />
+
+        <EditText
+
             android:id="@+id/balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -41,39 +75,28 @@
             android:layout_alignRight="@+id/contact_no"
             android:layout_alignEnd="@+id/contact_no" />
 
-        <EditText
-
-            android:id="@+id/fees"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Fees"
-            android:inputType="number"
-            android:layout_alignBaseline="@+id/balance"
-            android:layout_alignBottom="@+id/balance"
-            android:layout_centerHorizontal="true" />
+            android:layout_alignBaseline="@+id/date_txtview"
+            android:layout_alignBottom="@+id/date_txtview"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_toLeftOf="@+id/date_txtview"
+            android:layout_toStartOf="@+id/date_txtview"
+            android:text="Start Date:"
+            android:textSize="18sp" />
 
-        <EditText
-
-            android:id="@+id/cust_no"
+        <TextView
+            android:id="@+id/date_txtview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:hint="Cust No"
-            android:inputType="number|numberDecimal"
-            android:layout_below="@+id/contact_no"
-            android:layout_alignLeft="@+id/contact_no"
-            android:layout_alignStart="@+id/contact_no" />
-
-        <EditText
-            android:id="@+id/person_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
-            android:hint="Name"
-            android:minWidth="300dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_below="@+id/cust_no"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dip"
+            android:inputType="text"
+            android:text="StartDate"
+            android:textSize="18sp" />
 
     </RelativeLayout>
 
