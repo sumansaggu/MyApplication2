@@ -30,6 +30,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
     EditText contact_no;
     EditText cust_no;
     EditText monthly_fees;
+    TextView dateTxtview;
     TextView startdate;
     TextView balance_;
     DbHendler dbHendler;
@@ -66,6 +67,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
+        dateTxtview = (TextView) findViewById(R.id.datetxtview);
         startdate = (TextView) findViewById(R.id.date_txtview);
         startdate.setOnClickListener(this);
         spinner = (Spinner) findViewById(R.id.spinner_area);
@@ -93,6 +95,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
                 buttonAdd.setText("Change");
                 //   stbButton.setVisibility(View.VISIBLE);
                 getSupportActionBar().setTitle("Edit Customer");
+                dateTxtview.setVisibility(View.INVISIBLE);
                 //changeButton.setVisibility(View.VISIBLE);
                 getIntent().removeExtra("ID");
                 editCustomer();

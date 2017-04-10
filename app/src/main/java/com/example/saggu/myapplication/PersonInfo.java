@@ -13,6 +13,7 @@ public class PersonInfo {
     private int _balance;
     private int _area;
     private String _date;
+    private String _cstatus;
 
 
     // Empty Consturctor
@@ -50,7 +51,13 @@ public class PersonInfo {
         this._balance= balance;
     }
 
+    public PersonInfo(String name , String startdate) {
 
+    }
+
+    public PersonInfo(int Id) {
+        this._id=Id;
+    }
 
 
     //getters
@@ -74,6 +81,8 @@ public class PersonInfo {
     public int get_balance(){return this._balance;}
     public int get_area() {return this._area; }
     public String get_startdate(){return  this._date;}
+
+    public String get_cstatus(){return this._cstatus;}
 
 
     //setting id

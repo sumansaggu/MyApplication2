@@ -27,6 +27,7 @@ public class DialogFeesDetail extends DialogFragment {
     String TAG = "MyApp_ViewFees";
     TextView textview;
     int id;
+    TextView custname, startDate;
 
 
 
@@ -34,17 +35,21 @@ public class DialogFeesDetail extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         View view = inflater.inflate(R.layout.dialog_fees_detail, null);
         dbHendler = new DbHendler(this.getActivity(), null, null, 1);
         listViewFees = (ListView) view.findViewById(R.id.fees_list);
-
+        custname = (TextView) view.findViewById(R.id.cust_name_in_dialog);
+        startDate= (TextView) view.findViewById(R.id.strt_date_in_dailog);
 
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-        String name= dbHendler.personName(id);
-
-        getDialog().setTitle(name);
+        PersonInfo info= dbHendler.getCustInfo(id);
+        String name = info.getName().toString().trim();
+       String startdat= String.valueOf(info.get_startdate().toString());
+    //    getDialog().setTitle(name);
+        custname.setText(name);
+      startDate.setText(startdat);
 
         displayFeeDeatail();
 

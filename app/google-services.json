@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "780961708981-bh0okae4lqn82f9cvrqop8k95b87h7a5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.saggu.myapplication",
+            "certificate_hash": "e643994d33d155462c8e0bfca0deb8033d5eef5e"
+          }
+        },
+        {
           "client_id": "780961708981-ml5ruro6m44081qnrbfma5pnd44p3gpa.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -1,12 +1,16 @@
 package com.example.saggu.myapplication;
 
+import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,18 +24,19 @@ import java.util.List;
  * Created by Saggu on 12/16/2016.
  */
 
-public class DialogReciept extends DialogFragment implements View.OnClickListener {
+public class DialogReciept extends DialogFragment implements View.OnClickListener{
     String TAG = "MyApp_DialogBox";
 
-    Button Ok, Cancel;
+    DbHendler dbHendler;
+    Calendar calendar;
+    TextView title_dialog;
     TextView fees_dailog;
     TextView balance_dialog;
     EditText reciept_dialog;
-    TextView title_dialog;
-    Calendar calendar;
     TextView date;
     EditText remark;
-    DbHendler dbHendler;
+    Button Ok, Cancel;
+
 
     int id;
 
@@ -49,9 +54,12 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         fees_dailog = (TextView) view.findViewById(R.id.fees_dialog);
         balance_dialog = (TextView) view.findViewById(R.id.balance_dialog);
         reciept_dialog = (EditText) view.findViewById(R.id.reciept_dialog);
+
+
         title_dialog = (TextView) view.findViewById(R.id.title_dialog);
         date = (TextView) view.findViewById(R.id.date);
         date.setOnClickListener(this);
+
         remark = (EditText) view.findViewById(R.id.remarksEditText);
 
 
@@ -61,18 +69,16 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
-       /* date.setInputType(0);
-        fees_dailog.requestFocus();
-        date.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    pickDate();
-                    date.clearFocus();
-                }
-            }
-        });*/
+
         return view;
+    }
+
+
+
+    public void hideKeyboard() {
+
+        InputMethodManager imm = (InputMethodManager) getView().getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
     }
 
 
@@ -84,14 +90,19 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             viewfeestable();
 
 
-        }if(v.getId()==R.id.date){
+        }
+        if (v.getId() == R.id.date) {
+            hideKeyboard();
             pickDate();
-        }if(v.getId()==R.id.buttonNo){
+
+        }
+        if (v.getId() == R.id.buttonNo) {
             dismiss();
         }
 
 
     }
+
 
     public void getinformation() {
         PersonInfo personInfo = dbHendler.getCustInfo(id);
@@ -126,7 +137,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             String remark = this.remark.getText().toString();
 
             dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
-            dbHendler.addFees(new Fees(id, reciept, datefromEditText,remark));//fees recieved and date to fees table
+            dbHendler.addFees(new Fees(id, reciept, datefromEditText, remark));//fees recieved and date to fees table
 
             ViewAll activity = (ViewAll) getActivity();
             activity.refreshListView();
@@ -159,7 +170,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     }
 
     public void pickDate() {
-        Log.d(TAG, "date change called");
+        Log.d(TAG, "pick date called");
         DialogFragment newFragment = new MyDatePicker();
         newFragment.show(getFragmentManager(), "datepicker");
         Bundle bundle = new Bundle();

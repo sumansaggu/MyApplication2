@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.saggu.myapplication">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -26,13 +25,7 @@
             android:name=".CustAddEditActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ViewAll">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".ViewAll" />
         <activity android:name=".BtwTwoDates" />
         <activity android:name=".STBRecord" />
         <activity android:name=".ScannerActivity" />
@@ -53,19 +46,22 @@
         <activity
             android:name=".AreaList"
             android:label="@string/title_activity_area_list"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
 
-        <service android:name=".MyJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"/>
+        <service
+            android:name=".MyJobService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <receiver android:name=".AlarmReceiver" >
+        <receiver android:name=".AlarmReceiver"></receiver>
 
-        </receiver>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-
-
-
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

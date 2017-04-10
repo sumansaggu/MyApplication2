@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnD
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        hideKeyboard();
         Bundle bundle =getArguments();
         if (bundle !=null){
              id = bundle.getInt("id");
@@ -39,7 +41,13 @@ public class MyDatePicker extends DialogFragment implements DatePickerDialog.OnD
         // Create a new instance of DatePickerDialog and return it
         return new DatePickerDialog(getActivity(), this, year, month, day);
     }
+    public void hideKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
 
+        inputMethodManager.hideSoftInputFromWindow(
+                getActivity().getCurrentFocus()
+                        .getWindowToken(), 0);
+    } // hideKeyboard
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

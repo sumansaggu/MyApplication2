@@ -76,6 +76,7 @@
             android:layout_alignEnd="@+id/contact_no" />
 
         <TextView
+            android:id="@+id/datetxtview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@+id/date_txtview"
@@ -95,7 +96,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dip"
             android:inputType="text"
-            android:text="StartDate"
+            android:text="yy-mm-dd"
             android:textSize="18sp" />
 
     </RelativeLayout>

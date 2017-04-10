@@ -1,5 +1,9 @@
 package com.example.saggu.myapplication;
 
+import android.*;
+import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.AlarmManager;
 import android.app.DialogFragment;
 import android.app.PendingIntent;
@@ -12,8 +16,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -60,10 +66,9 @@ import me.tatarka.support.job.JobInfo;
 import me.tatarka.support.job.JobScheduler;
 
 
-// TODO: 1/16/2017  prevent reverse engineering
-// TODO: 1/25/2017  email support to be added
+// TODO: 1/16/2017  prevent reverse engineering (will use minify)
+// TODO: 1/25/2017  email support to be added    (crash reporting option will be used)
 // TODO: 2/13/2017 start and stop date needed(cut option)
-// TODO: 3/18/2017 default row need for table month
 public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener//, GoogleApiClient.OnConnectionFailedListener
 {
 
@@ -138,6 +143,10 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     //   signOut();
                     searchBox.setText("");
                 }
+                if (searchBox.getText().toString().equals("bulk")) {
+                    dbHendler.insertBulkData();
+                    searchBox.setText("");
+                }
             }
         });
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -150,7 +159,10 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             toolbar.setTitle("SD Card not found");
         }
 
-        checkApi();
+
+
+
+
         // dbHendler.getAllFromCustAndSTB();
         displayProductList();
         registerForContextMenu(listViewCustomers);
@@ -161,9 +173,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-
-
-          //<editor-fold desc="Firebase">
+    //<editor-fold desc="Firebase">
      /*
            mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
            mAuth = FirebaseAuth.getInstance();
@@ -305,6 +315,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
 
     //</editor-fold>
 
+
+
     public void scheduleAlarm() {
 
         Calendar calendarNOW = Calendar.getInstance();
@@ -344,6 +356,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         menu.add("Reciept");
         menu.add("Detail");
         menu.add("Edit");
+        menu.add("Start/Cut");
         menu.add("STB");
         menu.add("Delete");
         menu.add("Call");
@@ -356,13 +369,28 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         if (item.getTitle() == "Delete") {
             DeleteAlert myAlert = new DeleteAlert();
-            myAlert.show(getFragmentManager(), "DeleteAlert");
-            int id = (int) menuInfo.id;
+            int custid = (int) menuInfo.id;
+            int stbId = dbHendler.getStbIdFromCust(custid);
+            Log.d(TAG,"STB ID " + stbId);
             Bundle bundle = new Bundle();
             myAlert.setArguments(bundle);
-            bundle.putInt("ID", id);
+            bundle.putInt("CUSTID", custid);
+            bundle.putInt("STBID", stbId);
+            myAlert.show(getFragmentManager(), "DeleteAlert");
 
-        } else if (item.getTitle() == "Edit") {
+        }
+        else if(item.getTitle()=="Start/Cut"){
+            int custId = (int) menuInfo.id;
+            String status = dbHendler.conStatus(custId);
+
+            CutStartDialog cutStartDialog = new CutStartDialog();
+            Bundle bundle =new Bundle();
+            cutStartDialog.setArguments(bundle);
+            bundle.putInt("CUSTID", custId);
+            bundle.putString("STATUS",status);
+            cutStartDialog.show(getFragmentManager(),"CutStartDialog");
+
+        }else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, CustAddEditActivity.class);
             intent.putExtra("editcustomer", "editcustomer");
@@ -408,6 +436,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             startActivity(i);
 
         }
+
         return true;
     }
     //</editor-fold>
@@ -432,7 +461,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     DbHendler.KEY_CUST_NO,
                     DbHendler.KEY_FEES,
                     DbHendler.KEY_BALANCE,
-                    DbHendler.KEY_SN
+                    DbHendler.KEY_SN,
+                    DbHendler.KEY_CONSTATUS
             };
             int[] boundTo = new int[]{
                     //R.id.pId,
@@ -441,7 +471,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     R.id.cNo,
                     R.id.cFees,
                     R.id.cBalance,
-                    R.id.vc_mac
+                    R.id.vc_mac,
+                    R.id.txtstatus
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this,
                     R.layout.layout_list,
@@ -556,14 +587,12 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         Log.d(TAG, "dialg closed");
         mCursor = dbHendler.getAllFromCustAndSTB(areaId);
         simpleCursorAdapter.swapCursor(mCursor);
-
-
     }
     //endregion
 
     //region delete person
-    public void delete(int id) {
-        dbHendler.deletePerson(id);
+    public void delete(int custid, int stbid) {
+        dbHendler.deletePerson(custid, stbid);
         Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
         //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
         //If your ListView's content was created by attaching it to a database cursor,
@@ -571,6 +600,10 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         displayProductList();
     }
     //endregion
+    public void changeConStatus(int cutID,String newStatus){
+        dbHendler.conCutStart(cutID, newStatus);
+
+    }
 
     //region call to backup and restore functions
     public void backupDb() {
@@ -729,12 +762,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
 
     }
 
-    public int checkApi() {
-        String currntVersion = Build.VERSION.RELEASE;
-        int currentRealease = Build.VERSION.SDK_INT;
-        Log.d(TAG, "OS:" + currntVersion + " API:" + currentRealease);
-        return currentRealease;
-    }
 
 
     @Override
@@ -742,8 +769,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         super.onResume();
         backpress = 0;
     }
-
-
 
 
     @Override

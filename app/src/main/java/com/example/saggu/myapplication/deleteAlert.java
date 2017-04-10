@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -14,11 +15,15 @@ import android.widget.Toast;
  */
 
 public class DeleteAlert extends DialogFragment {
-    int id;
+    int custid;
+    int stbId;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle bundle = getArguments();
-        id = bundle.getInt("ID");
+         custid = bundle.getInt("CUSTID");
+         stbId =bundle.getInt("STBID");
+        Log.d("sdfsdd", "custid"+ custid+ " stbid "+stbId);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("DELETE..!!!!");
         builder.setMessage("Are you Sure??");
@@ -34,7 +39,7 @@ public class DeleteAlert extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ViewAll activity = (ViewAll)getActivity();
-                activity.delete(id);
+                activity.delete(custid, stbId);
             }
         });
 

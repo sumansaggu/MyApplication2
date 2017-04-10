@@ -90,7 +90,7 @@ public class DbHendler extends SQLiteOpenHelper {
             + KEY_STARTDATE + " DATETIME , "
             + KEY_STOPDATE + " DATETIME , "
             + KEY_CONSTATUS + " TEXT DEFAULT 'ACTIVE', "
-            + KEY_NOC + " INTEGER, "
+            + KEY_NOC + " INTEGER DEFAULT 1, "
             + " FOREIGN KEY ( " + KEY_STBID + " ) REFERENCES " + TABLE_STB + " ( " + KEY_ID + ") ON DELETE SET NULL " + " )";
 
 
@@ -245,12 +245,12 @@ public class DbHendler extends SQLiteOpenHelper {
 
     public Cursor getAllFromCustAndSTB(int areaId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        // String query = "SELECT " + TABLE_PERSON_INFO+"."+KEY_ID + ", " + KEY_NAME + " FROM" + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON " + TABLE_STB + "." + KEY_ID + " = " + TABLE_PERSON_INFO + "." + KEY_STBID + "; ";
+
         String query;
         if (areaId == 1) {
-            query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
+            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
         } else
-            query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID WHERE personInfo.area = " + areaId + " ORDER BY cust_no ASC ";
+            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID WHERE personInfo.area = " + areaId + " ORDER BY cust_no ASC ";
         Log.d(TAG, "" + query);
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
@@ -378,20 +378,6 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
-    public String personName(int id) {
-        String name = "";
-        SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {KEY_ID, KEY_NAME};
-        Cursor cursor = db.query(TABLE_PERSON_INFO, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-            name = cursor.getString(cursor.getColumnIndex(KEY_NAME));
-        }
-
-        return name;
-
-
-    }
 
     //region getFeesToList
     public Cursor getFeesToList(int id) {
@@ -480,11 +466,20 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+
     public void monthFlagChange(String flag) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_MONTH_STATUS, flag);
         db.update(TABLE_MONTH_END, values, KEY_ID + "=?", new String[]{String.valueOf(1)});
+    }
+
+    public void conCutStart(int id, String newstatus) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_CONSTATUS, newstatus);
+
+        db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(id)});
     }
 
 
@@ -542,7 +537,7 @@ public class DbHendler extends SQLiteOpenHelper {
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + " =? ", new String[]{String.valueOf(custid)});
     }
 
-    public int unSetId(int id) {
+    public int unSetId(int id) {    // from customer table
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_STBID, (byte[]) null);
@@ -561,12 +556,26 @@ public class DbHendler extends SQLiteOpenHelper {
     }
     //endregion
 
+    public int getStbIdFromCust(int custID) {  // to set assigned to 0 from stb table
+        int stbId = 0;
+        SQLiteDatabase db = getWritableDatabase();
+
+        String query = "SELECT " + KEY_STBID + " FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_ID + " = " + custID;
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            stbId = cursor.getInt(cursor.getColumnIndex(KEY_STBID));
+        }
+        return stbId;
+    }
+
     //region delete a person
 
-    public void deletePerson(int ID) {
+    public void deletePerson(int custID, int stbID) {
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_ID + "=\"" + ID + "\";");
-        db.execSQL("DELETE FROM " + TABLE_FEES + " WHERE " + KEY_ID + "=\"" + ID + "\"");
+        db.execSQL("DELETE FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_ID + "=\"" + custID + "\";");
+        db.execSQL("DELETE FROM " + TABLE_FEES + " WHERE " + KEY_ID + "=\"" + custID + "\"");
+        db.execSQL("UPDATE " + TABLE_STB + " SET " + KEY_ASSIGNED + " = 0 WHERE  " + KEY_ID + " =  " + stbID);
         db.close();
     }
     //endregion
@@ -578,7 +587,54 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
 
+    public void insertBulkData() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "( " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_STARTDATE + ", " + KEY_AREA + " ) VALUES " +
+                "('Ram', '80944', 2, 280, 560, '2017-5-3', 1)," +
+                "('Sham', '98154', 3, 280, 560,'2017-5-4', 1)," +
+                "('Makhan', '888', 4, 280, 280,'2017-5-7', 1), " +
+                "('Raj', '999', 5, 230, 460,'2017-5-9', 1), " +
+                "('Mehar', '666', 6, 230, 460,'2017-5-11', 1), " +
+                "('Roshan', '999', 7, 230, 460,'2017-5-13', 1), " +
+                "('Sapna', '999', 11, 230, 460, '2017-5-17',1), " +
+                "('Sandeep ', '999', 15, 230, 460,'2017-5-20', 1), " +
+                "('Raju', '999', 17, 230, 460, '2017-5-22',1), " +
+                "('Keshav', '999', 19, 230, 460,'2017-5-25', 1) "
+
+        );
+        db.execSQL("INSERT INTO " + TABLE_STB + "( " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + " ) VALUES " +
+                "('AAA', '789', 'ON'), " +
+                "('BBB', '567', 'ON'), " +
+                "('CCC', '678', 'ON'), " +
+                "('DDD', '123', 'ON'), " +
+                "('EEE', '129', 'ON'), " +
+                "('FFF', '345', 'ON'), " +
+                "('GGG', '432', 'ON'), " +
+                "('HHH', '679', 'ON'), " +
+                "('III', '654', 'ON'), " +
+                "('JJJ', '432', 'ON'), " +
+                "('KKK', '765', 'ON') "
+        );
+
+
+    }
+
+
     //region Reading a Row  Getting single contact
+    public String conStatus(int id) {
+        String status = "";
+        SQLiteDatabase db = getWritableDatabase();
+        String[] columns = {KEY_ID, KEY_CONSTATUS};
+
+        Cursor cursor = db.query(TABLE_PERSON_INFO, columns,
+                KEY_ID + " =? ",
+                new String[]{String.valueOf(id)},
+                null, null, null, null);
+        if (cursor!=null)
+            cursor.moveToFirst();
+         status = cursor.getString(cursor.getColumnIndex(KEY_CONSTATUS));
+        return status;
+    }
 
     public PersonInfo getCustInfo(int id) {
         SQLiteDatabase db = getReadableDatabase();
@@ -598,7 +654,28 @@ public class DbHendler extends SQLiteOpenHelper {
         return info;
     }
     //endregion
+   /* public PersonInfo personNameStartdate(int id) {
 
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {KEY_ID, KEY_NAME,KEY_STARTDATE};
+        Cursor cursor = db.query(TABLE_PERSON_INFO, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            PersonInfo personInfo = new PersonInfo(cursor.getString(cursor.getColumnIndex(KEY_NAME)),
+                    cursor.getString(cursor.getColumnIndex(KEY_STARTDATE))
+            );
+
+
+
+
+
+
+
+
+    } return personInfo;
+
+*/
 
     public STB getSTBInfo(int id) {
         SQLiteDatabase db = getWritableDatabase();
@@ -629,7 +706,7 @@ public class DbHendler extends SQLiteOpenHelper {
 
     //region end of month
     public void endOfMonth(Context context) {
-        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO;
+        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO +" WHERE " +KEY_CONSTATUS+ " = 'ACTIVE'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
@@ -932,5 +1009,7 @@ public class DbHendler extends SQLiteOpenHelper {
         }
         return areaId;
     }
+
+
 }
 
