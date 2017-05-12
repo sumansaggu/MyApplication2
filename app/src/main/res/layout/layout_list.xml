@@ -128,19 +128,18 @@
         android:layout_height="wrap_content"
         android:id="@+id/vc_mac"
         android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/pMob"
-        android:layout_alignEnd="@+id/pMob" />
+        android:layout_centerHorizontal="true" />
 
     <TextView
-        android:id="@+id/txtstatus"
+        android:id="@+id/cStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/vc_mac"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_toLeftOf="@+id/relativeLayout"
-        android:layout_toStartOf="@+id/relativeLayout"
-        android:text="C" />
+        android:text="C"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/cNo"
+        android:layout_toEndOf="@+id/cNo"
+        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp" />
 
 
 </RelativeLayout>

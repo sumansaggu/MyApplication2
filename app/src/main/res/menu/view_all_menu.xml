@@ -4,12 +4,12 @@
     <item
         android:id="@+id/large_balance"
         android:orderInCategory="80"
-        android:title="By Large Balance"
+        android:title="View Large Balance"
         app:showAsAction="never" />
     <item
         android:id="@+id/by_number"
         android:orderInCategory="90"
-        android:title="By Number" />
+        android:title="View By Number" />
     <item
         android:id="@+id/colection_btw_two_dates"
         android:orderInCategory="91"
@@ -18,17 +18,17 @@
     <item
         android:id="@+id/add_customer"
         android:orderInCategory="100"
-        android:title="Customer"
+        android:title="Add Customer"
         app:showAsAction="never" />
     <item
         android:id="@+id/manage_stb"
         android:orderInCategory="100"
-        android:title="STBs"
+        android:title="Manage STBs"
         app:showAsAction="never" />
     <item
         android:id="@+id/area"
         android:orderInCategory="100"
-        android:title="Areas"
+        android:title="Add Area"
         app:showAsAction="never" />
 
     <item
@@ -40,6 +40,11 @@
         android:id="@+id/restore_database"
         android:orderInCategory="300"
         android:title="Restore Database"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/set_password"
+        android:orderInCategory="300"
+        android:title="Set Login Password"
         app:showAsAction="never" />
 
 </menu>

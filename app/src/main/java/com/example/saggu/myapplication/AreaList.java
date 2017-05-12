@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +24,7 @@ public class AreaList extends AppCompatActivity {
     String tag = "AreaList ";
     private Cursor mCursor;
     static final String bundle_stbid= "editstb";
+    String TAG = "Area List";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class AreaList extends AppCompatActivity {
         });
         listViewArea = (ListView) findViewById(R.id.listViewArea);
         displayAreaList();
+        registerForContextMenu(listViewArea);
 
 
     }
@@ -60,13 +63,13 @@ public class AreaList extends AppCompatActivity {
                 return;
             }
             String[] columns = new String[]{
-                    DbHendler.KEY_ID,
+                  //  DbHendler.KEY_ID,
                     DbHendler.KEY_AREANO,
                     DbHendler.KEY_AREANAME
 
             };
             int[] boundTo = new int[]{
-                    R.id.areaId,
+              //      R.id.areaId,
                     R.id.areaNoInList,
                     R.id.areaNameInList
 
@@ -118,9 +121,26 @@ public class AreaList extends AppCompatActivity {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this,AreaAddEdit.class);
             intent.putExtra("editArea", "editarea");
-            intent.putExtra("ID", id);
+            intent.putExtra(bundle_stbid, id);
+            Log.d(TAG, "onContextItemSelected: "+id);
             startActivity(intent);
         }
         return true;
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.area_add_edit, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.add_area) {
+            Log.d(TAG, "onOptionsItemSelected: ");
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
     }
 }

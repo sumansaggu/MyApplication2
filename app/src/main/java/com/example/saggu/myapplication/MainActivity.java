@@ -2,7 +2,9 @@ package com.example.saggu.myapplication;
 
 import android.*;
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -13,23 +15,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
-
 
 
 public class MainActivity extends AppCompatActivity {
     static final Integer Storage = 0x3;
     static final Integer CALL = 0x2;
     String TAG = "MainActivity";
+    EditText pinEnter;
+    String oldp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pinEnter = (EditText) findViewById(R.id.pinEnter);
 
-        if (checkApi() >= 23)
+        if (checkApi() >= 23){
             permission();
+        }
+        loadShardPref();
 
     }
 
@@ -41,19 +48,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToViewAll(View view) {
-        Intent intent = new Intent(this, ViewAll.class);
-        startActivity(intent);
-
-
+        String enteredPass = pinEnter.getText().toString().trim();
+        if (enteredPass.equals(oldp)) {
+            Intent intent = new Intent(this, ViewAll.class);
+            startActivity(intent);
+            finish();
+        } else
+            Toast.makeText(this, "Wrong Password", Toast.LENGTH_SHORT).show();
     }
 
     public void permission() {
-
-
         askForPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Storage);
-
-
-
     }
 
     private void askForPermission(String permission, Integer requestCode) {
@@ -71,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
             }
         } else {
-           // Toast.makeText(this, "" + permission + " is already granted.", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "" + permission + " is already granted.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -117,5 +122,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    public void loadShardPref() {
+        SharedPreferences sharedPreferences = getSharedPreferences("Data", Context.MODE_PRIVATE);
+        String data = sharedPreferences.getString("pass","4321");
+        Log.d(TAG, "Old password: "+data);
+        oldp = data;
+
+    }
+
 
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -62,7 +63,7 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
         remark = (EditText) view.findViewById(R.id.remarksEditText);
 
-
+        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
         //  setCancelable(false); //preventing from cancel when clicking on background

@@ -100,33 +100,39 @@
         android:textSize="15sp"
         android:layout_below="@+id/reciept_dialog"
         android:layout_toRightOf="@+id/textView7"
-        android:layout_toEndOf="@+id/textView7" />
+        android:layout_toEndOf="@+id/textView7"
+        android:layout_marginTop="13dp" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/remarksEditText"
-        android:layout_below="@+id/date"
-        android:hint="Remark if any"/>
+        android:hint="Remark if any"
+        android:layout_below="@+id/date_diaglog"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp" />
 
     <Button
         android:text="OK"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonYes"
-        android:layout_below="@+id/remarksEditText"
+
+        android:layout_marginTop="71dp"
+        android:layout_below="@+id/date_diaglog"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:text="Cancel"
+        android:id="@+id/buttonNo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/buttonNo"
-        android:layout_below="@+id/buttonYes"
-
-        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+
+        android:layout_below="@+id/buttonYes"
+        android:layout_centerVertical="true"
+        android:text="Cancel" />
 
 </RelativeLayout>

@@ -48,7 +48,7 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_stb, null);
         dbHendler = new DbHendler(this.getActivity(), null, null, 1);
-    //    stbcountUA = (TextView) view.findViewById(R.id.totalStbsUnAssigned);
+        //    stbcountUA = (TextView) view.findViewById(R.id.totalStbsUnAssigned);
         listViewStb = (ListView) view.findViewById(R.id.stb_list_dialog);
 
         listViewStb.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -62,30 +62,6 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 
                 adapter.notifyDataSetChanged();
 
-
-                //region Description
-              /*  RelativeLayout viewlayout;
-                RadioButton radioButton;
-                viewlayout = (RelativeLayout) view;
-                radioButton = (RadioButton) viewlayout.findViewById(R.id.radioBtn);
-
-                if (!radioButton.isChecked()) {
-                    if (viewChecked != null) {
-                        checkedButton = (RadioButton) viewChecked.findViewById(R.id.radioBtn);
-                        checkedButton.setChecked(false);
-
-                    }
-                    radioButton.setChecked(true);
-                    Log.d(TAG, "checked view: " + view + " pos: " + position + " id: " + id);
-                    viewChecked = viewlayout;
-                    Log.d(TAG, viewChecked + "");
-
-                } else {
-                    radioButton.setChecked(false);
-                    Log.d(TAG, "view: " + view + " pos: " + position + " id: " + id);
-
-                }
-*/
                 //endregion
 
             }

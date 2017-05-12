@@ -21,6 +21,10 @@ public class Area {
         this._areaName = areaname;
     }
 
+    public Area(int i) {
+
+    }
+
 
     public int get_id(){
         return this._id;

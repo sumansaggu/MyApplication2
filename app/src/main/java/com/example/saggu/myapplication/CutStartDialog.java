@@ -17,6 +17,7 @@ public class CutStartDialog extends DialogFragment {
     String cStatus;
     String btn;
     String newStatus;
+    String message;
 
 
     @Override
@@ -26,9 +27,11 @@ public class CutStartDialog extends DialogFragment {
         custid = bundle.getInt("CUSTID");
         cStatus= bundle.getString("STATUS");
         if (cStatus.equals("ACTIVE")){
+            message ="You want to Cut the Connection??";
             btn ="Cut";
             newStatus = "INACTIVE";
         }else {
+            message ="You want to Start the connection??";
             btn ="START";
             newStatus = "ACTIVE";
 
@@ -40,7 +43,7 @@ public class CutStartDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Start Or Cut ..");
-        builder.setMessage("Select Option or Cancel");
+        builder.setMessage(message);
         builder.setPositiveButton(btn, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

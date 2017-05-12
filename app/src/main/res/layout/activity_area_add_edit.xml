@@ -11,34 +11,58 @@
         />
 
     <EditText
+        android:id="@+id/editTextAreaName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/editTextAreaName"
-        android:hint="Area Name"
-        android:layout_marginTop="26dp"
+        android:layout_alignLeft="@+id/editTextAreaNo"
+        android:layout_alignStart="@+id/editTextAreaNo"
         android:layout_below="@+id/editTextAreaNo"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="28dp"
+        android:ems="10"
+        android:inputType="text" />
 
     <Button
-        android:text="Add"
+        android:id="@+id/btnAreaAddEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnAreaAddEdit"
-        android:layout_marginTop="42dp"
         android:layout_below="@+id/editTextAreaName"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:text="ADD"
+        android:textAllCaps="false" />
 
     <EditText
+        android:id="@+id/editTextAreaNo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:id="@+id/editTextAreaNo"
-        android:hint="Area No."
-        android:inputType="number"
-        android:layout_marginTop="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/app_bar"
-        android:layout_alignLeft="@+id/editTextAreaName"
-        android:layout_alignStart="@+id/editTextAreaName" />
+        android:layout_marginEnd="27dp"
+        android:layout_marginRight="27dp"
+        android:layout_marginTop="30dp"
+        android:ems="10"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editTextAreaNo"
+        android:layout_alignBottom="@+id/editTextAreaNo"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="23dp"
+        android:layout_marginStart="23dp"
+        android:text="Area No." />
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editTextAreaName"
+        android:layout_alignBottom="@+id/editTextAreaName"
+        android:layout_alignLeft="@+id/textView4"
+        android:layout_alignStart="@+id/textView4"
+        android:text="Area Name" />
 </RelativeLayout>

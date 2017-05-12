@@ -1,10 +1,12 @@
 package com.example.saggu.myapplication;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -32,6 +34,7 @@ public class STBRecord extends AppCompatActivity {
     String TAG = "MyApp_STBRecord";
     RadioButton radioButton;
     private Cursor mCursor;
+    String search;
 
 
     @Override
@@ -44,13 +47,13 @@ public class STBRecord extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         totalSTBs = (TextView) findViewById(R.id.total_stbs);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Manage STBs");
+        getSupportActionBar().setTitle("");
         registerForContextMenu(listViewStb);
         displaySTBList();
-        stbcount= dbHendler.countSTBs;
-        totalSTBs.setText("Total STBs: "+stbcount);
+        stbcount = dbHendler.countSTBs;
+        totalSTBs.setText("Total STBs: " + stbcount);
 
-      //     radioButton.setVisibility(View.INVISIBLE);
+        //     radioButton.setVisibility(View.INVISIBLE);
     }
 
 
@@ -88,13 +91,75 @@ public class STBRecord extends AppCompatActivity {
             //   textView4.setText("There was an error!");
         }
     }
-    //endregion
 
+    //endregion
+    //region Create all List
+    public void searchSTBList() {
+
+        try {
+            Cursor cursor = dbHendler.searchSTBToList(search);
+            if (cursor == null) {
+                //  textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                //   textView4.setText("No Customer in the Database.");
+                return;
+            }
+            String[] columns = new String[]{
+                    DbHendler.KEY_SN,
+                    DbHendler.KEY_VC,
+                    DbHendler.KEY_STATUS
+            };
+            int[] boundTo = new int[]{
+                    R.id.stb_sn,
+                    R.id.stb_vc,
+                    R.id.stb_status
+            };
+            MySimpleCursorAdaptor adapter = new MySimpleCursorAdaptor(this,
+                    R.layout.stb_list_item,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listViewStb.setAdapter(adapter);
+
+        } catch (Exception ex) {
+            //   textView4.setText("There was an error!");
+        }
+    }
+    //endregion
 
     //region Option Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_stb_record, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        if (null != searchView) {
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(false);
+        }
+
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            public boolean onQueryTextChange(String newText) {
+                // this is your adapter that will be filtered
+
+                search = newText;
+                searchSTBList();
+                Log.d(TAG, "onQueryTextChange: " + newText);
+                return true;
+            }
+
+            public boolean onQueryTextSubmit(String query) {
+                //Here u can get the value "query" which is entered in the search box.
+
+                return true;
+            }
+        };
+        searchView.setOnQueryTextListener(queryTextListener);
         return true;
     }
 
@@ -104,7 +169,7 @@ public class STBRecord extends AppCompatActivity {
         if (id == R.id.add_stb) {
             Intent intent = new Intent(this, StbAddEditActivity.class);
             intent.putExtra("add_stb", R.id.add_stb);
-          //  Log.d(TAG, "add stb" + R.id.add_stb);
+            //  Log.d(TAG, "add stb" + R.id.add_stb);
             startActivity(intent);
             return true;
         }
@@ -118,6 +183,7 @@ public class STBRecord extends AppCompatActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Edit");
         menu.add("Delete");
+        menu.add("MQ");
     }
 
     @Override
@@ -129,16 +195,29 @@ public class STBRecord extends AppCompatActivity {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, StbAddEditActivity.class);
             intent.putExtra("ID", id);
-            Log.d(TAG,"" +id);
+            Log.d(TAG, "" + id);
             startActivity(intent);
 
-        }if (item.getTitle()=="Delete"){
-            int stbId= (int) menuInfo.id;
+        }
+        if (item.getTitle() == "Delete") {
+            int stbId = (int) menuInfo.id;
             dbHendler.deleteSTB(stbId);
             refreshListView();
         }
+        if (item.getTitle() == "MQ") {
+            int stbId = (int) menuInfo.id;
+
+            STB stb = dbHendler.getSTBInfo(stbId);
+            String sn= stb.getSerialNo();
+            Log.d(TAG, "onContextItemSelected: "+sn);
+            Intent intent = new Intent(this, MQWebViewActivity.class);
+            intent.putExtra("CALLINGACTIVITY", "STBRECORD");
+            intent.putExtra("SN", sn);
+            startActivity(intent);
+        }
         return true;
     }
+
     @Override
     public void onBackPressed() {
         Intent i = new Intent(this, ViewAll.class);
@@ -171,7 +250,7 @@ public class STBRecord extends AppCompatActivity {
 
             String serial = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_SN));
             String Vcard = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_VC));
-            String status= cursor.getString(cursor.getColumnIndex(DbHendler.KEY_STATUS));
+            String status = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_STATUS));
             sn.setText(serial);
             vc.setText(Vcard);
             sts.setText(status);
@@ -180,12 +259,13 @@ public class STBRecord extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View view= super.getView(position, convertView, parent);
-            RadioButton radiobtn= (RadioButton) view.findViewById(R.id.radioBtn);
-            radiobtn.setVisibility(view.INVISIBLE);
+            View view = super.getView(position, convertView, parent);
+            RadioButton radiobtn = (RadioButton) view.findViewById(R.id.radioBtn);
+            radiobtn.setVisibility(View.INVISIBLE);
             return view;
         }
     }
+
     public void refreshListView() {
         Log.d(TAG, "dialg closed");
         try {
@@ -198,5 +278,5 @@ public class STBRecord extends AppCompatActivity {
 
     }
 
-  }
+}
 

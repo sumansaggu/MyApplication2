@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.security.keystore.KeyInfo;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,7 +28,8 @@ public class DbHendler extends SQLiteOpenHelper {
     //region All Static variables
     // Database Version
     String TAG = "MyApp_dbhendler";
-    private static final int DATABASE_VER = 31;
+    private static final int DATABASE_VER = 36;
+
 
     private static final File DATABASE_FILE_PATH = Environment.getExternalStorageDirectory();
     //DATABASE NAME
@@ -40,7 +42,7 @@ public class DbHendler extends SQLiteOpenHelper {
     private static final String TABLE_STB = "stbRecord";
     public static final String TABLE_EXTRAS = "extras";
     public static final String TABLE_AREA = "area";
-
+    private static final String TABLE_MONTH_END = "month";
 
     //Table columns names
     public static final String KEY_ID = "_id";           //common for customer, fees, extras table
@@ -56,26 +58,41 @@ public class DbHendler extends SQLiteOpenHelper {
     public static final String KEY_STOPDATE = "stopdate";
     public static final String KEY_CONSTATUS = "constatus";
     public static final String KEY_NOC = "no_connections";
+    public static final String KEY_PERSONEXTRA1 = "col_13";
+    public static final String KEY_PERSONEXTRA2 = "col_14";
+    public static final String KEY_PERSONEXTRA3 = "col_15";
+    public static final String KEY_PERSONEXTRA4 = "col_16";
+    public static final String KEY_PERSONEXTRA5 = "col_17";
+    public static final String KEY_PERSONEXTRA6 = "col_18";
 
 
     public static final String KEY_SN = "serialNo";// stb record
     public static final String KEY_VC = "vcNo";
     public static final String KEY_STATUS = "status";
     public static final String KEY_ASSIGNED = "assigned";
+    public static final String KEY_STBEXTRA1 = "col_6";
+    public static final String KEY_STBEXTRA2 = "col_7";
 
 
     public static final String KEY_NO = "NO";                //for fees table
     public static final String KEY_RECIEPT = "reciept";
     public static final String KEY_DATE = "recieved_on";
     public static final String KEY_REMARK = "remark";
+    public static final String KEY_FEESEXTRA1 = "col_6";
+    public static final String KEY_FEESEXTRA2 = "col_7";
+
 
     public static final String KEY_MONTH_ENDED = "month";   //table extra
 
     public static final String KEY_AREANO = "no";
     public static final String KEY_AREANAME = "area_name";
+    public static final String KEY_AREAEXTRA1 = "col_4";
+    public static final String KEY_AREAEXTRA2 = "col_5";
 
-    private static final String TABLE_MONTH_END = "month";
-    private static final String KEY_MONTH_STATUS = "monthstatus";
+
+    private static final String KEY_MONTH_STATUS = "monthstatus";  //table month
+    private static final String KEY_MONTHEXTRA1 = "col_3";
+    private static final String KEY_MONTHEXTRA2 = "col_4";
 
 
     String CREATE_CONTACTS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PERSON_INFO + "("
@@ -86,11 +103,19 @@ public class DbHendler extends SQLiteOpenHelper {
             + KEY_FEES + " INTEGER, "
             + KEY_BALANCE + " INTEGER, "
             + KEY_AREA + " INTEGER, "
-            + KEY_STBID + " INTEGER, "
+            + KEY_STBID + " INTEGER , "
             + KEY_STARTDATE + " DATETIME , "
-            + KEY_STOPDATE + " DATETIME , "
+            + KEY_STOPDATE + " DATETIME DEFAULT 'N/A', "
             + KEY_CONSTATUS + " TEXT DEFAULT 'ACTIVE', "
             + KEY_NOC + " INTEGER DEFAULT 1, "
+            + KEY_PERSONEXTRA1 + " INTEGER DEFAULT 0 , "
+            + KEY_PERSONEXTRA2 + " INTEGER DEFAULT 0, "
+            + KEY_PERSONEXTRA3 + " TEXT DEFAULT 'N/A' , "
+            + KEY_PERSONEXTRA4 + " TEXT DEFAULT 'N/A' , "
+            + KEY_PERSONEXTRA5 + " REAL DEFAULT 0, "
+            + KEY_PERSONEXTRA6 + " REAL DEFAULT 0, "
+
+
             + " FOREIGN KEY ( " + KEY_STBID + " ) REFERENCES " + TABLE_STB + " ( " + KEY_ID + ") ON DELETE SET NULL " + " )";
 
 
@@ -99,30 +124,41 @@ public class DbHendler extends SQLiteOpenHelper {
             + KEY_ID + " INTEGER, "
             + KEY_RECIEPT + " INTEGER, "
             + KEY_DATE + " DATETIME, "
-            + KEY_REMARK + " TEXT " + ")";
+            + KEY_REMARK + " TEXT,  "
+            + KEY_FEESEXTRA1 + " TEXT DEFAULT 'N/A', "
+            + KEY_FEESEXTRA2 + " INTEGER DEFAULT 0 )";
 
     String CREATE_STB_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_STB + "("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + KEY_SN + " TEXT, "
             + KEY_VC + " TEXT, "
             + KEY_STATUS + " TEXT, "
-            + KEY_ASSIGNED + " INTEGER DEFAULT 0,    " +
-            " UNIQUE(" + KEY_SN + ", " + KEY_VC + ") " + ")";
+            + KEY_ASSIGNED + " INTEGER DEFAULT 0, "
+            + KEY_STBEXTRA1 + " TEXT DEFAULT 'N/A' , "
+            + KEY_STBEXTRA2 + " INTEGER DEFAULT 0, "
+            + " UNIQUE(" + KEY_SN + ", " + KEY_VC + ") " + ")";
 
     String CREATE_EXTRAS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_EXTRAS + "("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + KEY_MONTH_ENDED + " DATETIME " + ")";
 
-    String CREATE_AREA_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_AREA + "("
-            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + KEY_AREANO + " INTEGER, "
-            + KEY_AREANAME + " TEXT " + ")";
 
     String CREATE_MONTHEND_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_MONTH_END + "("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + KEY_MONTH_STATUS + " TEXT  )";
-    String DEFAULT_ROW_FOR_MONTH_TABLE = "INSERT INTO " + TABLE_MONTH_END + " VALUES(1,'DONE')";
-    String DEFAULT_ROW_FOR_AREA_TABLE = " INSERT INTO " + TABLE_AREA + " VALUES(1,1, 'All')";
+            + KEY_MONTH_STATUS + " TEXT, "
+            + KEY_MONTHEXTRA1 + " TEXT DEFAULT 'N/A', "
+            + KEY_MONTHEXTRA2 + " INTEGER DEFAULT 0 "
+            + " )";
+    String CREATE_AREA_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_AREA + "("
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + KEY_AREANO + " INTEGER, "
+            + KEY_AREANAME + " TEXT, "
+            + KEY_AREAEXTRA1 + " TEXT DEFAULT 'N/A', "
+            + KEY_AREAEXTRA2 + " INTEGER DEFAULT 0"
+            + ")";
+
+    String DEFAULT_ROW_FOR_MONTH_TABLE = "INSERT INTO " + TABLE_MONTH_END + " VALUES(1, 'DONE', 'default' ,0)";
+    String DEFAULT_ROW_FOR_AREA_TABLE = " INSERT INTO " + TABLE_AREA + " VALUES(1,1, 'All','default',0)";
 
     private static String path = externalStrorage() + "/myInfoManager.db";
     //endregion
@@ -151,8 +187,13 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL(CREATE_EXTRAS_TABLE);
         db.execSQL(CREATE_AREA_TABLE);
         db.execSQL(CREATE_MONTHEND_TABLE);
-        db.execSQL(DEFAULT_ROW_FOR_MONTH_TABLE);
-        db.execSQL(DEFAULT_ROW_FOR_AREA_TABLE);
+        try {
+            db.execSQL(DEFAULT_ROW_FOR_MONTH_TABLE);
+            db.execSQL(DEFAULT_ROW_FOR_AREA_TABLE);
+        } catch (RuntimeException ex) {
+            Log.d(TAG, "onCreate: " + ex);
+        }
+
     }
 
     // Upgrading database
@@ -169,28 +210,32 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL("ALTER TABLE " + TABLE_STB + " RENAME TO TempOldTableSTB");
         db.execSQL("ALTER TABLE " + TABLE_EXTRAS + " RENAME TO TempOldTableExtras");
         db.execSQL("ALTER TABLE " + TABLE_AREA + " RENAME TO TempOldTableArea");
+        db.execSQL("ALTER TABLE " + TABLE_MONTH_END + " RENAME TO TempOldTableMonthEnd");
 
         db.execSQL(CREATE_CONTACTS_TABLE);
         db.execSQL(CREATE_FEES_TABLE);
         db.execSQL(CREATE_EXTRAS_TABLE);
         db.execSQL(CREATE_STB_TABLE);
         db.execSQL(CREATE_AREA_TABLE);
+        db.execSQL(CREATE_MONTHEND_TABLE);
 
 
-        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "(" + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ") " +
-                "SELECT " + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + " FROM TempOldTablePerson");
+        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "(" + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_PERSONEXTRA3 + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + ") " +
+                "SELECT " + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_PERSONEXTRA3 + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + " FROM TempOldTablePerson");
 
-        db.execSQL("INSERT INTO " + TABLE_FEES + "(" + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + ") " +
-                "SELECT " + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + "  FROM TempOldTableFees");
+        db.execSQL("INSERT INTO " + TABLE_FEES + "(" + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + ", " + KEY_FEESEXTRA1 + ", " + KEY_FEESEXTRA2 + ") " +
+                "SELECT " + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + ", " + KEY_FEESEXTRA1 + ", " + KEY_FEESEXTRA2 + "  FROM TempOldTableFees");
 
-        db.execSQL("INSERT INTO " + TABLE_STB + "(" + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + ") " +
-                "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + "  FROM TempOldTableSTB");
-
+        db.execSQL("INSERT INTO " + TABLE_STB + "(" + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + ", " + KEY_STBEXTRA1 + ", " + KEY_STBEXTRA2 + ") " +
+                //      "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED +", "+KEY_STBEXTRA1+", " + KEY_STBEXTRA2 + "  FROM TempOldTableSTB");
+                "SELECT *  FROM TempOldTableSTB");
         db.execSQL("INSERT INTO " + TABLE_EXTRAS + "(" + KEY_ID + ", " + KEY_MONTH_ENDED + ") " +
                 "SELECT " + KEY_ID + ", " + KEY_MONTH_ENDED + "  FROM TempOldTableExtras");
 
-        db.execSQL("INSERT INTO " + TABLE_AREA + "(" + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + ") " +
-                "SELECT " + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + "  FROM TempOldTableArea");
+        db.execSQL("INSERT INTO " + TABLE_AREA + "(" + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + ", " + KEY_AREAEXTRA1 + ", " + KEY_AREAEXTRA2 + ") " +
+                "SELECT " + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + ", " + KEY_AREAEXTRA1 + ", " + KEY_AREAEXTRA2 + "  FROM TempOldTableArea");
+        db.execSQL("INSERT INTO " + TABLE_MONTH_END + "(" + KEY_ID + ", " + KEY_MONTH_STATUS + ", " + KEY_MONTHEXTRA1 + ", " + KEY_MONTHEXTRA2 + ") " +
+                " SELECT * FROM  TempOldTableMonthEnd");
 
 
         db.execSQL("DROP TABLE TempOldTablePerson");
@@ -198,6 +243,7 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE TempOldTableSTB");
         db.execSQL("DROP TABLE TempOldTableExtras");
         db.execSQL("DROP TABLE TempOldTableArea");
+        db.execSQL("DROP TABLE TempOldTableMonthEnd");
         //  Log.d(TAG," table deleted");
         //  db.execSQL(CREATE_FEES_TABLE);
         //  Log.d(TAG,"table created");
@@ -314,7 +360,7 @@ public class DbHendler extends SQLiteOpenHelper {
     //region serarch person to list
     public Cursor searchPersonToList(String namesearch) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID  WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID  WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -344,7 +390,7 @@ public class DbHendler extends SQLiteOpenHelper {
     public Cursor getLargerBalance() {
         SQLiteDatabase db = getWritableDatabase();
 
-        String query = "SELECT personinfo._id,name,phone_no,cust_no,fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID ORDER BY " + KEY_BALANCE + " DESC ;";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus,fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID ORDER BY " + KEY_BALANCE + " DESC ;";
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -464,8 +510,18 @@ public class DbHendler extends SQLiteOpenHelper {
         //updating row
         return db.update(TABLE_PERSON_INFO, values, KEY_ID + "=?", new String[]{String.valueOf(personInfo.getID())});
     }
-    //endregion
 
+    //endregion
+    public String changeArea(Area area) {
+
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_AREANO, area.get_areaNo());
+        values.put(KEY_AREANAME, area.get_areaName());
+        db.update(TABLE_AREA, values, KEY_ID + " =? ", new String[]{String.valueOf(area.get_id())});
+
+        return area.get_areaName(); // only for toast in the activity
+    }
 
     public void monthFlagChange(String flag) {
         SQLiteDatabase db = getWritableDatabase();
@@ -603,17 +659,17 @@ public class DbHendler extends SQLiteOpenHelper {
 
         );
         db.execSQL("INSERT INTO " + TABLE_STB + "( " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + " ) VALUES " +
-                "('AAA', '789', 'ON'), " +
-                "('BBB', '567', 'ON'), " +
-                "('CCC', '678', 'ON'), " +
-                "('DDD', '123', 'ON'), " +
-                "('EEE', '129', 'ON'), " +
-                "('FFF', '345', 'ON'), " +
-                "('GGG', '432', 'ON'), " +
-                "('HHH', '679', 'ON'), " +
-                "('III', '654', 'ON'), " +
-                "('JJJ', '432', 'ON'), " +
-                "('KKK', '765', 'ON') "
+                "('AAAAAAAAA', '7895365689', 'ON'), " +
+                "('BBBBBBBBB', '5678569957', 'ON'), " +
+                "('CCCCCCCCC', '6784568426', 'ON'), " +
+                "('DDDDDDDDD', '1235563458', 'ON'), " +
+                "('EEEEEEEEE', '1292568124', 'ON'), " +
+                "('FFFFFFFFF', '3452568521', 'ON'), " +
+                "('GGGGGGGGG', '4321325691', 'ON'), " +
+                "('HHHHHHHHH', '6793586985', 'ON'), " +
+                "('IIIIIIIII', '6547569258', 'ON'), " +
+                "('JJJJJJJJJ', '4321259631', 'ON'), " +
+                "('KKKKKKKKK', '7657569675', 'ON') "
         );
 
 
@@ -630,9 +686,9 @@ public class DbHendler extends SQLiteOpenHelper {
                 KEY_ID + " =? ",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
-        if (cursor!=null)
+        if (cursor != null)
             cursor.moveToFirst();
-         status = cursor.getString(cursor.getColumnIndex(KEY_CONSTATUS));
+        status = cursor.getString(cursor.getColumnIndex(KEY_CONSTATUS));
         return status;
     }
 
@@ -654,6 +710,20 @@ public class DbHendler extends SQLiteOpenHelper {
         return info;
     }
     //endregion
+
+    public Area getArea(int id) {
+        SQLiteDatabase db = getReadableDatabase();
+        String columns[] = {KEY_ID, KEY_AREANO, KEY_AREANAME};
+        Cursor cursor = db.query(TABLE_AREA, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null)
+            cursor.moveToFirst();
+        Area area = new Area(cursor.getInt(cursor.getColumnIndex(KEY_ID)),
+                cursor.getInt(cursor.getColumnIndex(KEY_AREANO)),
+                cursor.getString(cursor.getColumnIndex(KEY_AREANAME)));
+
+        return area;
+    }
+
    /* public PersonInfo personNameStartdate(int id) {
 
 
@@ -706,7 +776,7 @@ public class DbHendler extends SQLiteOpenHelper {
 
     //region end of month
     public void endOfMonth(Context context) {
-        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO +" WHERE " +KEY_CONSTATUS+ " = 'ACTIVE'";
+        String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_CONSTATUS + " = 'ACTIVE'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
@@ -984,7 +1054,8 @@ public class DbHendler extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_AREA;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
-        if (cursor.moveToFirst()) {
+        if (cursor != null) {
+            cursor.moveToFirst();
             do {
                 Area area = new Area();
                 area.set_id(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))));

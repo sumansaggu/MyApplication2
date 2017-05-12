@@ -1,37 +1,28 @@
 package com.example.saggu.myapplication;
 
-import android.*;
-import android.Manifest;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.AlarmManager;
-import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -59,20 +50,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-import me.tatarka.support.job.JobInfo;
 import me.tatarka.support.job.JobScheduler;
 
 
 // TODO: 1/16/2017  prevent reverse engineering (will use minify)
 // TODO: 1/25/2017  email support to be added    (crash reporting option will be used)
 // TODO: 2/13/2017 start and stop date needed(cut option)
-public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener//, GoogleApiClient.OnConnectionFailedListener
+// TODO: 5/10/2017 filter list itmes from adaptor NOT requrey from sqlite
+public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener, GoogleApiClient.OnConnectionFailedListener
 {
 
     SimpleCursorAdapter simpleCursorAdapter;
+    SimpleCursorAdapter myAdapter;
     DbHendler dbHendler;
     ListView listViewCustomers;
     TextView textView4;
@@ -102,10 +93,26 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         jobScheduler = JobScheduler.getInstance(this);
-
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
+        listViewCustomers.setOnItemClickListener(this);
         searchBox = (EditText) findViewById(R.id.search_box);
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -140,7 +147,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("logout")) {
-                    //   signOut();
+                      signOut();
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("bulk")) {
@@ -170,130 +177,87 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         spinner.setOnItemSelectedListener(this);
         loadSpinnerData();
         scheduleAlarm();
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+
+            }
+        };
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        //  findViewById(R.id.sign_in_button).setOnClickListener(this);
+        //   findViewById(R.id.sign_out_button).setOnClickListener(this);
+        //</editor-fold>
+
+        signIn();
+    }
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "Connection failed");
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
 
-    //<editor-fold desc="Firebase">
-     /*
-           mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-           mAuth = FirebaseAuth.getInstance();
-           mAuthListener = new FirebaseAuth.AuthStateListener() {
-               @Override
-               public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                   FirebaseUser user = firebaseAuth.getCurrentUser();
-                   if (user != null) {
-                       // User is signed in
-                       Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                   } else {
-                       // User is signed out
-                       Log.d(TAG, "onAuthStateChanged:signed_out");
-                   }
+    private void signOut() {
+        FirebaseAuth.getInstance().signOut();
+    }
 
-               }
-           };
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
 
-
-           GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                   .requestIdToken(getString(R.string.default_web_client_id))
-                   .requestEmail()
-                   .build();
-
-
-           mGoogleApiClient = new GoogleApiClient.Builder(this)
-                   .enableAutoManage(this, this)
-                   .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                   .build();
-
-
-         //  findViewById(R.id.sign_in_button).setOnClickListener(this);
-        //   findViewById(R.id.sign_out_button).setOnClickListener(this);
-           //</editor-fold>
-
-           signIn();
-       }
-
-
-       @Override
-       public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-           Log.d(TAG, "Connection failed");
-       }
-
-
-       //<editor-fold desc="Activity Life Cycle">
-       @Override
-       protected void onStart() {
-           super.onStart();
-           mAuth.addAuthStateListener(mAuthListener);
-       }
-
-       @Override
-       public void onStop() {
-           super.onStop();
-           if (mAuthListener != null) {
-               mAuth.removeAuthStateListener(mAuthListener);
-           }
-       }
-       //</editor-fold>
-
-
-
-       private void signIn() {
-           Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-           startActivityForResult(signInIntent, RC_SIGN_IN);
-       }
-
-       private void signOut() {
-           FirebaseAuth.getInstance().signOut();
-       }
-
-       @Override
-       protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-           super.onActivityResult(requestCode, resultCode, data);
-           if (requestCode == RC_SIGN_IN) {
-               GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-               if (result.isSuccess()) {
-                   GoogleSignInAccount account = result.getSignInAccount();
-                   firebaseAuthWithGoogle(account);
-
-               } else Log.d(TAG, "Log in failed");
-           }
-       }
-
-       private void firebaseAuthWithGoogle(GoogleSignInAccount accnt) {
-           AuthCredential credential = GoogleAuthProvider.getCredential(accnt.getIdToken(), null);
-           mAuth.signInWithCredential(credential)
-                   .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                       @Override
-                       public void onComplete(@NonNull Task<AuthResult> task) {
-                           Log.d("AUTH", " signInWithCredential:OnComplete: " + task.isSuccessful());
-                           getCurrentUser();
-
-                       }
-                   });
-       }
-       *//*  private void signIn(String email, String password) {
-
-        mAuth.signInWithEmailAndPassword(email, password)
+            } else Log.d(TAG, "Log in failed");
+        }
+    }
+    private void firebaseAuthWithGoogle(GoogleSignInAccount accnt) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(accnt.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                        Log.d("AUTH", " signInWithCredential:OnComplete: " + task.isSuccessful());
+                        getCurrentUser();
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail:failed", task.getException());
-                            Toast.makeText(ViewAll.this, "Signin with email failed", Toast.LENGTH_SHORT).show();
-                        }
-
-                        // ...
                     }
                 });
-
     }
-*//*
-
     private void getCurrentUser() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -309,13 +273,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             Toast.makeText(this, "Logged as: " + name, Toast.LENGTH_SHORT).show();
         }
 
-
     }
-    */
-
-    //</editor-fold>
-
-
 
     public void scheduleAlarm() {
 
@@ -349,6 +307,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
+
+
     //<editor-fold desc="Context Menu">
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -356,10 +316,11 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         menu.add("Reciept");
         menu.add("Detail");
         menu.add("Edit");
-        menu.add("Start/Cut");
-        menu.add("STB");
+        menu.add("START/CUT");
+        menu.add("SET STB");
         menu.add("Delete");
         menu.add("Call");
+        menu.add("MQ");
     }
 
     @Override
@@ -367,6 +328,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         super.onContextItemSelected(item);
         // Get extra info about list item that was long-pressed
         AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
         if (item.getTitle() == "Delete") {
             DeleteAlert myAlert = new DeleteAlert();
             int custid = (int) menuInfo.id;
@@ -379,7 +341,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             myAlert.show(getFragmentManager(), "DeleteAlert");
 
         }
-        else if(item.getTitle()=="Start/Cut"){
+        else if(item.getTitle()=="START/CUT"){
             int custId = (int) menuInfo.id;
             String status = dbHendler.conStatus(custId);
 
@@ -396,7 +358,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
-        } else if (item.getTitle() == "STB") {
+        } else if (item.getTitle() == "SET STB") {
             int id = (int) menuInfo.id;
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
@@ -435,209 +397,19 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             i.setData(Uri.parse("tel:" + "+91" + contact));
             startActivity(i);
 
+        }else if(item.getTitle()=="MQ"){
+            int custId = (int) menuInfo.id;
+            String sn = dbHendler.getAssignedSN(this,custId);
+
+            Intent intent = new Intent(this, MQWebViewActivity.class);
+            intent.putExtra("CALLINGACTIVITY", "VIEWALL");
+            intent.putExtra("SN",sn);
+            startActivity(intent);
+
         }
 
         return true;
     }
-    //</editor-fold>
-
-
-    //region Create all List
-    public void displayProductList() {
-        try {
-            Cursor cursor = dbHendler.getAllFromCustAndSTB(areaId);
-            if (cursor == null) {
-                Toast.makeText(this, "Unable to generate cursor", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                Toast.makeText(this, "No Customer in the Database", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            String[] columns = new String[]{
-                    //DbHendler.KEY_ID,
-                    DbHendler.KEY_NAME,
-                    DbHendler.KEY_PHONE_NO,
-                    DbHendler.KEY_CUST_NO,
-                    DbHendler.KEY_FEES,
-                    DbHendler.KEY_BALANCE,
-                    DbHendler.KEY_SN,
-                    DbHendler.KEY_CONSTATUS
-            };
-            int[] boundTo = new int[]{
-                    //R.id.pId,
-                    R.id.pName,
-                    R.id.pMob,
-                    R.id.cNo,
-                    R.id.cFees,
-                    R.id.cBalance,
-                    R.id.vc_mac,
-                    R.id.txtstatus
-            };
-            simpleCursorAdapter = new SimpleCursorAdapter(this,
-                    R.layout.layout_list,
-                    cursor,
-                    columns,
-                    boundTo,
-                    0);
-            listViewCustomers.setAdapter(simpleCursorAdapter);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(this, "" + ex, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    //endregion
-
-    //region Create Search  List
-    public void displaySearchList() {
-        searchItem = searchBox.getText().toString();
-        try {
-            Cursor cursor = dbHendler.searchPersonToList(searchItem);
-            if (cursor == null) {
-                //    textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                //  textView4.setText("No Customer Found");
-                return;
-            } else {
-                //   textView4.setText("");
-                String[] columns = new String[]{
-                        //DbHendler.KEY_ID,
-                        DbHendler.KEY_NAME,
-                        DbHendler.KEY_PHONE_NO,
-                        DbHendler.KEY_CUST_NO,
-                        DbHendler.KEY_FEES,
-                        DbHendler.KEY_BALANCE,
-                        DbHendler.KEY_SN
-                };
-                int[] boundTo = new int[]{
-                        //R.id.pId,
-                        R.id.pName,
-                        R.id.pMob,
-                        R.id.cNo,
-                        R.id.cFees,
-                        R.id.cBalance,
-                        R.id.vc_mac
-                };
-                simpleCursorAdapter = new SimpleCursorAdapter(this,
-                        R.layout.layout_list,
-                        cursor,
-                        columns,
-                        boundTo,
-                        0);
-                listViewCustomers.setAdapter(simpleCursorAdapter);
-            }
-        } catch (Exception ex) {
-            Log.d(TAG, "" + ex);
-//            textView4.setText("There was an error!");
-        }
-    }
-
-    //endregion
-
-    //region larger balance list
-    public void getLargerBalance() {
-        try {
-            Cursor cursor = dbHendler.getLargerBalance();
-            if (cursor == null) {
-                textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                textView4.setText("No Customer in the Database.");
-                return;
-            }
-            String[] columns = new String[]{
-                    //DbHendler.KEY_ID,
-                    DbHendler.KEY_NAME,
-                    DbHendler.KEY_PHONE_NO,
-                    DbHendler.KEY_CUST_NO,
-                    DbHendler.KEY_FEES,
-                    DbHendler.KEY_BALANCE,
-                    DbHendler.KEY_SN
-            };
-            int[] boundTo = new int[]{
-                    //R.id.pId,
-                    R.id.pName,
-                    R.id.pMob,
-                    R.id.cNo,
-                    R.id.cFees,
-                    R.id.cBalance,
-                    R.id.vc_mac
-            };
-            simpleCursorAdapter = new SimpleCursorAdapter(this,
-                    R.layout.layout_list,
-                    cursor,
-                    columns,
-                    boundTo,
-                    0);
-            listViewCustomers.setAdapter(simpleCursorAdapter);
-
-        } catch (Exception ex) {
-            textView4.setText("There was an error!");
-        }
-    }
-
-    //endregion
-
-    //region recreate list on dialog closed
-    public void refreshListView() {
-        Log.d(TAG, "dialg closed");
-        mCursor = dbHendler.getAllFromCustAndSTB(areaId);
-        simpleCursorAdapter.swapCursor(mCursor);
-    }
-    //endregion
-
-    //region delete person
-    public void delete(int custid, int stbid) {
-        dbHendler.deletePerson(custid, stbid);
-        Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
-        //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
-        //If your ListView's content was created by attaching it to a database cursor,
-        // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
-        displayProductList();
-    }
-    //endregion
-    public void changeConStatus(int cutID,String newStatus){
-        dbHendler.conCutStart(cutID, newStatus);
-
-    }
-
-    //region call to backup and restore functions
-    public void backupDb() {
-        String db = "myInfoManager.db";
-        dbHendler.copyDbToExternalStorage(this.getApplicationContext());
-
-    }
-
-    public void restoreDB() {
-        String db = "myInfoManager.db";
-        dbHendler.restoreDBfile(this.getApplicationContext(), db);
-    }
-    //endregion
-
-
-    private void loadSpinnerData() {
-
-        // Spinner Drop down elements
-        areas = dbHendler.getAllAreas();
-        for (Area area : areas) {
-            String singleitem = area.get_areaName();
-            items.add(singleitem);
-        }
-
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
-
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        spinner.setAdapter(dataAdapter);
-    }
-
     //region OptionMenu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -690,10 +462,301 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         if (id == R.id.area) {
             Intent intent = new Intent(this, AreaList.class);
             startActivity(intent);
+        }if(id==R.id.set_password){
+            Toast.makeText(this, "Set password here", Toast.LENGTH_SHORT).show();
+            FragmentManager fragmentManager = getFragmentManager();
+            PasswordSetDialog passwordSetDialog = new PasswordSetDialog();
+            passwordSetDialog.show(fragmentManager,"PasswordDailog");
         }
 
         return super.onOptionsItemSelected(item);
     }    //endregion
+
+    //</editor-fold>
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        String sn =((TextView)view.findViewById(R.id.vc_mac)).getText().toString();
+
+    }
+
+
+    //region Create all List
+    public void displayProductList() {
+        try {
+            Cursor cursor = dbHendler.getAllFromCustAndSTB(areaId);
+            if (cursor == null) {
+                Toast.makeText(this, "Unable to generate cursor", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                Toast.makeText(this, "No Customer in the Database", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String[] columns = new String[]{
+                    //DbHendler.KEY_ID,
+                    DbHendler.KEY_NAME,
+                    DbHendler.KEY_PHONE_NO,
+                    DbHendler.KEY_CUST_NO,
+                    DbHendler.KEY_FEES,
+                    DbHendler.KEY_BALANCE,
+                    DbHendler.KEY_SN,
+                    DbHendler.KEY_CONSTATUS
+            };
+            int[] boundTo = new int[]{
+                    //R.id.pId,
+                    R.id.pName,
+                    R.id.pMob,
+                    R.id.cNo,
+                    R.id.cFees,
+                    R.id.cBalance,
+                    R.id.vc_mac,
+                    R.id.cStatus
+            };
+            myAdapter = new MySimpleCursorAdapter(this,
+                    R.layout.layout_list,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listViewCustomers.setAdapter(myAdapter);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Toast.makeText(this, "" + ex, Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+
+
+
+    //endregion
+
+    private class MySimpleCursorAdapter extends SimpleCursorAdapter {
+        public MySimpleCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
+            super(context, layout, c, from, to, flags);
+        }
+
+        @Override
+        // The newView method is used to inflate a new view and return it,
+        // you don't bind any data to the view at this point.
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            View view = LayoutInflater.from(context).inflate(R.layout.layout_list, parent, false);
+            return view;
+        }
+
+        @Override
+        // The bindView method is used to bind all data to a given view
+        // such as setting the text on a TextView.
+        public void bindView(View view, Context context, Cursor cursor) {
+
+            // Find fields to populate in inflated template
+            TextView name = (TextView) view.findViewById(R.id.pName);
+            TextView mobile = (TextView) view.findViewById(R.id.pMob);
+            TextView conNo = (TextView) view.findViewById(R.id.cNo);
+            TextView sn = (TextView) view.findViewById(R.id.vc_mac);
+            TextView status = (TextView) view.findViewById(R.id.cStatus);
+            TextView fees = (TextView) view.findViewById(R.id.cFees);
+            TextView balance = (TextView) view.findViewById(R.id.cBalance);
+
+
+            // Extract properties from cursor
+         //   int id = cursor.getInt(cursor.getColumnIndex(DbHendler.KEY_ID));
+            String mname = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_NAME));
+            String mmobile = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_PHONE_NO));
+            String mconno = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_CUST_NO));
+            String msn = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_SN));
+            String mstatus = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_CONSTATUS));
+            String mfees = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_FEES));
+            String mbalance = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_BALANCE));
+            name.setText(mname);
+            mobile.setText(mmobile);
+            conNo.setText(mconno);
+            sn.setText(msn);
+
+            if(mstatus.equals("ACTIVE")){status.setText(" ");
+            }else status.setText("C");
+
+            fees.setText(mfees);
+            balance.setText(mbalance);
+
+
+
+        }
+
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            //get reference to the row
+            View view = super.getView(position, convertView, parent);
+
+
+
+            //check for odd or even to set alternate colors to the row background
+            /*if (position % 2 == 0) {
+                view.setBackgroundColor(Color.rgb(238, 233, 233));
+            } else {
+                view.setBackgroundColor(Color.rgb(255, 255, 255));
+            }*/
+            return view;
+        }
+
+    }
+
+
+
+
+    //region Create Search  List
+    public void displaySearchList() {
+        searchItem = searchBox.getText().toString();
+        try {
+            Cursor cursor = dbHendler.searchPersonToList(searchItem);
+            if (cursor == null) {
+                //    textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                //  textView4.setText("No Customer Found");
+                return;
+            } else {
+                //   textView4.setText("");
+                String[] columns = new String[]{
+                        //DbHendler.KEY_ID,
+                        DbHendler.KEY_NAME,
+                        DbHendler.KEY_PHONE_NO,
+                        DbHendler.KEY_CUST_NO,
+                        DbHendler.KEY_FEES,
+                        DbHendler.KEY_BALANCE,
+                        DbHendler.KEY_SN
+                };
+                int[] boundTo = new int[]{
+                        //R.id.pId,
+                        R.id.pName,
+                        R.id.pMob,
+                        R.id.cNo,
+                        R.id.cFees,
+                        R.id.cBalance,
+                        R.id.vc_mac
+                };
+                myAdapter = new MySimpleCursorAdapter(this,
+                        R.layout.layout_list,
+                        cursor,
+                        columns,
+                        boundTo,
+                        0);
+                listViewCustomers.setAdapter(myAdapter);
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, "" + ex);
+//            textView4.setText("There was an error!");
+        }
+    }
+
+    //endregion
+
+    //region larger balance list
+    public void getLargerBalance() {
+        try {
+            Cursor cursor = dbHendler.getLargerBalance();
+            if (cursor == null) {
+                textView4.setText("Unable to generate cursor.");
+                return;
+            }
+            if (cursor.getCount() == 0) {
+                textView4.setText("No Customer in the Database.");
+                return;
+            }
+            String[] columns = new String[]{
+                    //DbHendler.KEY_ID,
+                    DbHendler.KEY_NAME,
+                    DbHendler.KEY_PHONE_NO,
+                    DbHendler.KEY_CUST_NO,
+                    DbHendler.KEY_FEES,
+                    DbHendler.KEY_BALANCE,
+                    DbHendler.KEY_SN
+            };
+            int[] boundTo = new int[]{
+                    //R.id.pId,
+                    R.id.pName,
+                    R.id.pMob,
+                    R.id.cNo,
+                    R.id.cFees,
+                    R.id.cBalance,
+                    R.id.vc_mac
+            };
+            myAdapter = new MySimpleCursorAdapter(this,
+                    R.layout.layout_list,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listViewCustomers.setAdapter(myAdapter);
+
+        } catch (Exception ex) {
+            textView4.setText("There was an error!");
+        }
+    }
+
+    //endregion
+
+    //region recreate list on dialog closed
+    public void refreshListView() {
+        Log.d(TAG, "dialg closed");
+        mCursor = dbHendler.getAllFromCustAndSTB(areaId);
+        myAdapter.swapCursor(mCursor);
+    }
+    //endregion
+
+    //region delete person
+    public void delete(int custid, int stbid) {
+        dbHendler.deletePerson(custid, stbid);
+        Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_LONG).show();
+        //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
+        //If your ListView's content was created by attaching it to a database cursor,
+        // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
+        displayProductList();
+    }
+    //endregion
+    public void changeConStatus(int cutID,String newStatus){
+        dbHendler.conCutStart(cutID, newStatus);
+
+    }
+
+    //region call to backup and restore functions
+    public void backupDb() {
+        String db = "myInfoManager.db";
+        dbHendler.copyDbToExternalStorage(this.getApplicationContext());
+
+    }
+
+    public void restoreDB() {
+        String db = "myInfoManager.db";
+        dbHendler.restoreDBfile(this.getApplicationContext(), db);
+    }
+    //endregion
+
+
+    private void loadSpinnerData() {
+
+        // Spinner Drop down elements
+        areas = dbHendler.getAllAreas();
+        for (Area area : areas) {
+            String singleitem = area.get_areaName();
+            items.add(singleitem);
+            items.add(singleitem);
+        }
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+    }
+
 
     //region Reading searched item to log
     public void search() {
@@ -743,7 +806,16 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             Toast.makeText(getApplicationContext(), " Press Back again to Exit ", Toast.LENGTH_SHORT).show();
         }
         if (backpress > 1) {
-            this.finishAffinity();
+
+            //this.finishAffinity();
+            //finish();
+            Intent startMain = new Intent(Intent.ACTION_MAIN);
+            startMain.addCategory(Intent.CATEGORY_HOME);
+            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(startMain);
+            finishAffinity();
+
+
             super.onBackPressed();
         }
     }
@@ -787,23 +859,18 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
+
     /* Checks if external storage is available for read and write */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     /* Checks if external storage is available to at least read */
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
 
     public File getAlbumStorageDir(String albumName) {
@@ -815,5 +882,11 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }
         return file;
     }
+
+
+
+
+
+
 
 }

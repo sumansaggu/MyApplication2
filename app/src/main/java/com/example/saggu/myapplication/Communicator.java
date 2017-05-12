@@ -6,8 +6,8 @@ package com.example.saggu.myapplication;
  */
 
 public interface Communicator {
-    public void respond(String date) ;
-    public void respond2(String date2);
+    void respond(String date) ;
+    void respond2(String date2);
 
 
 }

@@ -7,6 +7,7 @@
     android:fitsSystemWindows="true"
     tools:context="com.example.saggu.myapplication.AreaList">
 
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -15,7 +16,9 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_input_add" />
 
-    <include layout="@layout/content_area_list"
-        android:layout_height="359dp" />
+    <include
+        layout="@layout/content_area_list"
+        android:layout_width="wrap_content"
+        android:layout_height="302dp" />
 
 </android.support.design.widget.CoordinatorLayout>
