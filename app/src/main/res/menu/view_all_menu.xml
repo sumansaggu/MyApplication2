@@ -46,5 +46,10 @@
         android:orderInCategory="300"
         android:title="Set Login Password"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/set_MQpassword"
+        android:orderInCategory="300"
+        android:title="Set MQ Id Password"
+        app:showAsAction="never" />
 
 </menu>

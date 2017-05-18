@@ -59,7 +59,9 @@ import me.tatarka.support.job.JobScheduler;
 // TODO: 1/25/2017  email support to be added    (crash reporting option will be used)
 // TODO: 2/13/2017 start and stop date needed(cut option)
 // TODO: 5/10/2017 filter list itmes from adaptor NOT requrey from sqlite
-public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener, GoogleApiClient.OnConnectionFailedListener
+// TODO: 5/12/2017 pagerefresh to be added in webview and
+// TODO: 5/12/2017 suggetions for searchAction
+public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener
 {
 
     SimpleCursorAdapter simpleCursorAdapter;
@@ -71,44 +73,25 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     EditText searchBox;
     int backpress;
     String searchItem;
-    private FirebaseAnalytics mFirebaseAnalytics;
 
     private Cursor mCursor;
     Spinner spinner;
     List<Area> areas;
     List<String> items = new ArrayList<>();
     int areaId = 1;
-    JobScheduler jobScheduler;
 
+
+    JobScheduler jobScheduler;
     private PendingIntent pendingIntent;
     private AlarmManager alarmManager;
 
-    private static int RC_SIGN_IN = 0;
-    private GoogleApiClient mGoogleApiClient;
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         jobScheduler = JobScheduler.getInstance(this);
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
+
         setContentView(R.layout.activity_view_all);
         dbHendler = new DbHendler(this, null, null, 1);
         listViewCustomers = (ListView) findViewById(R.id.listView);
@@ -147,7 +130,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("logout")) {
-                      signOut();
+                //      signOut();
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("bulk")) {
@@ -177,103 +160,9 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         spinner.setOnItemSelectedListener(this);
         loadSpinnerData();
         scheduleAlarm();
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-
-            }
-        };
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        //  findViewById(R.id.sign_in_button).setOnClickListener(this);
-        //   findViewById(R.id.sign_out_button).setOnClickListener(this);
-        //</editor-fold>
-
-        signIn();
-    }
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "Connection failed");
-    }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    private void signOut() {
-        FirebaseAuth.getInstance().signOut();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-
-            } else Log.d(TAG, "Log in failed");
-        }
-    }
-    private void firebaseAuthWithGoogle(GoogleSignInAccount accnt) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(accnt.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d("AUTH", " signInWithCredential:OnComplete: " + task.isSuccessful());
-                        getCurrentUser();
-
-                    }
-                });
-    }
-    private void getCurrentUser() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            // Name, email address, and profile photo Url
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            Uri photoUrl = user.getPhotoUrl();
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getToken() instead.
-            String uid = user.getUid();
-            Toast.makeText(this, "Logged as: " + name, Toast.LENGTH_SHORT).show();
-        }
 
     }
+
 
     public void scheduleAlarm() {
 
@@ -400,7 +289,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }else if(item.getTitle()=="MQ"){
             int custId = (int) menuInfo.id;
             String sn = dbHendler.getAssignedSN(this,custId);
-
             Intent intent = new Intent(this, MQWebViewActivity.class);
             intent.putExtra("CALLINGACTIVITY", "VIEWALL");
             intent.putExtra("SN",sn);
@@ -466,9 +354,19 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             Toast.makeText(this, "Set password here", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = getFragmentManager();
             PasswordSetDialog passwordSetDialog = new PasswordSetDialog();
+            Bundle bundle = new Bundle();
+            passwordSetDialog.setArguments(bundle);
+            bundle.putString("CALL","SET_PASSWORD");
             passwordSetDialog.show(fragmentManager,"PasswordDailog");
+        }if(id==R.id.set_MQpassword) {
+            Toast.makeText(this, "Set MQ password here", Toast.LENGTH_SHORT).show();
+            FragmentManager fragmentManager = getFragmentManager();
+            MQPasswordSetDialog mqPasswordSetDialog = new MQPasswordSetDialog();
+            Bundle bundle = new Bundle();
+            mqPasswordSetDialog.setArguments(bundle);
+            bundle.putString("CALL","SET_MQPASSWORD");
+            mqPasswordSetDialog.show(fragmentManager, "MQPasswordDailog");
         }
-
         return super.onOptionsItemSelected(item);
     }    //endregion
 

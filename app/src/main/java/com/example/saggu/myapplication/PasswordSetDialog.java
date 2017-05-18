@@ -21,14 +21,15 @@ import android.widget.Toast;
 public class PasswordSetDialog extends DialogFragment implements View.OnClickListener {
 
     EditText oldpw, newpw, confirmpw;
-    String TAG = "PASSWORD", oldp , newp , confirmp ;
+    String TAG = "PASSWORD", oldp, newp, confirmp;
     Button ok, cancel;
-
+    String MQID1, MQPASS1, MQID2, MQPASS2;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.set_password, null);
+
         oldpw = (EditText) view.findViewById(R.id.oldpw);
         newpw = (EditText) view.findViewById(R.id.newpw);
         confirmpw = (EditText) view.findViewById(R.id.confirmpw);
@@ -37,13 +38,17 @@ public class PasswordSetDialog extends DialogFragment implements View.OnClickLis
         cancel = (Button) view.findViewById(R.id.cancelpwbtn);
         cancel.setOnClickListener(this);
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            int call = bundle.getInt("CALL");
+        }
         loadShardPref();
         return view;
     }
 
     @Override
     public void onClick(View v) {
-          loadShardPref();
+        loadShardPref();
         if (v.getId() == R.id.setpwbtn) {
             oldp = oldpw.getText().toString().trim();
             newp = newpw.getText().toString().trim();
@@ -63,7 +68,7 @@ public class PasswordSetDialog extends DialogFragment implements View.OnClickLis
                 return;
             } else {
 
-                savesharedpref();
+                saveLogInsharedpref();
 
             }
         }
@@ -73,19 +78,32 @@ public class PasswordSetDialog extends DialogFragment implements View.OnClickLis
         }
     }
 
-    public void savesharedpref() {
+    public void saveLogInsharedpref() {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Data", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("pass", newp);
         editor.commit();
-        Toast.makeText(getActivity(), "Password Changed "+newp, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Password Changed " + newp, Toast.LENGTH_SHORT).show();
+        dismiss();
+    }
+
+    public void saveMQsharedpref() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Data", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("MQID1", MQID1);
+        editor.putString("MQPASS1", MQPASS1);
+        editor.putString("MQID2", MQID2);
+        editor.putString("MQPASS2", MQPASS2);
+
+        editor.commit();
+        Toast.makeText(getActivity(), "Password Changed " + newp, Toast.LENGTH_SHORT).show();
         dismiss();
     }
 
     public void loadShardPref() {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Data", Context.MODE_PRIVATE);
-        String data = sharedPreferences.getString("pass","N/A");
-        Log.d(TAG, "Old password: "+data);
+        String data = sharedPreferences.getString("pass", "N/A");
+        Log.d(TAG, "Old password: " + data);
         oldp = data;
 
     }

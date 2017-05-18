@@ -27,6 +27,7 @@ import org.w3c.dom.Text;
 public class STBRecord extends AppCompatActivity {
 
     SimpleCursorAdapter simpleCursorAdapter;
+    MySimpleCursorAdaptor adaptor;
     DbHendler dbHendler;
     ListView listViewStb;
     TextView totalSTBs;
@@ -79,13 +80,13 @@ public class STBRecord extends AppCompatActivity {
                     R.id.stb_vc,
                     R.id.stb_status
             };
-            MySimpleCursorAdaptor adapter = new MySimpleCursorAdaptor(this,
+       adaptor = new MySimpleCursorAdaptor(this,
                     R.layout.stb_list_item,
                     cursor,
                     columns,
                     boundTo,
                     0);
-            listViewStb.setAdapter(adapter);
+            listViewStb.setAdapter(adaptor);
 
         } catch (Exception ex) {
             //   textView4.setText("There was an error!");
@@ -93,7 +94,7 @@ public class STBRecord extends AppCompatActivity {
     }
 
     //endregion
-    //region Create all List
+    //region Create Search List
     public void searchSTBList() {
 
         try {
@@ -116,13 +117,13 @@ public class STBRecord extends AppCompatActivity {
                     R.id.stb_vc,
                     R.id.stb_status
             };
-            MySimpleCursorAdaptor adapter = new MySimpleCursorAdaptor(this,
+      adaptor = new MySimpleCursorAdaptor(this,
                     R.layout.stb_list_item,
                     cursor,
                     columns,
                     boundTo,
                     0);
-            listViewStb.setAdapter(adapter);
+            listViewStb.setAdapter(adaptor);
 
         } catch (Exception ex) {
             //   textView4.setText("There was an error!");
@@ -182,7 +183,7 @@ public class STBRecord extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Edit");
-        menu.add("Delete");
+       // menu.add("Delete");
         menu.add("MQ");
     }
 
@@ -217,6 +218,7 @@ public class STBRecord extends AppCompatActivity {
         }
         return true;
     }
+
 
     @Override
     public void onBackPressed() {
@@ -270,7 +272,7 @@ public class STBRecord extends AppCompatActivity {
         Log.d(TAG, "dialg closed");
         try {
             mCursor = dbHendler.getAllSTBs();
-            simpleCursorAdapter.swapCursor(mCursor);
+            adaptor.swapCursor(mCursor);
         } catch (Exception e) {
             e.printStackTrace();
         }
