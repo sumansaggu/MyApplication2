@@ -66,6 +66,8 @@
             android:name=".MQWebViewActivity"
             android:alwaysRetainTaskState="true"
             android:launchMode="singleInstance" />
+        <activity android:name=".ImportActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,8 +39,8 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
     private Cursor mCursor;
     EditText searchboxstb;
     MySimpleCursorAdapter adapter;
-    long checked1;
-    int tocheck2;
+    long checkedId;
+    long assignedSTBid;
 
 
     @Override
@@ -51,19 +50,24 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
         //    stbcountUA = (TextView) view.findViewById(R.id.totalStbsUnAssigned);
         listViewStb = (ListView) view.findViewById(R.id.stb_list_dialog);
 
+
         listViewStb.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                checked1 = id;
-                Log.d(TAG, " onItemClickCalled on id: " + id);
+                RadioButton Rbutton = (RadioButton) view.findViewById(R.id.radioBtn);
+                checkedId = id;
                 ok.setEnabled(true);
 
 
+                if (Rbutton.isChecked() == true) {
+                    Log.d(TAG, "rbutton checked");
+                    Rbutton.setChecked(false);
+
+
+                } else Rbutton.setChecked(true);
+                Log.d(TAG, " onItemClickCalled on id: " + id );
                 adapter.notifyDataSetChanged();
-
                 //endregion
-
             }
         });
         unAssign = (Button) view.findViewById(R.id.unassign_button);
@@ -93,11 +97,17 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 
         Bundle bundle = getArguments();
         custId = bundle.getInt("CUSTID");
+        assignedSTBid = bundle.getLong("STBID");
+        Log.d(TAG, "onCreateView: custid / stbid " + custId + " " + assignedSTBid);
+        if (assignedSTBid<1)
+            unAssign.setEnabled(false );
         registerForContextMenu(listViewStb);
         displaySTBList();
         stbcount();
+        //    setPosition(50);
         return view;
     }
+
 
     //region Create all List
     public void displaySTBList() {
@@ -113,8 +123,8 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
             }
 
 
-            String[] columns = new String[]{DbHendler.KEY_SN, DbHendler.KEY_VC, DbHendler.KEY_STATUS};
-            int[] boundTo = new int[]{R.id.stb_sn, R.id.stb_vc, R.id.stb_status};
+            String[] columns = new String[]{DbHendler.KEY_ID, DbHendler.KEY_SN, DbHendler.KEY_VC, DbHendler.KEY_STATUS};
+            int[] boundTo = new int[]{R.id.stbID, R.id.stb_sn, R.id.stb_vc, R.id.stb_status};
 
             adapter = new MySimpleCursorAdapter(this.getActivity(),
                     R.layout.stb_list_item,
@@ -124,13 +134,20 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 
             listViewStb.setAdapter(adapter);
             Log.d(TAG, "" + listViewStb.getCount());
+            //    listViewStb.smoothScrollToPosition(50);
 
 
         } catch (Exception ex) {
             Toast.makeText(getActivity(), "" + ex, Toast.LENGTH_SHORT).show();
         }
     }
+
     //endregion
+    public void setPosition(int position) { //setting listview position
+        if (listViewStb.getFirstVisiblePosition() > position || listViewStb.getLastVisiblePosition() < position)
+            listViewStb.setSelection(position);
+    }
+
 
     //region Create Search  List
     public void displaySearchList() {
@@ -173,6 +190,7 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 //            textView4.setText("There was an error!");
         }
     }
+    //endregion
 
     private class MySimpleCursorAdapter extends android.support.v4.widget.SimpleCursorAdapter {
         public MySimpleCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
@@ -192,22 +210,29 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
         // such as setting the text on a TextView.
         public void bindView(View view, Context context, Cursor cursor) {
 
+
             // Find fields to populate in inflated template
-            TextView sn = (TextView) view.findViewById(R.id.stb_sn);
-            TextView vc = (TextView) view.findViewById(R.id.stb_vc);
+            TextView sntxt = (TextView) view.findViewById(R.id.stb_sn);
+            TextView vctxt = (TextView) view.findViewById(R.id.stb_vc);
             RadioButton Rbutton = (RadioButton) view.findViewById(R.id.radioBtn);
+            TextView stbidtxt = (TextView) view.findViewById(R.id.stbID);
 
             // Extract properties from cursor
             int id = cursor.getInt(cursor.getColumnIndex(DbHendler.KEY_ID));
 
+
             String serial = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_SN));
             String Vcard = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_VC));
-            sn.setText(serial);
-            vc.setText(Vcard);
-            if (id == checked1) {
-                //     Log.d(TAG, "id" + id);
+            sntxt.setText(serial);
+            vctxt.setText(Vcard);
+            int assigned = cursor.getInt(cursor.getColumnIndex(DbHendler.KEY_ASSIGNED));
+            stbidtxt.setText(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_ID)));
+             if (id == checkedId) {
                 Rbutton.setChecked(true);
-            } else Rbutton.setChecked(false);
+            } else {
+                Rbutton.setChecked(false);
+            }
+
 
         }
 
@@ -217,11 +242,6 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
 
             //get reference to the row
             View view = super.getView(position, convertView, parent);
-           /* Context context = getActivity();
-            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view =inflater.inflate(R.layout.stb_list_item, parent ,false);
-            RadioButton radioButton= (RadioButton) view.findViewById(R.id.radioBtn);
-*/
 
 
             //check for odd or even to set alternate colors to the row background
@@ -233,6 +253,10 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
             return view;
         }
 
+        @Override
+        public boolean isEnabled(int position) {
+            return super.isEnabled(position);
+        }
     }
 
 
@@ -274,45 +298,61 @@ public class DialogSTB extends DialogFragment implements View.OnClickListener {
         return true;
     } //endregion
 
+
     @Override
     public void onClick(View v) {
-
         if (v.getId() == R.id.stb_ok) {
-            int stbId = (int) checked1;
-            int assigned = custId;
-
-            if (dbHendler.getSTBID(custId) > 0) {
-                Toast.makeText(getActivity(), "Already Assigned STB", Toast.LENGTH_LONG).show();
-            } else {
-                dbHendler.assignSTB(new STB(stbId, assigned));
-                dbHendler.SetStbID(custId, stbId);
-                Toast.makeText(this.getActivity(), "Now Assigned STB", Toast.LENGTH_LONG).show();
-                swapRefreshCursor();
-                ok.setEnabled(false);
-                ViewAll activity = (ViewAll) getActivity();
-                activity.refreshListView();
-            }
+            Log.d(TAG, "onClick: set");
+            assignSTB();
         }
-        if (v.getId() == R.id.unassign_button)
-            try {
-                String stbSN = dbHendler.getAssignedSN(getActivity(), custId);
-                dbHendler.unAssignSTB(stbSN); //from stb table
-                dbHendler.unSetId(custId);    //From cust table
-                Toast.makeText(getActivity(), "Unassigned cust: " + custId + " STB SN: " + stbSN, Toast.LENGTH_SHORT).show();
-                swapRefreshCursor();
-                stbcount();
-                ViewAll activity = (ViewAll) getActivity();
-                activity.refreshListView();
+        if (v.getId() == R.id.unassign_button) {
+            Log.d(TAG, "onClick: unassign");
+            unAssignSTB();
+        }
+    }
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public void assignSTB() {
+        int stbId = (int) checkedId;
+        int assigned = custId;
+        if (dbHendler.getSTBID(custId) > 0) {
+            Toast.makeText(getActivity(), "Already Assigned STB", Toast.LENGTH_SHORT).show();
+        } else {
+            dbHendler.assignSTB(new STB(stbId, assigned));
+            dbHendler.SetStbID(custId, stbId);
+            Toast.makeText(this.getActivity(), "Now Assigned STB", Toast.LENGTH_SHORT).show();
+            swapRefreshCursor();
+            ok.setEnabled(false);
+            unAssign.setEnabled(true);
+
+            ViewAll activity = (ViewAll) getActivity();
+            activity.refreshListView();
+            dismiss();
+        }
+    }
+
+    public void unAssignSTB() {
+        try {
+            String stbSN = dbHendler.getAssignedSN(getActivity(), custId);
+            dbHendler.unAssignSTB(stbSN); //from stb table
+            dbHendler.unSetId(custId);    //From cust table
+            Toast.makeText(getActivity(), "Unassigned STB : " + stbSN, Toast.LENGTH_LONG).show();
+            swapRefreshCursor();
+            stbcount();
+
+            ViewAll activity = (ViewAll) getActivity();
+            activity.refreshListView();
+            unAssign.setEnabled(false);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
     public void swapRefreshCursor() {
         try {
-            mCursor = dbHendler.getUnAssignedSTBs();
+          //  mCursor = dbHendler.getUnAssignedSTBs();
+            mCursor=dbHendler.getUnAssignedSTBs();
             adapter.swapCursor(mCursor);
             stbcount();
         } catch (Exception e) {

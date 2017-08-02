@@ -13,7 +13,12 @@ public class PersonInfo {
     private int _balance;
     private int _area;
     private String _date;
+
+
+
+    private String _nName;
     private String _cstatus;
+    private int _stbid;
 
 
     // Empty Consturctor
@@ -24,7 +29,7 @@ public class PersonInfo {
 
 
     //Constructors
-    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, int area, String date) {
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, int area, String date, String nName) {
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
@@ -32,15 +37,17 @@ public class PersonInfo {
         this._balance= balance;
         this._area=area;
         this._date= date;
+        this._nName= nName;
     }
 
-    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance,int area, String date) {
+    public PersonInfo(int id,  String name, String phone_no, float cust_no, int fees, int balance,int area, String date,String nName) {
         this._id = id;
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
         this._fees = fees;
         this._balance= balance;
+        this._nName= nName;
         this._area = area;
         this._date= date;
 
@@ -59,6 +66,15 @@ public class PersonInfo {
         this._id=Id;
     }
 
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, String nName) {
+        this._name = name;
+        this._phone_no = phone_no;
+        this._cust_no = cust_no;
+        this._fees = fees;
+        this._balance= balance;
+        this._nName= nName;
+    }
+
 
     //getters
     public int getID() {
@@ -72,6 +88,11 @@ public class PersonInfo {
     public String getPhoneNumber() {
         return this._phone_no;
     }
+    public String get_nName() {
+        return _nName;
+    }
+
+
 
     public float get_cust_no(){return this._cust_no;}
 
@@ -81,6 +102,7 @@ public class PersonInfo {
     public int get_balance(){return this._balance;}
     public int get_area() {return this._area; }
     public String get_startdate(){return  this._date;}
+    public int getStbID() {return this._stbid;}
 
     public String get_cstatus(){return this._cstatus;}
 
@@ -96,6 +118,9 @@ public class PersonInfo {
     // setting phone number
     public void setPhoneNumber(String phone_no) {
         this._phone_no = phone_no;
+    }
+    public void set_nName(String _nName) {
+        this._nName = _nName;
     }
     //settin customer no
     public void setCustNo(float cust_no){this._cust_no=cust_no;}

@@ -46,7 +46,8 @@ public class DialogFeesDetail extends DialogFragment {
         id = bundle.getInt("ID");
         PersonInfo info= dbHendler.getCustInfo(id);
         String name = info.getName().toString().trim();
-       String startdat= String.valueOf(info.get_startdate().toString());
+      // String startdat= String.valueOf(info.get_startdate().toString());
+        String startdat = info.get_startdate().toString().trim();
     //    getDialog().setTitle(name);
         custname.setText(name);
       startDate.setText(startdat);

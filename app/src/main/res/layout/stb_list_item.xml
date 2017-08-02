@@ -44,16 +44,17 @@
         android:clickable="false"/>
 
     <TextView
-        android:text="Status"
+        android:id="@+id/Status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/Status"
-        android:textAllCaps="false"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:clickable="false"
         android:focusable="false"
-        android:clickable="false"/>
+        android:text="Status"
+        android:textAllCaps="false"
+        android:visibility="invisible" />
 
     <TextView
         android:text="Serial No."
@@ -70,16 +71,17 @@
         android:clickable="false"/>
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/stb_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/stb_status"
-        tools:text="ON/OFF"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:clickable="false"
         android:focusable="false"
-        android:clickable="false"/>
+        android:text="TextView"
+        android:visibility="invisible"
+        tools:text="ON/OFF" />
 
     <RadioButton
         android:layout_width="wrap_content"
@@ -93,6 +95,15 @@
         android:layout_toStartOf="@+id/stb_status"
         android:layout_marginRight="18dp"
         android:layout_marginEnd="18dp" />
+
+    <TextView
+        android:id="@+id/stbID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/Status"
+        android:text="STBID" />
 
 
 </RelativeLayout>

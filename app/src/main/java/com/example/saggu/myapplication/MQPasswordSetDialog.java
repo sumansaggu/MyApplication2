@@ -22,6 +22,7 @@ public class MQPasswordSetDialog extends DialogFragment implements View.OnClickL
 
     EditText id1, pw1, id2,pw2;
     String TAG = "PASSWORD", ID1, PW1, ID2,PW2;
+    int scale;
     Button ok, cancel;
     String MQID1, MQPASS1, MQID2, MQPASS2;
 

@@ -61,8 +61,7 @@ import me.tatarka.support.job.JobScheduler;
 // TODO: 5/10/2017 filter list itmes from adaptor NOT requrey from sqlite
 // TODO: 5/12/2017 pagerefresh to be added in webview and
 // TODO: 5/12/2017 suggetions for searchAction
-public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener
-{
+public class ViewAll extends AppCompatActivity implements Communicator, AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
 
     SimpleCursorAdapter simpleCursorAdapter;
     SimpleCursorAdapter myAdapter;
@@ -84,7 +83,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     JobScheduler jobScheduler;
     private PendingIntent pendingIntent;
     private AlarmManager alarmManager;
-
 
 
     @Override
@@ -130,11 +128,16 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("logout")) {
-                //      signOut();
+                    //      signOut();
                     searchBox.setText("");
                 }
                 if (searchBox.getText().toString().equals("bulk")) {
                     dbHendler.insertBulkData();
+                    searchBox.setText("");
+                }
+                if (searchBox.getText().toString().equals("import")) {
+                    dbHendler.close();
+                    goToImportValues();
                     searchBox.setText("");
                 }
             }
@@ -148,9 +151,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             Toast.makeText(this, "SD Card not found", Toast.LENGTH_SHORT).show();
             toolbar.setTitle("SD Card not found");
         }
-
-
-
 
 
         // dbHendler.getAllFromCustAndSTB();
@@ -196,8 +196,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-
-
     //<editor-fold desc="Context Menu">
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -222,36 +220,39 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             DeleteAlert myAlert = new DeleteAlert();
             int custid = (int) menuInfo.id;
             int stbId = dbHendler.getStbIdFromCust(custid);
-            Log.d(TAG,"STB ID " + stbId);
+            Log.d(TAG, "STB ID " + stbId);
             Bundle bundle = new Bundle();
             myAlert.setArguments(bundle);
             bundle.putInt("CUSTID", custid);
             bundle.putInt("STBID", stbId);
             myAlert.show(getFragmentManager(), "DeleteAlert");
 
-        }
-        else if(item.getTitle()=="START/CUT"){
+        } else if (item.getTitle() == "START/CUT") {
             int custId = (int) menuInfo.id;
             String status = dbHendler.conStatus(custId);
 
             CutStartDialog cutStartDialog = new CutStartDialog();
-            Bundle bundle =new Bundle();
+            Bundle bundle = new Bundle();
             cutStartDialog.setArguments(bundle);
             bundle.putInt("CUSTID", custId);
-            bundle.putString("STATUS",status);
-            cutStartDialog.show(getFragmentManager(),"CutStartDialog");
+            bundle.putString("STATUS", status);
+            cutStartDialog.show(getFragmentManager(), "CutStartDialog");
 
-        }else if (item.getTitle() == "Edit") {
+        } else if (item.getTitle() == "Edit") {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, CustAddEditActivity.class);
             intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
         } else if (item.getTitle() == "SET STB") {
-            int id = (int) menuInfo.id;
+            int custid = (int) menuInfo.id;
             android.app.FragmentManager manager = getFragmentManager();
+
+            PersonInfo personInfo = new PersonInfo();
+            long stbId = dbHendler.getSTBID(custid);
             Bundle bundle = new Bundle();
-            bundle.putInt("CUSTID", id);
+            bundle.putInt("CUSTID", custid);
+            bundle.putLong("STBID", stbId);
             DialogSTB dialogSTB = new DialogSTB();
             dialogSTB.setArguments(bundle);
             dialogSTB.show(manager, "DialogSTB");
@@ -286,18 +287,19 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             i.setData(Uri.parse("tel:" + "+91" + contact));
             startActivity(i);
 
-        }else if(item.getTitle()=="MQ"){
+        } else if (item.getTitle() == "MQ") {
             int custId = (int) menuInfo.id;
-            String sn = dbHendler.getAssignedSN(this,custId);
+            String sn = dbHendler.getAssignedSN(this, custId);
             Intent intent = new Intent(this, MQWebViewActivity.class);
             intent.putExtra("CALLINGACTIVITY", "VIEWALL");
-            intent.putExtra("SN",sn);
+            intent.putExtra("SN", sn);
             startActivity(intent);
 
         }
 
         return true;
     }
+
     //region OptionMenu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -350,22 +352,30 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         if (id == R.id.area) {
             Intent intent = new Intent(this, AreaList.class);
             startActivity(intent);
-        }if(id==R.id.set_password){
+        }
+        if (id == R.id.set_password) {
             Toast.makeText(this, "Set password here", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = getFragmentManager();
             PasswordSetDialog passwordSetDialog = new PasswordSetDialog();
             Bundle bundle = new Bundle();
             passwordSetDialog.setArguments(bundle);
-            bundle.putString("CALL","SET_PASSWORD");
-            passwordSetDialog.show(fragmentManager,"PasswordDailog");
-        }if(id==R.id.set_MQpassword) {
+            bundle.putString("CALL", "SET_PASSWORD");
+            passwordSetDialog.show(fragmentManager, "PasswordDailog");
+        }
+        if (id == R.id.set_MQpassword) {
             Toast.makeText(this, "Set MQ password here", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = getFragmentManager();
             MQPasswordSetDialog mqPasswordSetDialog = new MQPasswordSetDialog();
             Bundle bundle = new Bundle();
             mqPasswordSetDialog.setArguments(bundle);
-            bundle.putString("CALL","SET_MQPASSWORD");
+            bundle.putString("CALL", "SET_MQPASSWORD");
             mqPasswordSetDialog.show(fragmentManager, "MQPasswordDailog");
+
+        }
+        if (id == R.id.importdata) {
+            Intent intent = new Intent(this, ImportActivity.class);
+            startActivity(intent);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }    //endregion
@@ -374,7 +384,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        String sn =((TextView)view.findViewById(R.id.vc_mac)).getText().toString();
+        String sn = ((TextView) view.findViewById(R.id.vc_mac)).getText().toString();
 
     }
 
@@ -399,7 +409,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     DbHendler.KEY_FEES,
                     DbHendler.KEY_BALANCE,
                     DbHendler.KEY_SN,
-                    DbHendler.KEY_CONSTATUS
+                    DbHendler.KEY_CONSTATUS,
+                    DbHendler.KEY_NICKNAME
             };
             int[] boundTo = new int[]{
                     //R.id.pId,
@@ -409,7 +420,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     R.id.cFees,
                     R.id.cBalance,
                     R.id.vc_mac,
-                    R.id.cStatus
+                    R.id.cStatus,
+                    R.id.txtnickname
             };
             myAdapter = new MySimpleCursorAdapter(this,
                     R.layout.layout_list,
@@ -423,10 +435,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             Toast.makeText(this, "" + ex, Toast.LENGTH_LONG).show();
         }
     }
-
-
-
-
 
     //endregion
 
@@ -456,10 +464,11 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             TextView status = (TextView) view.findViewById(R.id.cStatus);
             TextView fees = (TextView) view.findViewById(R.id.cFees);
             TextView balance = (TextView) view.findViewById(R.id.cBalance);
+            TextView nickname = (TextView) view.findViewById(R.id.txtnickname);
 
 
             // Extract properties from cursor
-         //   int id = cursor.getInt(cursor.getColumnIndex(DbHendler.KEY_ID));
+            //   int id = cursor.getInt(cursor.getColumnIndex(DbHendler.KEY_ID));
             String mname = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_NAME));
             String mmobile = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_PHONE_NO));
             String mconno = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_CUST_NO));
@@ -467,17 +476,19 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             String mstatus = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_CONSTATUS));
             String mfees = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_FEES));
             String mbalance = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_BALANCE));
+            String mnickname = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_NICKNAME));
             name.setText(mname);
             mobile.setText(mmobile);
             conNo.setText(mconno);
             sn.setText(msn);
 
-            if(mstatus.equals("ACTIVE")){status.setText(" ");
-            }else status.setText("C");
+            if (mstatus.equals("ACTIVE")) {
+                status.setText(" ");
+            } else status.setText("C");
 
             fees.setText(mfees);
             balance.setText(mbalance);
-
+            nickname.setText(mnickname);
 
 
         }
@@ -490,7 +501,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             View view = super.getView(position, convertView, parent);
 
 
-
             //check for odd or even to set alternate colors to the row background
             /*if (position % 2 == 0) {
                 view.setBackgroundColor(Color.rgb(238, 233, 233));
@@ -501,8 +511,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }
 
     }
-
-
 
 
     //region Create Search  List
@@ -526,7 +534,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                         DbHendler.KEY_CUST_NO,
                         DbHendler.KEY_FEES,
                         DbHendler.KEY_BALANCE,
-                        DbHendler.KEY_SN
+                        DbHendler.KEY_SN,
+                        DbHendler.KEY_NICKNAME
                 };
                 int[] boundTo = new int[]{
                         //R.id.pId,
@@ -535,7 +544,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                         R.id.cNo,
                         R.id.cFees,
                         R.id.cBalance,
-                        R.id.vc_mac
+                        R.id.vc_mac,
+                        R.id.txtnickname
                 };
                 myAdapter = new MySimpleCursorAdapter(this,
                         R.layout.layout_list,
@@ -572,7 +582,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     DbHendler.KEY_CUST_NO,
                     DbHendler.KEY_FEES,
                     DbHendler.KEY_BALANCE,
-                    DbHendler.KEY_SN
+                    DbHendler.KEY_SN,
+                    DbHendler.KEY_NICKNAME
             };
             int[] boundTo = new int[]{
                     //R.id.pId,
@@ -581,7 +592,8 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     R.id.cNo,
                     R.id.cFees,
                     R.id.cBalance,
-                    R.id.vc_mac
+                    R.id.vc_mac,
+                    R.id.txtnickname
             };
             myAdapter = new MySimpleCursorAdapter(this,
                     R.layout.layout_list,
@@ -592,7 +604,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             listViewCustomers.setAdapter(myAdapter);
 
         } catch (Exception ex) {
-            textView4.setText("There was an error!");
+//            textView4.setText("There was an error!");
         }
     }
 
@@ -615,8 +627,9 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
         displayProductList();
     }
+
     //endregion
-    public void changeConStatus(int cutID,String newStatus){
+    public void changeConStatus(int cutID, String newStatus) {
         dbHendler.conCutStart(cutID, newStatus);
 
     }
@@ -642,9 +655,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         for (Area area : areas) {
             String singleitem = area.get_areaName();
             items.add(singleitem);
-            items.add(singleitem);
         }
-
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
 
@@ -733,7 +744,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -755,7 +765,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-
 
 
     /* Checks if external storage is available for read and write */
@@ -782,9 +791,11 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-
-
-
+    public void goToImportValues() {
+        Intent intent = new Intent(this, ImportActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
 
 }

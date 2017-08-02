@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import schemasMicrosoftComOfficeOffice.STInsetMode;
+
 import static com.example.saggu.myapplication.R.id.date;
 
 public class CustAddEditActivity extends AppCompatActivity implements Communicator, View.OnClickListener, AdapterView.OnItemSelectedListener {
@@ -30,6 +32,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
     EditText contact_no;
     EditText cust_no;
     EditText monthly_fees;
+    EditText nickName;
     TextView dateTxtview;
     TextView startdate;
     TextView balance_;
@@ -67,6 +70,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
+        nickName= (EditText)findViewById(R.id.etxtnickname);
         dateTxtview = (TextView) findViewById(R.id.datetxtview);
         startdate = (TextView) findViewById(R.id.date_txtview);
         startdate.setOnClickListener(this);
@@ -117,6 +121,10 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             Toast.makeText(getApplicationContext(), "Enter the Contact No.", Toast.LENGTH_LONG).show();
             return;
         }
+        String nName = nickName.getText().toString().trim();
+        if (nName.equals("")) {
+            nName="N/A";
+        }
         String Custno = cust_no.getText().toString().trim();
         if (Custno.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the Customer No.", Toast.LENGTH_LONG).show();
@@ -143,13 +151,14 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             return;
         }
         //endregion
-        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId, date));
+        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId, date,nName), this);
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
         monthly_fees.setText("");
         balance_.setText("");
-        Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
+        nickName.setText("");
+      //  Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
 
 
     }
@@ -195,6 +204,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         String fEES = Integer.toString(fees);
         int balance = personInfo.get_balance();
         String bALANCE = Integer.toString(balance);
+        String nName = personInfo.get_nName().toString().trim();
         String startdate = personInfo.get_startdate();
         int areaID = personInfo.get_area();
         String area = dbHendler.getAreaName(areaID);
@@ -203,6 +213,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         cust_no.setText(cUSTnO);
         monthly_fees.setText(fEES);
         balance_.setText(bALANCE);
+        nickName.setText(nName);
         this.startdate.setText(startdate);
         // retrieving the index of element u
         int retval = items.indexOf(area);
@@ -222,6 +233,10 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         if (no.equals("")) {
             Toast.makeText(getApplicationContext(), "Enter the Contact No.", Toast.LENGTH_LONG).show();
             return;
+        }
+        String nickname = nickName.getText().toString().trim();
+        if (nickname.equals("")) {
+            nickname="N/A";
         }
         String Custno = cust_no.getText().toString().trim();
         if (Custno.equals("")) {
@@ -250,12 +265,13 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         }
 
 
-        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId, date));
+        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId, date,nickname));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
         monthly_fees.setText("");
         balance_.setText("");
+        nickName.setText("");
         //changeButton.setEnabled(false);
         viewAll();
 
@@ -317,7 +333,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             dialogSTB.show(manager, "DialogSTB");
         }
         if (v.getId() == R.id.date_txtview) {
-            Toast.makeText(this, "date clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Select the Date", Toast.LENGTH_SHORT).show();
             pickDate();
         } else {
 

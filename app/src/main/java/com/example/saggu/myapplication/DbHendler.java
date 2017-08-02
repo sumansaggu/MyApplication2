@@ -2,12 +2,10 @@ package com.example.saggu.myapplication;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
-import android.security.keystore.KeyInfo;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class DbHendler extends SQLiteOpenHelper {
 
@@ -60,7 +57,7 @@ public class DbHendler extends SQLiteOpenHelper {
     public static final String KEY_NOC = "no_connections";
     public static final String KEY_PERSONEXTRA1 = "col_13";
     public static final String KEY_PERSONEXTRA2 = "col_14";
-    public static final String KEY_PERSONEXTRA3 = "col_15";
+    public static final String KEY_NICKNAME = "col_16";
     public static final String KEY_PERSONEXTRA4 = "col_16";
     public static final String KEY_PERSONEXTRA5 = "col_17";
     public static final String KEY_PERSONEXTRA6 = "col_18";
@@ -102,15 +99,15 @@ public class DbHendler extends SQLiteOpenHelper {
             + KEY_CUST_NO + " REAL, "
             + KEY_FEES + " INTEGER, "
             + KEY_BALANCE + " INTEGER, "
-            + KEY_AREA + " INTEGER, "
-            + KEY_STBID + " INTEGER , "
-            + KEY_STARTDATE + " DATETIME , "
+            + KEY_AREA + " INTEGER DEFAULT 1, "
+            + KEY_STBID + " INTEGER,  "
+            + KEY_STARTDATE + " DATETIME DEFAULT 'N/A' , "
             + KEY_STOPDATE + " DATETIME DEFAULT 'N/A', "
             + KEY_CONSTATUS + " TEXT DEFAULT 'ACTIVE', "
             + KEY_NOC + " INTEGER DEFAULT 1, "
             + KEY_PERSONEXTRA1 + " INTEGER DEFAULT 0 , "
             + KEY_PERSONEXTRA2 + " INTEGER DEFAULT 0, "
-            + KEY_PERSONEXTRA3 + " TEXT DEFAULT 'N/A' , "
+            + KEY_NICKNAME + " TEXT DEFAULT 'N/A' , "
             + KEY_PERSONEXTRA4 + " TEXT DEFAULT 'N/A' , "
             + KEY_PERSONEXTRA5 + " REAL DEFAULT 0, "
             + KEY_PERSONEXTRA6 + " REAL DEFAULT 0, "
@@ -220,22 +217,22 @@ public class DbHendler extends SQLiteOpenHelper {
         db.execSQL(CREATE_MONTHEND_TABLE);
 
 
-        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "(" + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_PERSONEXTRA3 + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + ") " +
-                "SELECT " + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_PERSONEXTRA3 + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + " FROM TempOldTablePerson");
+        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "(" + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_NICKNAME + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + ") " +
+                "SELECT " + KEY_ID + ", " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_AREA + ", " + KEY_STBID + ", " + KEY_PERSONEXTRA1 + ", " + KEY_PERSONEXTRA2 + ", " + KEY_NICKNAME + ", " + KEY_PERSONEXTRA4 + ", " + KEY_PERSONEXTRA5 + ", " + KEY_PERSONEXTRA6 + " FROM TempOldTablePerson");
 
         db.execSQL("INSERT INTO " + TABLE_FEES + "(" + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + ", " + KEY_FEESEXTRA1 + ", " + KEY_FEESEXTRA2 + ") " +
                 "SELECT " + KEY_NO + ", " + KEY_ID + ", " + KEY_RECIEPT + ", " + KEY_DATE + ", " + KEY_REMARK + ", " + KEY_FEESEXTRA1 + ", " + KEY_FEESEXTRA2 + "  FROM TempOldTableFees");
 
         db.execSQL("INSERT INTO " + TABLE_STB + "(" + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + ", " + KEY_STBEXTRA1 + ", " + KEY_STBEXTRA2 + ") " +
-                //      "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED +", "+KEY_STBEXTRA1+", " + KEY_STBEXTRA2 + "  FROM TempOldTableSTB");
-                "SELECT *  FROM TempOldTableSTB");
+                "SELECT " + KEY_ID + ", " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + ", " + KEY_ASSIGNED + ", " + KEY_STBEXTRA1 + ", " + KEY_STBEXTRA2 + "  FROM TempOldTableSTB");
+        // "SELECT *  FROM TempOldTableSTB");
         db.execSQL("INSERT INTO " + TABLE_EXTRAS + "(" + KEY_ID + ", " + KEY_MONTH_ENDED + ") " +
                 "SELECT " + KEY_ID + ", " + KEY_MONTH_ENDED + "  FROM TempOldTableExtras");
 
         db.execSQL("INSERT INTO " + TABLE_AREA + "(" + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + ", " + KEY_AREAEXTRA1 + ", " + KEY_AREAEXTRA2 + ") " +
                 "SELECT " + KEY_ID + ", " + KEY_AREANO + ", " + KEY_AREANAME + ", " + KEY_AREAEXTRA1 + ", " + KEY_AREAEXTRA2 + "  FROM TempOldTableArea");
         db.execSQL("INSERT INTO " + TABLE_MONTH_END + "(" + KEY_ID + ", " + KEY_MONTH_STATUS + ", " + KEY_MONTHEXTRA1 + ", " + KEY_MONTHEXTRA2 + ") " +
-                " SELECT * FROM  TempOldTableMonthEnd");
+                " SELECT " + KEY_ID + ", " + KEY_MONTH_STATUS + ", " + KEY_MONTHEXTRA1 + ", " + KEY_MONTHEXTRA2 + " FROM  TempOldTableMonthEnd");
 
 
         db.execSQL("DROP TABLE TempOldTablePerson");
@@ -290,14 +287,16 @@ public class DbHendler extends SQLiteOpenHelper {
     }
 
     public Cursor getAllFromCustAndSTB(int areaId) {
+
         SQLiteDatabase db = this.getReadableDatabase();
 
         String query;
         if (areaId == 1) {
-            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
-        } else
-            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID WHERE personInfo.area = " + areaId + " ORDER BY cust_no ASC ";
-        Log.d(TAG, "" + query);
+            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees, balance, serialNo, " + KEY_NICKNAME + " FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
+        } else {
+            query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo, " + KEY_NICKNAME + " FROM PERSONINFO LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID WHERE personInfo.area = " + areaId + " ORDER BY cust_no ASC ";
+        }
+        Log.d(TAG, "GET ALL:" + query);
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -360,7 +359,7 @@ public class DbHendler extends SQLiteOpenHelper {
     //region serarch person to list
     public Cursor searchPersonToList(String namesearch) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID  WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus, fees,balance, serialNo, nick_name FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID  WHERE " + KEY_NAME + "  LIKE '%" + namesearch + "%';";
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
             cursor.moveToFirst();
@@ -446,7 +445,7 @@ public class DbHendler extends SQLiteOpenHelper {
 
 
     //region addingh new person
-    public void addPerson(PersonInfo personInfo) {
+    public void addPerson(PersonInfo personInfo, Context context) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, personInfo.getName());
@@ -456,10 +455,30 @@ public class DbHendler extends SQLiteOpenHelper {
         values.put(KEY_BALANCE, personInfo.get_balance());
         values.put(KEY_AREA, personInfo.get_area());
         values.put(KEY_STARTDATE, personInfo.get_startdate());
+        values.put(KEY_NICKNAME, personInfo.get_nName());
         //Insert row
         db.insert(TABLE_PERSON_INFO, null, values);
         db.close(); //close database
+        Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+
     }
+
+    public void addPersonImport(PersonInfo personInfo, Context context) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_NAME, personInfo.getName());
+        values.put(KEY_PHONE_NO, personInfo.getPhoneNumber());
+        values.put(KEY_CUST_NO, personInfo.get_cust_no());
+        values.put(KEY_FEES, personInfo.get_fees());
+        values.put(KEY_BALANCE, personInfo.get_balance());
+        values.put(KEY_NICKNAME, personInfo.get_nName());
+        //Insert row
+        db.insert(TABLE_PERSON_INFO, null, values);
+        db.close(); //close database
+
+
+    }
+
 
     //endregion
     public void AddArea(int areano, String areaname) {
@@ -582,6 +601,7 @@ public class DbHendler extends SQLiteOpenHelper {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(context, "Not Any assigned STB", Toast.LENGTH_SHORT).show();
+
         }
         return SN;
     }
@@ -645,17 +665,17 @@ public class DbHendler extends SQLiteOpenHelper {
 
     public void insertBulkData() {
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "( " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_STARTDATE + ", " + KEY_AREA + " ) VALUES " +
-                "('Ram', '80944', 2, 280, 560, '2017-5-3', 1)," +
-                "('Sham', '98154', 3, 280, 560,'2017-5-4', 1)," +
-                "('Makhan', '888', 4, 280, 280,'2017-5-7', 1), " +
-                "('Raj', '999', 5, 230, 460,'2017-5-9', 1), " +
-                "('Mehar', '666', 6, 230, 460,'2017-5-11', 1), " +
-                "('Roshan', '999', 7, 230, 460,'2017-5-13', 1), " +
-                "('Sapna', '999', 11, 230, 460, '2017-5-17',1), " +
-                "('Sandeep ', '999', 15, 230, 460,'2017-5-20', 1), " +
-                "('Raju', '999', 17, 230, 460, '2017-5-22',1), " +
-                "('Keshav', '999', 19, 230, 460,'2017-5-25', 1) "
+        db.execSQL("INSERT INTO " + TABLE_PERSON_INFO + "( " + KEY_NAME + ", " + KEY_PHONE_NO + ", " + KEY_CUST_NO + ", " + KEY_FEES + ", " + KEY_BALANCE + ", " + KEY_STARTDATE + ", " + KEY_AREA + ", " + KEY_NICKNAME + " ) VALUES " +
+                "('Ram', '55446', 2, 280, 560, '2017-5-3', 1, 'nickname nickname nick')," +
+                "('Sham', '89681', 3, 280, 560,'2017-5-4', 1, 'nickname')," +
+                "('Makhan', '888', 4, 280, 280,'2017-5-7', 1, 'nickname'), " +
+                "('Raj', '999', 5, 230, 460,'2017-5-9', 1, 'nickname'), " +
+                "('Mehar', '666', 6, 230, 460,'2017-5-11', 1, 'nickname'), " +
+                "('Roshan', '999', 7, 230, 460,'2017-5-13', 1, 'nickname'), " +
+                "('Sapna', '999', 11, 230, 460, '2017-5-17',1, 'nickname'), " +
+                "('Sandeep ', '999', 15, 230, 460,'2017-5-20', 1, 'nickname'), " +
+                "('Raju', '999', 17, 230, 460, '2017-5-22',1, 'nickname'), " +
+                "('Keshav', '999', 19, 230, 460,'2017-5-25', 1, 'nickname') "
 
         );
         db.execSQL("INSERT INTO " + TABLE_STB + "( " + KEY_SN + ", " + KEY_VC + ", " + KEY_STATUS + " ) VALUES " +
@@ -694,7 +714,7 @@ public class DbHendler extends SQLiteOpenHelper {
 
     public PersonInfo getCustInfo(int id) {
         SQLiteDatabase db = getReadableDatabase();
-        String columns[] = {KEY_ID, KEY_NAME, KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE, KEY_AREA, KEY_STARTDATE};
+        String columns[] = {KEY_ID, KEY_NAME, KEY_PHONE_NO, KEY_CUST_NO, KEY_FEES, KEY_BALANCE, KEY_AREA, KEY_NICKNAME, KEY_STARTDATE};
         Cursor cursor = db.query(TABLE_PERSON_INFO, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
@@ -705,7 +725,8 @@ public class DbHendler extends SQLiteOpenHelper {
                 cursor.getInt(cursor.getColumnIndex(KEY_FEES)),
                 cursor.getInt(cursor.getColumnIndex(KEY_BALANCE)),
                 cursor.getInt(cursor.getColumnIndex(KEY_AREA)),
-                cursor.getString(cursor.getColumnIndex(KEY_STARTDATE))
+                cursor.getString(cursor.getColumnIndex(KEY_STARTDATE)),
+                cursor.getString(cursor.getColumnIndex(KEY_NICKNAME))
         );
         return info;
     }
@@ -771,6 +792,13 @@ public class DbHendler extends SQLiteOpenHelper {
         }
 
         return stbID;
+    }
+
+    public void getSTBPosition() {
+        SQLiteDatabase db = getReadableDatabase();
+        String colunms[] = {KEY_ID};
+        Cursor cursor;
+
     }
 
 

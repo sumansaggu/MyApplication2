@@ -189,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
             Toast.makeText(this, "Wrong Password", Toast.LENGTH_SHORT).show();
     }
 
+
+
     public void permission() {
         askForPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Storage);
     }
