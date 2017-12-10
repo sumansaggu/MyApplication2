@@ -41,8 +41,6 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
         buttonScanVC = (Button) findViewById(R.id.btnScanVC);
         buttonAddSTB = (Button) findViewById(R.id.add_stb);
         buttonAddSTB.setOnClickListener(this);
-        buttonViewSTBs = (Button) findViewById(R.id.btn_stb_record);
-        buttonViewSTBs.setOnClickListener(this);
         buttonScanSn.setOnClickListener(this);
         buttonScanVC.setOnClickListener(this);
         toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -96,12 +94,12 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
     public void addNewStb() {
         String sn = stbSN.getText().toString().trim();
         if (sn.equals("")) {
-            Toast.makeText(getApplicationContext(), "Enter the Name", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Enter the Serial Number", Toast.LENGTH_LONG).show();
             return;
         }
         String vc = stbVC.getText().toString().trim();
         if (vc.equals("")) {
-            Toast.makeText(getApplicationContext(), "Enter the Contact No.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Enter the VC/MAC Number.", Toast.LENGTH_LONG).show();
             return;
         }
         dbHendler.AddNewStb(new STB(sn, vc, stbStatus));
@@ -191,10 +189,7 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
 
             int id = R.id.btnScanVC;
             scanBar(id);
-        }
-        if (v.getId() == R.id.btn_stb_record) {
-            Intent i = new Intent(this, STBRecord.class);
-            startActivity(i);
+
 
         } else {
 
@@ -252,8 +247,9 @@ public class StbAddEditActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onBackPressed() {
-        Intent i = new Intent(this, STBRecord.class);
-        startActivity(i);
+        finish();
+       // Intent i = new Intent(this, STBRecord.class);
+       // startActivity(i);
     }
 
 }

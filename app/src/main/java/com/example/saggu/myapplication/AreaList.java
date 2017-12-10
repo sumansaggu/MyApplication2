@@ -91,6 +91,7 @@ public class AreaList extends AppCompatActivity {
 
     //endregion
     public void cursorswap() {
+
         try {
             mCursor = dbHendler.getAreasToList();
             simpleCursorAdapter.swapCursor(mCursor);

@@ -25,11 +25,11 @@
         android:layout_height="wrap_content"
         android:id="@+id/stb_vc"
         android:textSize="14sp"
+        android:focusable="false"
+        android:clickable="false"
         android:layout_alignParentBottom="true"
         android:layout_alignLeft="@+id/stb_sn"
-        android:layout_alignStart="@+id/stb_sn"
-        android:focusable="false"
-        android:clickable="false"/>
+        android:layout_alignStart="@+id/stb_sn" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -100,10 +100,10 @@
         android:id="@+id/stbID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:text="STBID"
         android:layout_below="@+id/Status"
-        android:text="STBID" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>

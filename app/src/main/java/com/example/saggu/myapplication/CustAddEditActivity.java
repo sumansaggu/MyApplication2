@@ -35,7 +35,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
     EditText nickName;
     TextView dateTxtview;
     TextView startdate;
-    TextView balance_;
+    EditText balance_;
     DbHendler dbHendler;
     Button stbButton, buttonAdd, viewAll;
     List<Area> areas;
@@ -61,16 +61,16 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         dbHendler = new DbHendler(this, null, null, 1);
         person_name = (EditText) findViewById(R.id.person_name);
         contact_no = (EditText) findViewById(R.id.contact_no);
-        stbButton = (Button) findViewById(R.id.stbButton);
-        stbButton.setOnClickListener(this);
+        //   stbButton = (Button) findViewById(R.id.stbButton);
+//        stbButton.setOnClickListener(this);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(this);
-        viewAll = (Button) findViewById(R.id.buttonViewAll);
-        viewAll.setOnClickListener(this);
+        //  viewAll = (Button) findViewById(R.id.buttonViewAll);
+        // viewAll.setOnClickListener(this);
         cust_no = (EditText) findViewById(R.id.cust_no);
         monthly_fees = (EditText) findViewById(R.id.fees);
         balance_ = (EditText) findViewById(R.id.balance);
-        nickName= (EditText)findViewById(R.id.etxtnickname);
+        nickName = (EditText) findViewById(R.id.etxtnickname);
         dateTxtview = (TextView) findViewById(R.id.datetxtview);
         startdate = (TextView) findViewById(R.id.date_txtview);
         startdate.setOnClickListener(this);
@@ -100,6 +100,8 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
                 //   stbButton.setVisibility(View.VISIBLE);
                 getSupportActionBar().setTitle("Edit Customer");
                 dateTxtview.setVisibility(View.INVISIBLE);
+                startdate.setVisibility(View.INVISIBLE);
+                balance_.setEnabled(false);
                 //changeButton.setVisibility(View.VISIBLE);
                 getIntent().removeExtra("ID");
                 editCustomer();
@@ -123,7 +125,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         }
         String nName = nickName.getText().toString().trim();
         if (nName.equals("")) {
-            nName="N/A";
+            nName = "N/A";
         }
         String Custno = cust_no.getText().toString().trim();
         if (Custno.equals("")) {
@@ -151,21 +153,21 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             return;
         }
         //endregion
-        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId, date,nName), this);
+        dbHendler.addPerson(new PersonInfo(name, no, custNo, fees, balance, areaId, date, nName), this);
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
         monthly_fees.setText("");
         balance_.setText("");
         nickName.setText("");
-      //  Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
+        //  Toast.makeText(getApplicationContext(), name + " Saved", Toast.LENGTH_LONG).show();
 
 
     }
 
 
     /**
-     * Function to load the spinner data from SQLite database
+     * Function to load the spinnerArea data from SQLite database
      */
     private void loadSpinnerData() {
 
@@ -176,13 +178,13 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             items.add(singleitem);
         }
 
-        // Creating adapter for spinner
+        // Creating adapter for spinnerArea
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        // attaching data adapter to spinner
+        // attaching data adapter to spinnerArea
         spinner.setAdapter(dataAdapter);
     }
 
@@ -236,7 +238,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         }
         String nickname = nickName.getText().toString().trim();
         if (nickname.equals("")) {
-            nickname="N/A";
+            nickname = "N/A";
         }
         String Custno = cust_no.getText().toString().trim();
         if (Custno.equals("")) {
@@ -265,7 +267,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         }
 
 
-        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId, date,nickname));
+        dbHendler.updateInfo(new PersonInfo(id, name, no, custNo, fees, balance, areaId, date, nickname));
         person_name.setText("");
         contact_no.setText("");
         cust_no.setText("");
@@ -273,6 +275,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
         balance_.setText("");
         nickName.setText("");
         //changeButton.setEnabled(false);
+        finish();
         viewAll();
 
     }
@@ -306,14 +309,13 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
     public void onBackPressed() {
         Intent i = new Intent(this, ViewAll.class);
         startActivity(i);
+        finish();
     }
+
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.buttonViewAll) {
-            Intent i = new Intent(this, ViewAll.class);
-            startActivity(i);
-        }
+
         if (v.getId() == R.id.buttonAdd && buttonAdd.getText().equals("Add")) {
             addButtonClicked();
 
@@ -323,15 +325,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
             Log.d(TAG, "change clicked");
 
         }
-        if (v.getId() == R.id.stbButton) {
-            android.app.FragmentManager manager = getFragmentManager();
-            Bundle bundle = new Bundle();
-            bundle.putInt("CUSTID", this.id);
-            Log.d(TAG, "hjhjgfhjfgjh" + this.id);
-            DialogSTB dialogSTB = new DialogSTB();
-            dialogSTB.setArguments(bundle);
-            dialogSTB.show(manager, "DialogSTB");
-        }
+
         if (v.getId() == R.id.date_txtview) {
             Toast.makeText(this, "Select the Date", Toast.LENGTH_SHORT).show();
             pickDate();
@@ -366,6 +360,7 @@ public class CustAddEditActivity extends AppCompatActivity implements Communicat
 
 
     }
+
     public String getDate() {
         calendar = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");

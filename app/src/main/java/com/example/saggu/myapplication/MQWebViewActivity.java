@@ -1,9 +1,11 @@
 package com.example.saggu.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.PersistableBundle;
@@ -16,13 +18,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.SslErrorHandler;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
-public class MQWebViewActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MQWebViewActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     static final String loginPage = "http://bss.myfastway.in:9003/oapservice/";
     static final String redirectLoginPage = "http://bss.myfastway.in:9003/oapservice/index.php?r=login/index&redirect=true";
@@ -32,24 +40,45 @@ public class MQWebViewActivity extends AppCompatActivity {
     ProgressBar progressBar;
     Bundle webViewBundle;
     String sn, oldsn;
+    Toolbar toolbar;
 
     String cActivity;
     String MQID1, MQPASS1, MQID2, MQPASS2;
     int scale;
-
+    Spinner spinnerID;
+    public static Activity mqactivity;
+    DbHendler dbHendler;
+    List<String> listID;
+    List<String> listPW;
+    Button btnrelogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        mqactivity = this;
         setContentView(R.layout.activity_mqweb_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        dbHendler = new DbHendler(this, null, null, 1);
+        toolbar = (Toolbar) findViewById(R.id.app_bar);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("MQ");
         mywebView = (WebView) findViewById(R.id.myWebView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        // WebView m = new WebView(this);
-        // mywebView.getSettings().setUserAgentString("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.4) Gecko/20100101 Firefox/4.0");
+        spinnerID = (Spinner) findViewById(R.id.spnrOragleID);
+        spinnerID.setOnItemSelectedListener(this);
+        btnrelogin = (Button) findViewById(R.id.btn_relogin);
+        btnrelogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        });
+             //request desktopmode
+        mywebView.getSettings().setUserAgentString("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.4) Gecko/20100101 Firefox/4.0");
+
         mywebView.getSettings().setJavaScriptEnabled(true);
         mywebView.getSettings().setDomStorageEnabled(true);
         mywebView.getSettings().setBuiltInZoomControls(true);
@@ -59,7 +88,8 @@ public class MQWebViewActivity extends AppCompatActivity {
         mywebView.setWebViewClient(new myWebViewClient());
         Bundle bundle = getIntent().getExtras();
         Log.d(TAG, "onCreate: webactivity");
-        loadShardPref();
+        //  loadShardPref();
+
         if (bundle == null) {
             return;
         }
@@ -79,7 +109,52 @@ public class MQWebViewActivity extends AppCompatActivity {
 
         }
 
+
     }
+
+    public void loadSpinner() {
+        listID = new ArrayList<>();
+        listPW = new ArrayList<>();
+        listID.add("Select ID to login");
+        listPW.add("Blank");
+
+        Cursor cursor = dbHendler.getIDPW();
+        if (cursor.moveToFirst()) {
+            do {
+                listID.add(cursor.getString(cursor.getColumnIndex(dbHendler.KEY_USERID)));
+                listPW.add(cursor.getString(cursor.getColumnIndex(dbHendler.KEY_USERPASSWORD)));
+            } while (cursor.moveToNext());
+        }
+        ArrayAdapter<String> idadaptor = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, listID);
+        idadaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerID.setAdapter(idadaptor);
+
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        MQID1 = parent.getItemAtPosition(position).toString();
+        Log.d(TAG, "onItemClick: " + MQID1);
+        MQPASS1 = listPW.get(position);
+        Log.d(TAG, "onItemSelected: pw" + MQPASS1);
+
+        mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('form-control');" +
+                "var l = x.length;" +
+                "console.log(l);" +
+                "x[0].value = '" + MQID1 + "'})()");
+
+        mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
+        mywebView.loadUrl("javascript:(function() { document.getElementById('submitbutton').click() ; ;})()");
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
 
     public void loadShardPref() {
         SharedPreferences sharedPreferences = getSharedPreferences("credentials", Context.MODE_PRIVATE);
@@ -106,6 +181,8 @@ public class MQWebViewActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        loadSpinner();
         Intent intent = getIntent();
         Bundle bundle = getIntent().getExtras();
         if (bundle == null) {
@@ -116,7 +193,7 @@ public class MQWebViewActivity extends AppCompatActivity {
             cActivity = bundle.getString("CALLINGACTIVITY");
             if (!oldsn.equals(sn)) {
                 myWebViewClient webViewClient = new myWebViewClient();
-                Log.d(TAG, "onResume: if executed");
+                Log.d(TAG, "onResume if");
                 mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
                         "var l = x.length;" +
                         "console.log(l);" +
@@ -133,7 +210,9 @@ public class MQWebViewActivity extends AppCompatActivity {
                             "x[0].click()})()");
                 webViewClient.counter++;
             }
-            Log.d(TAG, "onResume:  new " + sn + "  old " + oldsn);
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setTitle(sn);
+            Log.d(TAG, "onResume else:  new " + sn + "  old " + oldsn);
         }
     }
 
@@ -143,8 +222,8 @@ public class MQWebViewActivity extends AppCompatActivity {
         myWebViewClient myweb = new myWebViewClient();
         myweb.counter = 0;
         Log.d(TAG, "onBackPressed: ");
-        Intent intent = new Intent(this, ViewAll.class);
-        startActivity(intent);
+        //  Intent intent = new Intent(this, ViewAll.class);
+        // startActivity(intent);
     }
 
     @Override
@@ -167,6 +246,7 @@ public class MQWebViewActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mq_menu, menu);
@@ -176,10 +256,19 @@ public class MQWebViewActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.paste) {
-          mywebView.reload();
+        if (id == R.id.refresh) {
+            mywebView.reload();
 
             return true;
+        }
+        if (id == R.id.restart) {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        }
+        if (id == R.id.idpassword) {
+            Intent intent = new Intent(this, IDPWActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -198,6 +287,7 @@ public class MQWebViewActivity extends AppCompatActivity {
             super.onPageStarted(view, url, favicon);
             progressBar.setVisibility(View.VISIBLE);
             Log.d(TAG, "onPageStarted: ");
+            String currenturl = mywebView.getUrl();
         }
 
 
@@ -206,10 +296,15 @@ public class MQWebViewActivity extends AppCompatActivity {
             super.onPageFinished(view, url);
             view.setInitialScale(80);
 
+
             progressBar.setVisibility(View.GONE);
             //  Toast.makeText(MainActivity.this, "onPageFinished called", Toast.LENGTH_SHORT).show();
             String currentURL = mywebView.getUrl();
             Log.d(TAG, "onPageFinished: " + url);
+
+            if (currentURL.equals(loginPage)) {
+                spinnerID.setVisibility(View.VISIBLE);
+            } else spinnerID.setVisibility(View.INVISIBLE);
 
 
             if (currentURL.equals(loginPage)) {
@@ -219,7 +314,8 @@ public class MQWebViewActivity extends AppCompatActivity {
                         "x[0].value = '" + MQID1 + "'})()");
 
                 mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
-                mywebView.loadUrl("javascript:(function() { document.getElementById('submitbutton').click() ; ;})()");
+                //  mywebView.loadUrl("javascript:(function() { document.getElementById('submitbutton').click() ; ;})()");
+
             }
             if (currentURL.equals(redirectLoginPage)) {
                 mywebView.loadUrl("javascript:(function() { document.getElementById('username').value = '" + MQID1 + "'; ;})()");
@@ -228,6 +324,8 @@ public class MQWebViewActivity extends AppCompatActivity {
             if (currentURL.equals(afterLoginPage + MQID1) && counter == 0) {
                 // setting option selected
                 Log.d(TAG, "options");
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle(sn);
                 mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
                         "var l = x.length;" +
                         "console.log(l);" +

@@ -13,17 +13,18 @@ public class ImportValues {
     private double fees;
     private double balance;
 
-
+private int stbid;
 
     private String nickName;
 
 
-    public ImportValues(String names, String mobNo, double conNo, double fees, double balance,String nickName) {
+    public ImportValues(String names, String mobNo, double conNo, double fees, double balance,int stbid,String nickName) {
         this.names = names;
         this.mobNo = mobNo;
         this.conNo = conNo;
         this.fees = fees;
         this.balance = balance;
+        this.stbid= stbid;
         this.nickName= nickName;
 
     }

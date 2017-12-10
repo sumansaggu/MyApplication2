@@ -66,12 +66,13 @@ public class PersonInfo {
         this._id=Id;
     }
 
-    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance, String nName) {
+    public PersonInfo(String name, String phone_no, float cust_no, int fees, int balance,int stbid, String nName) {
         this._name = name;
         this._phone_no = phone_no;
         this._cust_no = cust_no;
         this._fees = fees;
         this._balance= balance;
+        this._stbid= stbid;
         this._nName= nName;
     }
 

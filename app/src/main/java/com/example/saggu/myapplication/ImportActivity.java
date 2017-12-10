@@ -2,16 +2,21 @@ package com.example.saggu.myapplication;
 
 import android.Manifest;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -27,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -37,64 +43,40 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
     private File[] listFiles;
     File file;
 
-    Button btnListStorageForSTB, btnListStorageForCust;
+    Button btnListStorageForCust, btnListStorageForSTB;
 
     ArrayList<String> pathHistory;
     String lastDirectory;
     int count = 0;
-    ArrayList<ImportValues> uploadData;
+    ArrayList<ImportValues> uploadCust;
+    ArrayList<STB> uploadSTB;
     ListView listStorage;
+    TextView title;
     DbHendler dbHendler;
+    TextView helpText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import);
         dbHendler = new DbHendler(this, null, null, 1);
+        title = (TextView) findViewById(R.id.txtviewimport);
         listStorage = (ListView) findViewById(R.id.lvIntenalStorage);
-
+        helpText = (TextView) findViewById(R.id.txtViewHelp);
         btnListStorageForCust = (Button) findViewById(R.id.importCust);
         btnListStorageForSTB = (Button) findViewById(R.id.importSTB);
-        uploadData = new ArrayList<>();
+
+        uploadCust = new ArrayList<>();
+        uploadSTB = new ArrayList<>();
+        // checkFilePermissions();
         dbHendler.copyDbToExternalStorage(this.getApplicationContext());
-        checkFilePermissions();
-        dbHendler.copyDbToExternalStorage(this.getApplicationContext());
 
 
-
-
-
-
-        btnListStorageForCust.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                count = 0;
-                pathHistory = new ArrayList<String>();
-                pathHistory.add(count, System.getenv("EXTERNAL_STORAGE"));
-                Log.d(TAG, "btn sd card: " + pathHistory.get(count));
-                checkInternalStorage();
-            }
-        });
-        listStorage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                lastDirectory = pathHistory.get(count);
-                if (lastDirectory.equals(parent.getItemAtPosition(position))) {
-                    Log.d(TAG, " selected item for uplaod: " + lastDirectory);
-                    //execute method to read exel data
-                    readExelData(lastDirectory);
-
-
-                } else {
-                    count++;
-                    pathHistory.add(count, (String) parent.getItemAtPosition(position));
-                    checkInternalStorage();
-                    Log.d(TAG, "lvInternalstorage: " + pathHistory.get(count));
-                }
-
-            }
-        });
-        btnListStorageForSTB.setOnClickListener(new View.OnClickListener() {
+        btnListStorageForCust.setOnClickListener(this);
+        btnListStorageForSTB.setOnClickListener(this);
+        helpText.setOnClickListener(this);
+        //  registerForContextMenu(listStorage);
+     /*  backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (count == 0) {
@@ -106,34 +88,86 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
                     Log.d(TAG, "up Directory: " + pathHistory.get(count));
                 }
             }
-        });
+        });*/
 
 
     }
+
     @Override
     public void onClick(View v) {
-        if(v.getId()==R.id.importCust){
-
+        if (v.getId() == R.id.importCust) {
+            title.setText("SELECT CUSTOMER DATA");
+            count = 0;
+            pathHistory = new ArrayList<String>();
+            pathHistory.add(count, System.getenv("EXTERNAL_STORAGE"));
+            Log.d(TAG, "btn sd card: " + pathHistory.get(count));
+            checkInternalStorage();
+            listStorage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    lastDirectory = pathHistory.get(count);
+                    if (lastDirectory.equals(parent.getItemAtPosition(position))) {
+                        Log.d(TAG, " selected item for uplaod: " + lastDirectory);
+                        //execute method to read exel data
+                        readExelDataCustmer(lastDirectory);
+                    } else {
+                        count++;
+                        pathHistory.add(count, (String) parent.getItemAtPosition(position));
+                        checkInternalStorage();
+                        Log.d(TAG, "lvInternalstorage: " + pathHistory.get(count));
+                    }
+                }
+            });
         }
-        if(v.getId()==R.id.importSTB){
+        if (v.getId() == R.id.importSTB) {
+            title.setText("SELECT STB DATA");
+            count = 0;
+            pathHistory = new ArrayList<String>();
+            pathHistory.add(count, System.getenv("EXTERNAL_STORAGE"));
+            Log.d(TAG, "btn sd card: " + pathHistory.get(count));
+            checkInternalStorage();
+            listStorage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    lastDirectory = pathHistory.get(count);
+                    if (lastDirectory.equals(parent.getItemAtPosition(position))) {
+                        Log.d(TAG, " selected item for uplaod: " + lastDirectory);
+                        //execute method to read exel data
+                        readExelDataSTB(lastDirectory);
 
+                    } else {
+                        count++;
+                        pathHistory.add(count, (String) parent.getItemAtPosition(position));
+                        checkInternalStorage();
+                        Log.d(TAG, "lvInternalstorage: " + pathHistory.get(count));
+                    }
+                }
+            });
+        }
+        if (v.getId() == R.id.txtViewHelp) {
+            Log.d(TAG, "onClick: help clicked");
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setPackage("com.google.android.youtube");
+            intent.setData(Uri.parse("https://www.youtube.com/watch?v=vcNw1Pt0uMI"));
+            startActivity(intent);
         }
 
     }
-    private void readExelData(String filePath) {
+
+    private void readExelDataCustmer(String filePath) {
         Log.d(TAG, "readExelData...");
         //declare input file
         File inputFile = new File(filePath);
         try {
             InputStream inputStream = new FileInputStream(inputFile);
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-            XSSFSheet sheet = workbook.getSheetAt(0);
+            XSSFSheet sheet = workbook.getSheetAt(1);
             int rowscount = sheet.getPhysicalNumberOfRows();
             FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
             StringBuilder sb = new StringBuilder();
 
             //loops through the rows
-            for (int r = 0; r < rowscount; r++) {
+            for (int r = 1; r < rowscount; r++) {
                 Row row = sheet.getRow(r);
                 int cellscount = row.getPhysicalNumberOfCells();
                 //loop through the columns
@@ -143,16 +177,16 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
                         toast("format not supported");
                         break;
                     } else {
-                        String value = getCellsAtString(row, c, formulaEvaluator);
-                        String cellInfo = "r:" + r + "; c:" + c + "; v:" + value;
+                        String valueCust = getCellsAtString(row, c, formulaEvaluator);
+                        String cellInfo = "r:" + r + "; c:" + c + "; v:" + valueCust;
                         Log.d(TAG, "readExelData: data from row: " + cellInfo);
-                        sb.append(value + ", ");
+                        sb.append(valueCust + ", ");
                     }
                 }
                 sb.append(":");
             }
             Log.d(TAG, "readExelData: " + sb.toString());
-            parseStingBuilder(sb);
+            parseStringBuilderCust(sb);
             toast("Upload Success");
         } catch (FileNotFoundException ex) {
             Log.e(TAG, "readExelData: file not found " + ex.getMessage());
@@ -162,8 +196,8 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     //method for parsing data and storing in ArrayList<ImportedValues>
-    private void parseStingBuilder(StringBuilder mStingBuilder) {
-        Log.d(TAG, "parseStingBuilder: parsing started");
+    private void parseStringBuilderCust(StringBuilder mStingBuilder) {
+        Log.d(TAG, "parseStringBuilderCust: parsing started");
         //splits the sb into rows
         String[] rows = mStingBuilder.toString().split(":");
         //add to the arraylist row by row
@@ -182,17 +216,90 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
                 float conno = (float) conNo;
                 int fees = (int) Double.parseDouble(columns[3]);
                 int balance = (int) Double.parseDouble(columns[4]);
+                int stbid = (int) conNo;
                 String nName = columns[5];
-                dbHendler.addPersonImport(new PersonInfo(name, mob, conno, fees, balance, nName), this);
-                //    String cellInfo = "Rows.. | " + name + " | " + mob + " | " + conNo + " | " + fees + " | " + balance + " | " + nName;
-                //   Log.d(TAG, "parseStingBuilder: data from row: " + cellInfo);
+                dbHendler.addPersonImport(new PersonInfo(name, mob, conno, fees, balance, stbid, nName), this);
+                String cellInfo = "Rows.. | " + name + " | " + mob + " | " + conNo + " | " + fees + " | " + balance + " | " + stbid + " | " + nName;
+                Log.d(TAG, "parseStringBuilderCust: data from row: " + cellInfo);
 
 
                 //add the uploaddata ArrayList
                 //  uploadData.add(new ImportValues(x,y));
-                uploadData.add(new ImportValues(name, mob, conNo, fees, balance, nName));
+                uploadCust.add(new ImportValues(name, mob, conNo, fees, balance, stbid, nName));
             } catch (NumberFormatException ex) {
                 Log.e(TAG, "parseStringBuilder: NUMBERFORMATEXCEPTION " + ex.getMessage());
+            }
+        }
+
+    }
+
+    private void readExelDataSTB(String filePath) {
+        Log.d(TAG, "readExelData...");
+        //declare input file
+        File inputFile = new File(filePath);
+        try {
+            InputStream inputStream = new FileInputStream(inputFile);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            int rowscount = sheet.getPhysicalNumberOfRows();
+            FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            StringBuilder sb = new StringBuilder();
+
+            //loops through the rows
+            for (int r = 1; r < rowscount; r++) {
+                Row row = sheet.getRow(r);
+                int cellscount = row.getPhysicalNumberOfCells();
+                //loop through the columns
+                for (int c = 0; c < cellscount; c++) {
+                    //handle if there are two many columns in the sheet
+                    if (c > 2) {
+                        toast("format not supported");
+                        break;
+                    } else {
+                        String valueSTB = getCellsAtString(row, c, formulaEvaluator);
+                        String cellInfo = "r:" + r + "; c:" + c + "; v:" + valueSTB;
+                        Log.d(TAG, "readExelData: data from row: " + cellInfo);
+                        sb.append(valueSTB + ", ");
+                    }
+                }
+                sb.append("%");
+            }
+            Log.d(TAG, "readExelData: " + sb.toString());
+            parseStringBuilderSTB(sb);
+            toast("Upload Success");
+        } catch (FileNotFoundException ex) {
+            Log.e(TAG, "readExelData: file not found " + ex.getMessage());
+        } catch (IOException ex) {
+            Log.e(TAG, "readExelData: Error reading inputstream " + ex.getMessage());
+        }
+    }
+
+
+    private void parseStringBuilderSTB(StringBuilder mStingBuilder) {
+        Log.d(TAG, "parseStringBuilderCust:STB parsing started");
+        //splits the sb into rows
+        String[] rows = mStingBuilder.toString().split("%");
+        //add to the arraylist row by row
+        for (int i = 0; i < rows.length; i++) {
+            //split the columns of rows
+            String[] columns = rows[i].split(",");
+            //use try catch to make sure there are no "" that try to parse into doubles.
+            try {
+                String sn = columns[0];
+                String vc_mac = columns[1];
+                String status = "ACTIVE";
+                dbHendler.AddNewStb(new STB(sn, vc_mac, status));
+                String cellInfo = "Rows.." + i + " | " + sn + " | " + vc_mac + " | ";
+                Log.d(TAG, "parseStringBuilderCust: data from row: " + cellInfo);
+
+
+                //    add the data to ArrayList
+
+                //    uploadSTB.add(new STB(sn, vc_mac));
+            } catch (NumberFormatException ex) {
+                Log.e(TAG, "parseStringBuilder STB: NUMBERFORMATEXCEPTION " + ex.getMessage());
+            } catch (SQLiteConstraintException ex) {
+                toast("" + ex);
             }
         }
 
@@ -211,13 +318,15 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
                     break;
                 case Cell.CELL_TYPE_NUMERIC:
                     double numericvalue = cellvalue.getNumberValue();
+                    BigDecimal bd = new BigDecimal(numericvalue); //convert exponetial value to simple value
+
                     if (HSSFDateUtil.isCellDateFormatted(cell)) {
                         double date = cellvalue.getNumberValue();
                         SimpleDateFormat dateformatter =
                                 new SimpleDateFormat("YYYY/MM/DD");
                         value = dateformatter.format(HSSFDateUtil.getJavaDate(date));
                     } else {
-                        value = "" + numericvalue;
+                        value = "" + bd;
                     }
                     break;
                 case Cell.CELL_TYPE_STRING:
@@ -287,9 +396,27 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onBackPressed() {
-        Intent i = new Intent(this, ViewAll.class);
-        startActivity(i);
+        // Intent i = new Intent(this, ViewAll.class);
+        // startActivity(i);
+        finish();
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add("Import");
+    }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        super.onContextItemSelected(item);
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        if (item.getTitle() == "Import") {
+            toast("selected" + item);
+
+
+        }
+        return true;
+
+    }
 }

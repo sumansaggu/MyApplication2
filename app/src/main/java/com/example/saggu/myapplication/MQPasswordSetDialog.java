@@ -31,6 +31,7 @@ public class MQPasswordSetDialog extends DialogFragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.set_mq_password, null);
 
+
         id1 = (EditText) view.findViewById(R.id.id1);
         pw1 = (EditText) view.findViewById(R.id.pw1);
         id2 = (EditText) view.findViewById(R.id.id2);

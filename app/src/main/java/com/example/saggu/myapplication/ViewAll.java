@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -30,22 +29,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.html.WebColors;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,31 +68,43 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     SimpleCursorAdapter myAdapter;
     DbHendler dbHendler;
     ListView listViewCustomers;
-    TextView textView4;
     String TAG = "MyApp_ViewAll";
     EditText searchBox;
     int backpress;
-    String searchItem;
+    String searchItem = "";
 
     private Cursor mCursor;
-    Spinner spinner;
+    Spinner spinnerArea, spinnerSearchBy;
     List<Area> areas;
-    List<String> items = new ArrayList<>();
+    List<String> itemsArea = new ArrayList<>();
+    List<String> itemsSearchby = new ArrayList<>();
     int areaId = 1;
+    int searchBy = 0;
+    String searchText = "";
 
 
     JobScheduler jobScheduler;
     private PendingIntent pendingIntent;
     private AlarmManager alarmManager;
+    private String path;
+    private File dir;
+    private File file;
+    private PdfPCell cell;
+    //use to set background color
+    BaseColor myColor = WebColors.getRGBColor("#9E9E9E");
+    BaseColor myColor1 = WebColors.getRGBColor("#757575");
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         jobScheduler = JobScheduler.getInstance(this);
 
         setContentView(R.layout.activity_view_all);
+        // recovering the instance state
         dbHendler = new DbHendler(this, null, null, 1);
+
         listViewCustomers = (ListView) findViewById(R.id.listView);
         listViewCustomers.setOnItemClickListener(this);
         searchBox = (EditText) findViewById(R.id.search_box);
@@ -103,17 +116,32 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                displaySearchList();
+
+                searchText = String.valueOf(s);
+                createList(searchText);
+
+                try {
+                    myAdapter.swapCursor(mCursor);
+                } catch (Exception e) {
+                    Log.d(TAG, "onTextChanged: " + e.getMessage());
+                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (searchBox.getText().toString().equals("")) {
-                    displayProductList();
+                if (searchBox.getText().toString().equals("pdf")) {
+
+                    searchBox.setText("");
+
+                }
+                if (searchBox.getText().toString().equals("@idpw")) {
+                    dbHendler.createIDPWTable();
+                    searchBox.setText("");
+
                 }
                 if (searchBox.getText().toString().equals("checkmonth")) {
                     dbHendler.checkmonthchange(getApplicationContext());
-                    searchBox.setText("");
+
                 }
                 if (searchBox.getText().toString().equals("@endofmonth@")) {
                     dbHendler.endOfMonth(getApplicationContext());
@@ -140,6 +168,10 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
                     goToImportValues();
                     searchBox.setText("");
                 }
+                if (searchBox.getText().toString().equals("deletedb")) {
+                    deletedb();
+                    searchBox.setText("");
+                }
             }
         });
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
@@ -152,15 +184,15 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             toolbar.setTitle("SD Card not found");
         }
 
-
-        // dbHendler.getAllFromCustAndSTB();
-        displayProductList();
+        //dbHendler.getAllFromCustAndSTB();
+        createList("");
         registerForContextMenu(listViewCustomers);
-        spinner = (Spinner) findViewById(R.id.spinnerByArea);
-        spinner.setOnItemSelectedListener(this);
+        spinnerArea = (Spinner) findViewById(R.id.spinnerByArea);
+        spinnerArea.setOnItemSelectedListener(this);
+        spinnerSearchBy = (Spinner) findViewById(R.id.spinnerSearchByName);
+        spinnerSearchBy.setOnItemSelectedListener(this);
         loadSpinnerData();
         scheduleAlarm();
-
     }
 
 
@@ -202,12 +234,15 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Reciept");
         menu.add("Detail");
-        menu.add("Edit");
-        menu.add("START/CUT");
-        menu.add("SET STB");
-        menu.add("Delete");
-        menu.add("Call");
         menu.add("MQ");
+        menu.add("Call");
+        menu.add("Message");
+        menu.add("Start/Cut");
+        menu.add("Edit");
+        menu.add("Set STB");
+        menu.add("Delete");
+
+
     }
 
     @Override
@@ -220,14 +255,14 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             DeleteAlert myAlert = new DeleteAlert();
             int custid = (int) menuInfo.id;
             int stbId = dbHendler.getStbIdFromCust(custid);
-            Log.d(TAG, "STB ID " + stbId);
+
             Bundle bundle = new Bundle();
             myAlert.setArguments(bundle);
             bundle.putInt("CUSTID", custid);
             bundle.putInt("STBID", stbId);
             myAlert.show(getFragmentManager(), "DeleteAlert");
 
-        } else if (item.getTitle() == "START/CUT") {
+        } else if (item.getTitle() == "Start/Cut") {
             int custId = (int) menuInfo.id;
             String status = dbHendler.conStatus(custId);
 
@@ -244,10 +279,10 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             intent.putExtra("editcustomer", "editcustomer");
             intent.putExtra("ID", id);
             startActivity(intent);
-        } else if (item.getTitle() == "SET STB") {
+
+        } else if (item.getTitle() == "Set STB") {
             int custid = (int) menuInfo.id;
             android.app.FragmentManager manager = getFragmentManager();
-
             PersonInfo personInfo = new PersonInfo();
             long stbId = dbHendler.getSTBID(custid);
             Bundle bundle = new Bundle();
@@ -258,7 +293,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             dialogSTB.show(manager, "DialogSTB");
 
 
-        } else if (item.getTitle() == "Detail") {
+        }/* else if (item.getTitle() == "Detail") {
             android.app.FragmentManager manager = getFragmentManager();
             Bundle bundle = new Bundle();
             DialogFeesDetail dialogFeesDetail = new DialogFeesDetail();
@@ -267,6 +302,12 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             bundle.putInt("ID", id);
             dialogFeesDetail.show(manager, "FeeDetailDialog");
             // Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
+*/ else if (item.getTitle() == "Detail") {
+            int id = (int) menuInfo.id;
+            Intent intent = new Intent(this, DetailFeesActivity.class);
+            intent.putExtra("ID", id);
+            startActivity(intent);
+
 
         } else if (item.getTitle() == "Reciept") {
             android.app.FragmentManager manager = getFragmentManager();
@@ -282,7 +323,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             int custId = (int) menuInfo.id;
             PersonInfo info = dbHendler.getCustInfo(custId);
             String contact = info.getPhoneNumber();
-            Log.d(TAG, contact);
+
             Intent i = new Intent(Intent.ACTION_DIAL);
             i.setData(Uri.parse("tel:" + "+91" + contact));
             startActivity(i);
@@ -295,12 +336,41 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             intent.putExtra("SN", sn);
             startActivity(intent);
 
+        } else if (item.getTitle() == "Message") {
+            int custId = (int) menuInfo.id;
+            PersonInfo info = dbHendler.getCustInfo(custId);
+            String name = info.getName();
+            String mobNo = info.getPhoneNumber();
+
+            int balance = info.get_balance();
+            String y = "";
+            List<Fees> detail = dbHendler.getFeesForMsg(custId);
+
+            for (Fees fees : detail) {
+
+                String x = "Rs." + fees.getFees() + " " + fees.getDate() + ", ";
+                //    Log.d("single entry ", x);
+                y = y.concat(x);
+            }
+            String z = "Payment due Rs. " + balance + ", " + y;
+
         }
 
         return true;
     }
 
-    //region OptionMenu
+
+    public void send(String detail, String mobNo) {
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, detail);
+        //   sendIntent.putExtra("jid", mobNo + "@s.whatsapp.net"); //phone number without "+" prefix
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_all_menu, menu);
@@ -311,17 +381,29 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.large_balance) {
-            getLargerBalance();
+            //  getLargerBalance();
+            createList("largeBalance");
+            myAdapter.swapCursor(mCursor);
             return true;
         }
         if (id == R.id.by_number) {
             // int sum = dbHendler.totalBalance();
-            displayProductList();
+            createList("");
             return true;
         }
         if (id == R.id.colection_btw_two_dates) {
             Intent intent = new Intent(this, BtwTwoDates.class);
             startActivity(intent);
+            return true;
+        }
+        if(id == R.id.create_pdf){
+            try {
+                createPdf2();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            }
             return true;
         }
         if (id == R.id.add_customer) {
@@ -330,7 +412,9 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }
         if (id == R.id.manage_stb) {
             Intent intent = new Intent(this, STBRecord.class);
+
             startActivity(intent);
+
             return true;
         }
         if (id == R.id.backup_database) {
@@ -345,7 +429,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         if (id == R.id.add_stb) {
             Intent intent = new Intent(this, CustAddEditActivity.class);
             intent.putExtra("addstb", R.id.add_stb);
-            Log.d(TAG, "add stb" + R.id.add_stb);
+
             startActivity(intent);
             return true;
         }
@@ -389,16 +473,37 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-    //region Create all List
-    public void displayProductList() {
+    public void createList(String s) {
         try {
-            Cursor cursor = dbHendler.getAllFromCustAndSTB(areaId);
-            if (cursor == null) {
+            if (s.equals("")) {
+                //
+                mCursor = dbHendler.getAllFromCustAndSTB(areaId);
+
+            } else if (!s.equals("") && !s.equals("largeBalance")) {
+                //     Log.d(TAG, "createList: 2");
+                if (searchBy == 0) {
+                    mCursor = dbHendler.searchPersonToList(s);
+                } else if (searchBy == 1) {
+                    mCursor = dbHendler.searchPersonByNickName(s);
+                } else if (searchBy == 2) {
+                    mCursor = dbHendler.searchBySTBSN(s);
+                } else if (searchBy == 3) {
+                    mCursor = dbHendler.searchPersonByMobileNo(s);
+                }
+            } else if (s.equals("largeBalance")) {
+                //    Log.d(TAG, "createList: 3");
+                mCursor = dbHendler.getLargerBalance();
+            } else if (!s.equals("") && !(searchBy == 0)) {
+                //     Log.d(TAG, "createList: 4");
+                mCursor = dbHendler.searchPersonByNickName(s);
+            }
+            if (mCursor == null) {
                 Toast.makeText(this, "Unable to generate cursor", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (cursor.getCount() == 0) {
-                Toast.makeText(this, "No Customer in the Database", Toast.LENGTH_SHORT).show();
+            if (mCursor.getCount() == 0) {
+                //   Toast.makeText(this, "No Customer in the Database", Toast.LENGTH_SHORT).show();
+
                 return;
             }
             String[] columns = new String[]{
@@ -425,7 +530,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             };
             myAdapter = new MySimpleCursorAdapter(this,
                     R.layout.layout_list,
-                    cursor,
+                    mCursor,
                     columns,
                     boundTo,
                     0);
@@ -436,7 +541,6 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }
     }
 
-    //endregion
 
     private class MySimpleCursorAdapter extends SimpleCursorAdapter {
         public MySimpleCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
@@ -477,6 +581,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             String mfees = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_FEES));
             String mbalance = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_BALANCE));
             String mnickname = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_NICKNAME));
+
             name.setText(mname);
             mobile.setText(mmobile);
             conNo.setText(mconno);
@@ -513,106 +618,9 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     }
 
 
-    //region Create Search  List
-    public void displaySearchList() {
-        searchItem = searchBox.getText().toString();
-        try {
-            Cursor cursor = dbHendler.searchPersonToList(searchItem);
-            if (cursor == null) {
-                //    textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                //  textView4.setText("No Customer Found");
-                return;
-            } else {
-                //   textView4.setText("");
-                String[] columns = new String[]{
-                        //DbHendler.KEY_ID,
-                        DbHendler.KEY_NAME,
-                        DbHendler.KEY_PHONE_NO,
-                        DbHendler.KEY_CUST_NO,
-                        DbHendler.KEY_FEES,
-                        DbHendler.KEY_BALANCE,
-                        DbHendler.KEY_SN,
-                        DbHendler.KEY_NICKNAME
-                };
-                int[] boundTo = new int[]{
-                        //R.id.pId,
-                        R.id.pName,
-                        R.id.pMob,
-                        R.id.cNo,
-                        R.id.cFees,
-                        R.id.cBalance,
-                        R.id.vc_mac,
-                        R.id.txtnickname
-                };
-                myAdapter = new MySimpleCursorAdapter(this,
-                        R.layout.layout_list,
-                        cursor,
-                        columns,
-                        boundTo,
-                        0);
-                listViewCustomers.setAdapter(myAdapter);
-            }
-        } catch (Exception ex) {
-            Log.d(TAG, "" + ex);
-//            textView4.setText("There was an error!");
-        }
-    }
-
-    //endregion
-
-    //region larger balance list
-    public void getLargerBalance() {
-        try {
-            Cursor cursor = dbHendler.getLargerBalance();
-            if (cursor == null) {
-                textView4.setText("Unable to generate cursor.");
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                textView4.setText("No Customer in the Database.");
-                return;
-            }
-            String[] columns = new String[]{
-                    //DbHendler.KEY_ID,
-                    DbHendler.KEY_NAME,
-                    DbHendler.KEY_PHONE_NO,
-                    DbHendler.KEY_CUST_NO,
-                    DbHendler.KEY_FEES,
-                    DbHendler.KEY_BALANCE,
-                    DbHendler.KEY_SN,
-                    DbHendler.KEY_NICKNAME
-            };
-            int[] boundTo = new int[]{
-                    //R.id.pId,
-                    R.id.pName,
-                    R.id.pMob,
-                    R.id.cNo,
-                    R.id.cFees,
-                    R.id.cBalance,
-                    R.id.vc_mac,
-                    R.id.txtnickname
-            };
-            myAdapter = new MySimpleCursorAdapter(this,
-                    R.layout.layout_list,
-                    cursor,
-                    columns,
-                    boundTo,
-                    0);
-            listViewCustomers.setAdapter(myAdapter);
-
-        } catch (Exception ex) {
-//            textView4.setText("There was an error!");
-        }
-    }
-
-    //endregion
-
     //region recreate list on dialog closed
     public void refreshListView() {
-        Log.d(TAG, "dialg closed");
+
         mCursor = dbHendler.getAllFromCustAndSTB(areaId);
         myAdapter.swapCursor(mCursor);
     }
@@ -625,7 +633,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         //  Toast.makeText(getApplicationContext(), "ID " + menuInfo.id + ", position " + menuInfo.position, Toast.LENGTH_SHORT).show();
         //If your ListView's content was created by attaching it to a database cursor,
         // the ID property of the AdapterContextMenuInfo object is the database ID corresponding to the ListItem.
-        displayProductList();
+        createList("");
     }
 
     //endregion
@@ -636,9 +644,16 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
 
     //region call to backup and restore functions
     public void backupDb() {
-        String db = "myInfoManager.db";
+
         dbHendler.copyDbToExternalStorage(this.getApplicationContext());
 
+    }
+
+
+    private void deletedb() {
+        File dbfile = new File(Environment.getExternalStorageDirectory(), "/MyCableData/myInfoManager.db");
+        dbfile.delete();
+        Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
     }
 
     public void restoreDB() {
@@ -648,22 +663,33 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     //endregion
 
 
-    private void loadSpinnerData() {
+    public void loadSpinnerData() {
 
         // Spinner Drop down elements
         areas = dbHendler.getAllAreas();
         for (Area area : areas) {
             String singleitem = area.get_areaName();
-            items.add(singleitem);
+            itemsArea.add(singleitem);
         }
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, items);
+
+        itemsSearchby.add("Full Name");
+        itemsSearchby.add("Nick Name");
+        itemsSearchby.add("STB Serial");
+        itemsSearchby.add("Mobile No.");
+        // Creating adapter for spinnerArea
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, itemsArea);
+        ArrayAdapter<String> searchByAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, itemsSearchby);
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        searchByAdaptor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        // attaching data adapter to spinner
-        spinner.setAdapter(dataAdapter);
+
+        // attaching data adapter to spinnerArea
+        spinnerArea.setAdapter(dataAdapter);
+        spinnerSearchBy.setAdapter(searchByAdaptor);
+
+
     }
 
 
@@ -716,15 +742,16 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         }
         if (backpress > 1) {
 
-            //this.finishAffinity();
-            //finish();
+            try {
+                MQWebViewActivity.mqactivity.finish();   // to finish Oracle activity on backpress
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Intent startMain = new Intent(Intent.ACTION_MAIN);
             startMain.addCategory(Intent.CATEGORY_HOME);
             startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(startMain);
             finishAffinity();
-
-
             super.onBackPressed();
         }
     }
@@ -748,6 +775,9 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     protected void onResume() {
         super.onResume();
         backpress = 0;
+        createList(searchBox.getText().toString());
+
+        Log.d(TAG, "onResume: ");
     }
 
 
@@ -755,10 +785,14 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)
-        String item = parent.getItemAtPosition(position).toString();
-        areaId = dbHendler.getAreaID(item);
-        displayProductList();
-        Log.d(TAG, "" + areaId);
+        if (parent.getId() == R.id.spinnerByArea) {
+            String item = parent.getItemAtPosition(position).toString();
+            areaId = dbHendler.getAreaID(item);
+            createList("");
+        } else if (parent.getId() == R.id.spinnerSearchByName) {
+            searchBy = position;
+            createList(searchText);
+        }
     }
 
     @Override
@@ -795,6 +829,273 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         Intent intent = new Intent(this, ImportActivity.class);
         startActivity(intent);
         finish();
+    }
+
+
+    public void createPDF() throws FileNotFoundException, DocumentException {
+
+        //create document file
+        Document doc = new Document();
+        try {
+
+            Log.e("PDFCreator", "PDF Path: " + path);
+            SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+            file = new File(dir, "Trinity PDF" + sdf.format(Calendar.getInstance().getTime()) + ".pdf");
+            FileOutputStream fOut = new FileOutputStream(file);
+            PdfWriter writer = PdfWriter.getInstance(doc, fOut);
+
+            //open the document
+            doc.open();
+            //create table
+            PdfPTable pt = new PdfPTable(3);
+            pt.setWidthPercentage(100);
+            float[] fl = new float[]{20, 45, 35};
+            pt.setWidths(fl);
+            cell = new PdfPCell();
+            cell.setBorder(Rectangle.NO_BORDER);
+
+            //set drawable in cell
+           /* Drawable myImage = MainActivity.this.getResources().getDrawable(R.drawable.trinity);
+            Bitmap bitmap = ((BitmapDrawable) myImage).getBitmap();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] bitmapdata = stream.toByteArray();*/
+            try {
+                //bgImage = Image.getInstance(bitmapdata);
+                // bgImage.setAbsolutePosition(330f, 642f);
+                //cell.addElement(bgImage);
+                // pt.addCell(cell);
+                cell = new PdfPCell();
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.addElement(new Paragraph("Trinity Tuts"));
+
+                cell.addElement(new Paragraph(""));
+                cell.addElement(new Paragraph(""));
+                pt.addCell(cell);
+                cell = new PdfPCell(new Paragraph(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                pt.addCell(cell);
+
+                PdfPTable pTable = new PdfPTable(1);
+                pTable.setWidthPercentage(100);
+                cell = new PdfPCell();
+                cell.setColspan(1);
+                cell.addElement(pt);
+                pTable.addCell(cell);
+                PdfPTable table = new PdfPTable(6);
+
+                float[] columnWidth = new float[]{6, 30, 30, 20, 20, 30};
+                table.setWidths(columnWidth);
+
+
+                cell = new PdfPCell();
+
+
+                cell.setBackgroundColor(myColor);
+                cell.setColspan(6);
+                cell.addElement(pTable);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase(" "));
+                cell.setColspan(6);
+                table.addCell(cell);
+                cell = new PdfPCell();
+                cell.setColspan(6);
+
+                cell.setBackgroundColor(myColor1);
+
+                cell = new PdfPCell(new Phrase("#"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase("Header 1"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase("Header 2"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase("Header 3"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase("Header 4"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+                cell = new PdfPCell(new Phrase("Header 5"));
+                cell.setBackgroundColor(myColor1);
+                table.addCell(cell);
+
+                //table.setHeaderRows(3);
+                cell = new PdfPCell();
+                cell.setColspan(6);
+
+                for (int i = 1; i <= 10; i++) {
+                    table.addCell(String.valueOf(i));
+                    table.addCell("Header 1 row " + i);
+                    table.addCell("Header 2 row " + i);
+                    table.addCell("Header 3 row " + i);
+                    table.addCell("Header 4 row " + i);
+                    table.addCell("Header 5 row " + i);
+
+                }
+
+                PdfPTable ftable = new PdfPTable(6);
+                ftable.setWidthPercentage(100);
+                float[] columnWidthaa = new float[]{30, 10, 30, 10, 30, 10};
+                ftable.setWidths(columnWidthaa);
+                cell = new PdfPCell();
+                cell.setColspan(6);
+                cell.setBackgroundColor(myColor1);
+                cell = new PdfPCell(new Phrase("Total Nunber"));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Phrase(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Phrase(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Phrase(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Phrase(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Phrase(""));
+                cell.setBorder(Rectangle.NO_BORDER);
+                cell.setBackgroundColor(myColor1);
+                ftable.addCell(cell);
+                cell = new PdfPCell(new Paragraph("Footer"));
+                cell.setColspan(6);
+                ftable.addCell(cell);
+                cell = new PdfPCell();
+                cell.setColspan(6);
+                cell.addElement(ftable);
+                table.addCell(cell);
+                doc.add(table);
+                Toast.makeText(getApplicationContext(), "created PDF", Toast.LENGTH_LONG).show();
+            } catch (DocumentException de) {
+                Log.e("PDFCreator", "DocumentException:" + de);
+            } finally {
+                doc.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    String LOG_TAG = "PDF GENERATOR";
+
+    File myFile;
+    String timeStamp;
+    private void createPdf2() throws FileNotFoundException, DocumentException {
+
+        //  File pdfFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "pdfdemo");
+        File pdfFolder = new File(Environment.getExternalStorageDirectory(), "MyReports");
+        Log.d(TAG, "createPdf2: " + pdfFolder);
+        if (!pdfFolder.exists()) {
+            pdfFolder.mkdir();
+            Log.i(LOG_TAG, "Pdf Directory created");
+        }
+
+        //Create time stamp
+        Date date = new Date();
+        timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+        myFile = new File(pdfFolder + "/" + timeStamp + ".pdf");
+        Log.d(TAG, "createPdf2: " + myFile);
+
+        OutputStream output = new FileOutputStream(myFile);
+
+        //Step 1
+        Document document = new Document(PageSize.A4);
+
+        //Step 2
+        PdfWriter.getInstance(document, output);
+
+        //Step 3
+        document.open();
+        document.add(addTitle(areaId));
+        PdfPTable table = new PdfPTable(7); // columns.
+        table.setWidthPercentage(100);
+
+        float[] columnWidths = {
+                1f, // no
+                6f, //name
+                2f, //phone
+                1f, //connections
+                1f, //fees
+                1f, //total
+                1.5f  //date
+        };
+        table.setWidths(columnWidths);
+        table.addCell("No.");
+        table.addCell("Name");
+        table.addCell("Mobile");
+        table.addCell("NoC");
+        table.addCell("Fees");
+        table.addCell("Total");
+        table.addCell("Date");
+        table.setHeaderRows(1);
+        Cursor cursor = dbHendler.getAllFromCustAndSTB(areaId);
+        int totalfees = 0;
+        if (cursor.moveToFirst()) {
+
+            do {
+                PdfPCell custno = new PdfPCell(new Paragraph(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_CUST_NO))));
+                PdfPCell name = new PdfPCell(new Paragraph(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_NAME))));
+                PdfPCell mobile = new PdfPCell(new Paragraph(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_PHONE_NO))));
+                PdfPCell NoC = new PdfPCell(new Paragraph("1"));
+                PdfPCell fees = new PdfPCell(new Paragraph(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_FEES))));
+                PdfPCell total = new PdfPCell(new Paragraph(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_BALANCE))));
+                PdfPCell rdate = new PdfPCell(new Paragraph(""));
+
+                table.addCell(custno);
+                table.addCell(name);
+                table.addCell(mobile);
+                table.addCell(NoC);
+                table.addCell(fees);
+                table.addCell(total);
+                table.addCell(rdate);
+                int addfees = Integer.parseInt(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_BALANCE)));
+                if(addfees>0){ //not add advance collected fees
+                    totalfees = totalfees +addfees;
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        table.addCell("");
+        table.addCell("");
+        table.addCell("");
+        table.addCell("");
+        table.addCell("Total");
+        table.addCell(String.valueOf(totalfees));
+        table.addCell("");
+        document.add(table);
+        //Step 4 Add content
+        //document.add(new Paragraph("HEEELO"));
+        //document.add(new Paragraph("MEEEELO"));
+        //Step 5: Close the document
+        document.close();
+        viewPdf();
+    }
+    public  Paragraph addTitle(int areaid){
+      Area area=  dbHendler.getArea(areaid);
+        String areaname =area.get_areaName();
+
+        Font fontbold = FontFactory.getFont("Times-Roman", 20, Font.BOLD);
+        Paragraph p = new Paragraph("Area: "+areaname+" ("+timeStamp+")", fontbold);
+        p.setSpacingAfter(20);
+        p.setAlignment(1); // Center
+        return p;
+    }
+    private void viewPdf() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(myFile), "application/pdf");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
     }
 
 

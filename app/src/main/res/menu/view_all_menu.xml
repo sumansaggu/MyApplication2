@@ -16,15 +16,21 @@
         android:title="Between two dates"
         app:showAsAction="never" />
     <item
-        android:id="@+id/add_customer"
-        android:orderInCategory="100"
-        android:title="Add Customer"
+        android:id="@+id/create_pdf"
+        android:orderInCategory="92"
+        android:title="Create PDF"
         app:showAsAction="never" />
     <item
         android:id="@+id/manage_stb"
         android:orderInCategory="100"
         android:title="Manage STBs"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/add_customer"
+        android:orderInCategory="100"
+        android:title="Add Customer"
+        app:showAsAction="never" />
+
     <item
         android:id="@+id/area"
         android:orderInCategory="100"
@@ -54,7 +60,7 @@
     <item
         android:id="@+id/importdata"
         android:orderInCategory="300"
-        android:title="Import Data"
+        android:title="Import Data from Excel"
         app:showAsAction="never" />
 
 </menu>

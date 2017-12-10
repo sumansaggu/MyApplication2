@@ -4,8 +4,8 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,8 +20,6 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 
 public class STBRecord extends AppCompatActivity {
@@ -80,7 +78,7 @@ public class STBRecord extends AppCompatActivity {
                     R.id.stb_vc,
                     R.id.stb_status
             };
-       adaptor = new MySimpleCursorAdaptor(this,
+            adaptor = new MySimpleCursorAdaptor(this,
                     R.layout.stb_list_item,
                     cursor,
                     columns,
@@ -108,16 +106,18 @@ public class STBRecord extends AppCompatActivity {
                 return;
             }
             String[] columns = new String[]{
+                    DbHendler.KEY_ID,
                     DbHendler.KEY_SN,
                     DbHendler.KEY_VC,
                     DbHendler.KEY_STATUS
             };
             int[] boundTo = new int[]{
+                    R.id.stbID,
                     R.id.stb_sn,
                     R.id.stb_vc,
                     R.id.stb_status
             };
-      adaptor = new MySimpleCursorAdaptor(this,
+            adaptor = new MySimpleCursorAdaptor(this,
                     R.layout.stb_list_item,
                     cursor,
                     columns,
@@ -183,7 +183,7 @@ public class STBRecord extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add("Edit");
-       // menu.add("Delete");
+        // menu.add("Delete");
         menu.add("MQ");
     }
 
@@ -209,8 +209,8 @@ public class STBRecord extends AppCompatActivity {
             int stbId = (int) menuInfo.id;
 
             STB stb = dbHendler.getSTBInfo(stbId);
-            String sn= stb.getSerialNo();
-            Log.d(TAG, "onContextItemSelected: "+sn);
+            String sn = stb.getSerialNo();
+            Log.d(TAG, "onContextItemSelected: " + sn);
             Intent intent = new Intent(this, MQWebViewActivity.class);
             intent.putExtra("CALLINGACTIVITY", "STBRECORD");
             intent.putExtra("SN", sn);
@@ -222,6 +222,8 @@ public class STBRecord extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
+        finish();
         Intent i = new Intent(this, ViewAll.class);
         startActivity(i);
     }
@@ -244,6 +246,7 @@ public class STBRecord extends AppCompatActivity {
             // Find fields to populate in inflated template
             TextView sn = (TextView) view.findViewById(R.id.stb_sn);
             TextView vc = (TextView) view.findViewById(R.id.stb_vc);
+            TextView id = (TextView) view.findViewById(R.id.stbID);
             TextView sts = (TextView) view.findViewById(R.id.stb_status);
             RadioButton radiobtn = (RadioButton) view.findViewById(R.id.radioBtn);
             radiobtn.setVisibility(View.INVISIBLE);
@@ -253,9 +256,11 @@ public class STBRecord extends AppCompatActivity {
             String serial = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_SN));
             String Vcard = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_VC));
             String status = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_STATUS));
+            String stbID = cursor.getString(cursor.getColumnIndex(DbHendler.KEY_ID));
             sn.setText(serial);
             vc.setText(Vcard);
             sts.setText(status);
+            id.setText(stbID);
 
         }
 

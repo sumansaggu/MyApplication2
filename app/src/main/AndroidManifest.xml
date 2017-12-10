@@ -25,7 +25,9 @@
             android:name=".CustAddEditActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ViewAll" />
+        <activity
+            android:name=".ViewAll"
+            android:launchMode="singleInstance" />
         <activity android:name=".BtwTwoDates" />
         <activity android:name=".STBRecord" />
         <activity android:name=".ScannerActivity" />
@@ -66,8 +68,9 @@
             android:name=".MQWebViewActivity"
             android:alwaysRetainTaskState="true"
             android:launchMode="singleInstance" />
-        <activity android:name=".ImportActivity">
-        </activity>
+        <activity android:name=".ImportActivity" />
+        <activity android:name=".DetailFeesActivity" />
+        <activity android:name=".IDPWActivity"></activity>
     </application>
 
 </manifest>

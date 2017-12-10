@@ -1,6 +1,5 @@
 package com.example.saggu.myapplication;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,7 +23,7 @@ import java.util.List;
  * Created by Saggu on 12/16/2016.
  */
 
-public class DialogReciept extends DialogFragment implements View.OnClickListener{
+public class DialogReciept extends DialogFragment implements View.OnClickListener {
     String TAG = "MyApp_DialogBox";
 
     DbHendler dbHendler;
@@ -75,7 +73,6 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     }
 
 
-
     public void hideKeyboard() {
 
         InputMethodManager imm = (InputMethodManager) getView().getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -85,23 +82,19 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
+        if (v.getId() == R.id.date) {
+            hideKeyboard();
+            pickDate();
+        }
         if (v.getId() == R.id.buttonYes) {
             updateReciept();
             getinformation();
             viewfeestable();
-
-
-        }
-        if (v.getId() == R.id.date) {
-            hideKeyboard();
-            pickDate();
-
+            dismiss();
         }
         if (v.getId() == R.id.buttonNo) {
             dismiss();
         }
-
-
     }
 
 

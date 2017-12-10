@@ -41,10 +41,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/pName"
-
         android:layout_alignStart="@+id/pName"
         android:layout_below="@+id/pName"
-        android:maxLength="10"
         android:text="8888888888" />
 
     <TextView
@@ -160,10 +158,10 @@
         android:id="@+id/textView25"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="nName:"
-        android:layout_below="@+id/textView27"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView27"
+        android:text="Other:" />
 
 
 </RelativeLayout>

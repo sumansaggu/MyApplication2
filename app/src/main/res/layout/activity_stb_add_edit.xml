@@ -73,33 +73,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/layoutButtons2"
-        android:layout_below="@+id/layoutButtons1"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="18dp">
+        android:layout_alignParentStart="true">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/add_stb"
             android:text="ADD"
-            android:layout_marginLeft="75dp"
-            android:layout_marginStart="75dp"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <Button
-            android:id="@+id/btn_stb_record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="View STBs"
-            android:visibility="visible"
-            android:layout_marginLeft="41dp"
-            android:layout_marginStart="41dp"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/add_stb"
-            android:layout_toEndOf="@+id/add_stb" />
+            android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 

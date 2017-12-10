@@ -10,12 +10,12 @@
         android:id="@+id/relativeLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentStart="true">
 
         <TextView
-            android:id="@+id/textView33"
+            android:id="@+id/txtviewimport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -27,25 +27,36 @@
             android:id="@+id/importCust"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/importSTB"
-            android:layout_alignBottom="@+id/importSTB"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="68dp"
-            android:layout_marginStart="68dp"
-            android:text="Customer" />
+            android:text="Customer"
+            android:layout_marginTop="14dp"
+            android:layout_below="@+id/txtviewimport"
+            android:layout_toRightOf="@+id/importSTB"
+            android:layout_toEndOf="@+id/importSTB"
+            android:layout_marginLeft="80dp"
+            android:layout_marginStart="80dp" />
 
         <Button
             android:id="@+id/importSTB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="78dp"
-            android:layout_marginStart="78dp"
-            android:layout_marginTop="64dp"
-            android:layout_toEndOf="@+id/importCust"
-            android:layout_toRightOf="@+id/importCust"
-            android:text="STB" />
+
+            android:text="STB"
+            android:layout_marginLeft="64dp"
+            android:layout_marginStart="64dp"
+            android:layout_alignBaseline="@+id/importCust"
+            android:layout_alignBottom="@+id/importCust"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/txtViewHelp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Need Help Click Here"
+            android:textColor="@color/colorAccent"
+            android:layout_below="@+id/importCust"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="6dp" />
 
     </RelativeLayout>
 
@@ -53,11 +64,9 @@
         android:id="@+id/lvIntenalStorage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/relativeLayout3"
-        android:layout_marginBottom="44dp" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

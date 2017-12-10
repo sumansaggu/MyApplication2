@@ -12,15 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by Saggu on 12/20/2016.
  */
 
-public class DialogFeesDetail extends DialogFragment {
+public class DialogFeesDetail extends DialogFragment implements View.OnClickListener{
     SimpleCursorAdapter simpleCursorAdapter;
     DbHendler dbHendler;
     ListView listViewFees;
@@ -28,8 +30,7 @@ public class DialogFeesDetail extends DialogFragment {
     TextView textview;
     int id;
     TextView custname, startDate;
-
-
+    Button sms,whatsApp;
 
 
     @Nullable
@@ -40,20 +41,22 @@ public class DialogFeesDetail extends DialogFragment {
         dbHendler = new DbHendler(this.getActivity(), null, null, 1);
         listViewFees = (ListView) view.findViewById(R.id.fees_list);
         custname = (TextView) view.findViewById(R.id.cust_name_in_dialog);
-        startDate= (TextView) view.findViewById(R.id.strt_date_in_dailog);
+        startDate = (TextView) view.findViewById(R.id.strt_date_in_dailog);
+      //  sms = (Button) view.findViewById(R.id.sendSms);
+     //   whatsApp = (Button) view.findViewById(R.id.whatsApp);
+
 
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-        PersonInfo info= dbHendler.getCustInfo(id);
+        PersonInfo info = dbHendler.getCustInfo(id);
         String name = info.getName().toString().trim();
-      // String startdat= String.valueOf(info.get_startdate().toString());
+        // String startdat= String.valueOf(info.get_startdate().toString());
         String startdat = info.get_startdate().toString().trim();
-    //    getDialog().setTitle(name);
+        //    getDialog().setTitle(name);
         custname.setText(name);
-      startDate.setText(startdat);
+        startDate.setText(startdat);
 
         displayFeeDeatail();
-
 
 
         return view;
@@ -97,8 +100,19 @@ public class DialogFeesDetail extends DialogFragment {
             listViewFees.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
-            Log.d(TAG,"error");
-          //  textview.setText("There was an error!");
+            Log.d(TAG, "error");
+            //  textview.setText("There was an error!");
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId()==R.id.sendSms){
+            Toast.makeText(this.getActivity(), "clicked"+v, Toast.LENGTH_SHORT).show();
+        }
+        if (v.getId()==R.id.whatsApp){
+            Toast.makeText(this.getActivity(), "clicked"+v, Toast.LENGTH_SHORT).show();
+        }
+
     }
 }
