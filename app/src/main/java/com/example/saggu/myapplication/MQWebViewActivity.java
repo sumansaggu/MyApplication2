@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.http.SslError;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
@@ -50,7 +52,7 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
     DbHendler dbHendler;
     List<String> listID;
     List<String> listPW;
-    Button btnrelogin;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,18 +67,11 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
         getSupportActionBar().setTitle("MQ");
         mywebView = (WebView) findViewById(R.id.myWebView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        spinnerID = (Spinner) findViewById(R.id.spnrOragleID);
+        spinnerID = (Spinner) findViewById(R.id.spnrOracleID);
         spinnerID.setOnItemSelectedListener(this);
-        btnrelogin = (Button) findViewById(R.id.btn_relogin);
-        btnrelogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
-        });
-             //request desktopmode
+
+
+        //request desktopmode
         mywebView.getSettings().setUserAgentString("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.4) Gecko/20100101 Firefox/4.0");
 
         mywebView.getSettings().setJavaScriptEnabled(true);
@@ -89,6 +84,7 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
         Bundle bundle = getIntent().getExtras();
         Log.d(TAG, "onCreate: webactivity");
         //  loadShardPref();
+        isConnected(this);
 
         if (bundle == null) {
             return;
@@ -167,6 +163,24 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
 
     }
 
+    /**
+     * Check the network state
+     *
+     * @param context context of application
+     * @return true if the phone is connected
+     */
+    public static boolean isConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnected()) {
+            Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            Toast.makeText(context, "Data not connected", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -181,38 +195,43 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
     @Override
     protected void onResume() {
         super.onResume();
-
-        loadSpinner();
-        Intent intent = getIntent();
-        Bundle bundle = getIntent().getExtras();
-        if (bundle == null) {
-            return;
-        }
-        if (bundle != null) {
-            sn = bundle.getString("SN");
-            cActivity = bundle.getString("CALLINGACTIVITY");
-            if (!oldsn.equals(sn)) {
-                myWebViewClient webViewClient = new myWebViewClient();
-                Log.d(TAG, "onResume if");
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = 'serialno'})()");
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = '" + sn + "'})()");
-                if (webViewClient.counter == 0)
-                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('btn btn-sm btn-danger btn-round');" +
-                            "var l = x.length;" +
-                            "console.log('button');" +
-                            "console.log(l);" +
-                            "x[0].click()})()");
-                webViewClient.counter++;
+        try {
+            loadSpinner();
+            Intent intent = getIntent();
+            Bundle bundle = getIntent().getExtras();
+            if (bundle == null) {
+                return;
             }
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setTitle(sn);
-            Log.d(TAG, "onResume else:  new " + sn + "  old " + oldsn);
+            if (bundle != null) {
+                sn = bundle.getString("SN");
+                cActivity = bundle.getString("CALLINGACTIVITY");
+                if (!oldsn.equals(sn)) {
+                    myWebViewClient webViewClient = new myWebViewClient();
+                    Log.d(TAG, "onResume if");
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = 'serialno'})()");
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = '" + sn + "'})()");
+                    if (webViewClient.counter == 0)
+                        mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('btn btn-sm btn-danger btn-round');" +
+                                "var l = x.length;" +
+                                "console.log('button');" +
+                                "console.log(l);" +
+                                "x[0].click()})()");
+                    webViewClient.counter++;
+                }
+                setSupportActionBar(toolbar);
+                getSupportActionBar().setTitle(sn);
+                Log.d(TAG, "onResume else:  new " + sn + "  old " + oldsn);
+
+            }
+
+        } catch (Exception ex) {
+            Toast.makeText(mqactivity, "Error in Page Loading", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -296,64 +315,70 @@ public class MQWebViewActivity extends AppCompatActivity implements AdapterView.
             super.onPageFinished(view, url);
             view.setInitialScale(80);
 
+            try {
+                progressBar.setVisibility(View.GONE);
+                //  Toast.makeText(MainActivity.this, "onPageFinished called", Toast.LENGTH_SHORT).show();
+                String currentURL = mywebView.getUrl();
+                Log.d(TAG, "onPageFinished: " + url);
 
-            progressBar.setVisibility(View.GONE);
-            //  Toast.makeText(MainActivity.this, "onPageFinished called", Toast.LENGTH_SHORT).show();
-            String currentURL = mywebView.getUrl();
-            Log.d(TAG, "onPageFinished: " + url);
-
-            if (currentURL.equals(loginPage)) {
-                spinnerID.setVisibility(View.VISIBLE);
-            } else spinnerID.setVisibility(View.INVISIBLE);
+                if (currentURL.equals(loginPage)) {
+                    spinnerID.setVisibility(View.VISIBLE);
+                } else spinnerID.setVisibility(View.INVISIBLE);
 
 
-            if (currentURL.equals(loginPage)) {
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('form-control');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = '" + MQID1 + "'})()");
+                if (currentURL.equals(loginPage)) {
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('form-control');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = '" + MQID1 + "'})()");
 
-                mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
-                //  mywebView.loadUrl("javascript:(function() { document.getElementById('submitbutton').click() ; ;})()");
+                    mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
+                    //  mywebView.loadUrl("javascript:(function() { document.getElementById('submitbutton').click() ; ;})()");
+
+                }
+                if (currentURL.equals(redirectLoginPage)) {
+                    mywebView.loadUrl("javascript:(function() { document.getElementById('username').value = '" + MQID1 + "'; ;})()");
+                    mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
+                }
+                if (currentURL.equals(afterLoginPage + MQID1) && counter == 0) {
+                    // setting option selected
+                    Log.d(TAG, "options");
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setTitle(sn);
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = 'serialno'})()");
+                    //setting serial no
+                    Log.d(TAG, "input search");
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = '" + sn + "'})()");
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('btn btn-sm btn-danger btn-round');" +
+                            "var l = x.length;" +
+                            "console.log('button');" +
+                            "console.log(l);" +
+                            "x[0].click()})()");
+                    counter++;
+                } else {
+                    // Toast.makeText(MQWebViewActivity.this, ""+currentURL, Toast.LENGTH_SHORT).show();
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = 'serialno'})()");
+                    mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
+                            "var l = x.length;" +
+                            "console.log(l);" +
+                            "x[0].value = '" + sn + "'})()");
+                }
+                Log.d(TAG, "onPageFinished and counter is: " + counter);
+            } catch (Exception ex) {
+
+                Toast.makeText(MQWebViewActivity.this, "Error in Page Loading", Toast.LENGTH_SHORT).show();
 
             }
-            if (currentURL.equals(redirectLoginPage)) {
-                mywebView.loadUrl("javascript:(function() { document.getElementById('username').value = '" + MQID1 + "'; ;})()");
-                mywebView.loadUrl("javascript:(function() { document.getElementById('upass').value = '" + MQPASS1 + "'; ;})()");
-            }
-            if (currentURL.equals(afterLoginPage + MQID1) && counter == 0) {
-                // setting option selected
-                Log.d(TAG, "options");
-                setSupportActionBar(toolbar);
-                getSupportActionBar().setTitle(sn);
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = 'serialno'})()");
-                //setting serial no
-                Log.d(TAG, "input search");
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = '" + sn + "'})()");
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('btn btn-sm btn-danger btn-round');" +
-                        "var l = x.length;" +
-                        "console.log('button');" +
-                        "console.log(l);" +
-                        "x[0].click()})()");
-                counter++;
-            } else {
-                // Toast.makeText(MQWebViewActivity.this, ""+currentURL, Toast.LENGTH_SHORT).show();
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('inner_custom');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = 'serialno'})()");
-                mywebView.loadUrl("javascript:(function() { var x = document.getElementsByClassName('nav-search-input');" +
-                        "var l = x.length;" +
-                        "console.log(l);" +
-                        "x[0].value = '" + sn + "'})()");
-            }
-            Log.d(TAG, "onPageFinished and counter is: " + counter);
+
         }
 
         @Override

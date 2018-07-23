@@ -1,7 +1,5 @@
 package com.example.saggu.myapplication;
 
-import android.*;
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,7 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 
-public class MainActivity extends AppCompatActivity implements  GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     static final Integer Storage = 0x3;
     static final Integer CALL = 0x2;
     String TAG = "MainActivity";
@@ -52,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        pinEnter = (EditText) findViewById(R.id.pinEnter);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -68,22 +69,6 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
                 // ...
             }
         };
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-
-            }
-        };
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -93,24 +78,27 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+
         signIn();
 
-        setContentView(R.layout.activity_main);
-        pinEnter = (EditText) findViewById(R.id.pinEnter);
 
-        if (checkApi() >= 23){
+        if (checkApi() >= 23) {
             permission();
         }
         loadShardPref();
 
     }
+
+
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
+
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -123,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
             } else Log.d(TAG, "Log in failed");
         }
     }
+
     private void firebaseAuthWithGoogle(GoogleSignInAccount accnt) {
         AuthCredential credential = GoogleAuthProvider.getCredential(accnt.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -130,11 +119,14 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d("AUTH", " signInWithCredential:OnComplete: " + task.isSuccessful());
+
                         getCurrentUser();
+
 
                     }
                 });
     }
+
     private void getCurrentUser() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -153,11 +145,11 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
     }
 
 
-
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "Connection failed");
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -189,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
         } else
             Toast.makeText(this, "Wrong Password", Toast.LENGTH_SHORT).show();
     }
-
 
 
     public void permission() {
@@ -261,8 +252,8 @@ public class MainActivity extends AppCompatActivity implements  GoogleApiClient.
 
     public void loadShardPref() {
         SharedPreferences sharedPreferences = getSharedPreferences("Data", Context.MODE_PRIVATE);
-        String data = sharedPreferences.getString("pass","");
-        Log.d(TAG, "Old password: "+data);
+        String data = sharedPreferences.getString("pass", "");
+        Log.d(TAG, "Old password: " + data);
         oldp = data;
 
     }

@@ -208,7 +208,7 @@ public class ImportActivity extends AppCompatActivity implements View.OnClickLis
             try {
                 //   double x = Double.parseDouble(columns[0]);
                 //   double y = Double.parseDouble(columns[1]);
-                //    double z = Double.parseDouble(columns[2]);
+                //   double z = Double.parseDouble(columns[2]);
 
                 String name = columns[0];
                 String mob = columns[1];

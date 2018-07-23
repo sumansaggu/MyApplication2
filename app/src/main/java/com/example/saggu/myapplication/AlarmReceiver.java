@@ -20,8 +20,7 @@ import java.util.Date;
 
 
 public class AlarmReceiver extends BroadcastReceiver {
-    AlarmManager alarmManager;
-    PendingIntent pendingIntent;
+
     DbHendler dbHendler;
     String TAG = "Alarm Reciever";
     String done = "DONE";
@@ -42,13 +41,14 @@ public class AlarmReceiver extends BroadcastReceiver {
         Log.d(TAG, flag);
         Log.d(TAG, "Day is " + date);
 
-
+       //date == 1 means it will update the balance on 1st of every month
         if (date == 1 && flag.equals(notDone)) {
             dbHendler.copyDbToExternalStorage(context);
             dbHendler.monthFlagChange(done);
             String fl = dbHendler.monthFlag();
             Log.d(TAG, "flag changed to " + fl);
             Log.d(TAG, "balance will be updated");
+          // Balance will be updated
             dbHendler.endOfMonth(context);
 
         }

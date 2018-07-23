@@ -57,7 +57,7 @@ import me.tatarka.support.job.JobScheduler;
 
 
 // TODO: 1/16/2017  prevent reverse engineering (will use minify)
-// TODO: 1/25/2017  email support to be added    (crash reporting option will be used)
+// TODO: 1/25/2017  email support to be added (crash reporting option will be used)
 // TODO: 2/13/2017 start and stop date needed(cut option)
 // TODO: 5/10/2017 filter list itmes from adaptor NOT requrey from sqlite
 // TODO: 5/12/2017 pagerefresh to be added in webview and
@@ -102,7 +102,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
         jobScheduler = JobScheduler.getInstance(this);
 
         setContentView(R.layout.activity_view_all);
-        // recovering the instance state
+
         dbHendler = new DbHendler(this, null, null, 1);
 
         listViewCustomers = (ListView) findViewById(R.id.listView);
@@ -293,16 +293,7 @@ public class ViewAll extends AppCompatActivity implements Communicator, AdapterV
             dialogSTB.show(manager, "DialogSTB");
 
 
-        }/* else if (item.getTitle() == "Detail") {
-            android.app.FragmentManager manager = getFragmentManager();
-            Bundle bundle = new Bundle();
-            DialogFeesDetail dialogFeesDetail = new DialogFeesDetail();
-            dialogFeesDetail.setArguments(bundle);
-            int id = (int) menuInfo.id;
-            bundle.putInt("ID", id);
-            dialogFeesDetail.show(manager, "FeeDetailDialog");
-            // Toast.makeText(getApplicationContext(), "Selected For " + menuInfo.id, Toast.LENGTH_LONG).show();
-*/ else if (item.getTitle() == "Detail") {
+        }else if (item.getTitle() == "Detail") {
             int id = (int) menuInfo.id;
             Intent intent = new Intent(this, DetailFeesActivity.class);
             intent.putExtra("ID", id);

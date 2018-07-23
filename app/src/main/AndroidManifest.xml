@@ -70,7 +70,8 @@
             android:launchMode="singleInstance" />
         <activity android:name=".ImportActivity" />
         <activity android:name=".DetailFeesActivity" />
-        <activity android:name=".IDPWActivity"></activity>
+        <activity android:name=".IDPWActivity" />
+        <activity android:name=".OldDBBrowser"></activity>
     </application>
 
 </manifest>

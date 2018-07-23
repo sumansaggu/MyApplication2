@@ -65,11 +65,7 @@ public class DetailFeesActivity extends AppCompatActivity implements View.OnClic
                 textview.setText("Unable to generate cursor.");
                 return;
             }
-            /*if (cursor.getCount() == 0)
-            {
-                textView4.setText("No Products in the Database.");
-                return;
-            }*/
+
             String[] columns = new String[]{
 
                     //  DbHendler.KEY_NAME,

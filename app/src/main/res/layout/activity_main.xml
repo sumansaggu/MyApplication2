@@ -18,6 +18,7 @@
         android:layout_centerHorizontal="true" />
 
     <EditText
+
         android:id="@+id/pinEnter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
