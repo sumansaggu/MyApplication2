@@ -11,8 +11,8 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="NAME:" />
 
     <TextView
@@ -20,9 +20,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/textView"
         android:maxLength="30"
         android:text="SSSSSSSSSSSSSsssss" />
@@ -31,18 +31,18 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/textView2"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="MOB:" />
 
     <TextView
         android:id="@+id/pMob"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/pName"
-        android:layout_alignStart="@+id/pName"
         android:layout_below="@+id/pName"
+        android:layout_alignStart="@+id/pName"
+        android:layout_alignLeft="@+id/pName"
         android:text="8888888888" />
 
     <TextView
@@ -50,9 +50,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/textView3"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="Con.No." />
 
     <TextView
@@ -65,56 +65,66 @@
         android:text="13" />
 
     <RelativeLayout
-        android:id="@+id/relativeLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="97dp"
         android:layout_height="wrap_content"
-        android:paddingRight="10dp"
-        android:layout_below="@+id/pName"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignTop="@+id/textView"
+
+        android:layout_alignEnd="@+id/cFees"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/ss">
 
         <TextView
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/textView5"
-            android:text="Bal:    Rs." />
+            android:layout_alignTop="@+id/textView2"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="38dp"
+            android:layout_marginRight="38dp"
+            android:text="Bal:    Rs."
+            android:textColor="@color/cast_expanded_controller_text_color"
+            tools:layout_editor_absoluteX="201dp"
+            tools:layout_editor_absoluteY="60dp" />
 
         <TextView
             android:id="@+id/cBalance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-            android:layout_below="@+id/cFees"
-            android:layout_toEndOf="@+id/textView5"
-            android:layout_toRightOf="@+id/textView5"
-            android:text="0000" />
-
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:text="Fees: Rs. " />
-
-        <TextView
-            android:id="@+id/cFees"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-
-
-            android:layout_toEndOf="@+id/textView5"
-            android:layout_toRightOf="@+id/textView5"
-            android:text="280" />
-
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="1dp"
+            android:layout_marginRight="1dp"
+            android:text="0000"
+            android:textColor="@color/cast_expanded_controller_text_color" />
     </RelativeLayout>
+ <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_alignTop="@+id/textView2"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="58dp"
+        android:layout_marginRight="58dp"
+        android:text="Fees:  Rs." />
+
+    <TextView
+        android:id="@+id/cFees"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+
+        android:layout_alignTop="@+id/textView5"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="21dp"
+        android:layout_marginRight="21dp"
+        android:text="280" />
 
     <TextView
         android:id="@+id/vc_mac"
@@ -130,8 +140,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/pMob"
-        android:layout_marginLeft="25dp"
         android:layout_marginStart="25dp"
+        android:layout_marginLeft="25dp"
         android:layout_toEndOf="@+id/cNo"
         android:layout_toRightOf="@+id/cNo"
         android:text="C" />
@@ -140,27 +150,27 @@
         android:id="@+id/txtnickname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SSSSS"
         android:layout_below="@+id/vc_mac"
+        android:layout_alignStart="@+id/vc_mac"
         android:layout_alignLeft="@+id/vc_mac"
-        android:layout_alignStart="@+id/vc_mac" />
+        android:text="SSSSS" />
 
     <TextView
         android:id="@+id/textView27"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="S/N:" />
 
     <TextView
         android:id="@+id/textView25"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_below="@+id/textView27"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:text="Other:" />
 
 

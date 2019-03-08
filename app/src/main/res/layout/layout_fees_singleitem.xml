@@ -1,70 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-
-    <RelativeLayout
-        android:layout_height="40dp"
-        android:layout_width="80dip"
-        android:id="@+id/feesbox"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-
-        <TextView
-            android:text="  Rs."
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView11"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:text="Fees"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/feesInList"
-            android:layout_alignBaseline="@+id/textView11"
-            android:layout_alignBottom="@+id/textView11"
-            android:layout_centerHorizontal="true" />
-    </RelativeLayout>
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_height="40dp"
-        android:layout_width="100dp"
         android:id="@+id/datebox"
-        android:layout_toEndOf="@+id/feesbox"
-       >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/dateInList"
-
-            android:text="Date"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp" />
-    </RelativeLayout>
-    <RelativeLayout
+        android:layout_width="80dp"
         android:layout_height="40dp"
-        android:layout_width="wrap_content"
-        android:layout_toEndOf="@+id/datebox"
-        >
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="-183dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/feesbox">
 
         <TextView
+            android:id="@+id/dateInList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-
-            android:text="Remark"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
+            android:layout_marginStart="7dp"
+            android:layout_marginLeft="7dp"
+            android:text="2018-88-88" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/feesbox"
+        android:layout_width="50dip"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="133dp"
+        android:layout_marginLeft="133dp"
+        android:layout_marginTop="0dp">
+
+        <TextView
+            android:id="@+id/feesInList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textView11"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="11dp"
+            android:layout_marginLeft="11dp"
+            android:layout_marginBottom="11dp"
+            android:text="Fees" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="50dip"
+        android:layout_height="40dip"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="-101dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/feesbox">
+
+        <TextView
+            android:id="@+id/lastbalInList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="lbal" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="50dip"
+        android:layout_height="40dip"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/feesbox">
+
+        <TextView
+            android:id="@+id/curBalInList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="cbal" />
+
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="150dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@+id/datebox">
+
+        <TextView
+            android:id="@+id/remarkInList"
+            android:layout_width="wrap_content"
+
+
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:id="@+id/remarkInList" />
+            android:layout_centerVertical="true"
+            android:text="Remark" />
     </RelativeLayout>
 
 

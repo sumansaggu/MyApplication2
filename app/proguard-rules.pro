@@ -18,3 +18,4 @@
 
 -keepattributes Signature
 -keepattributes *Annotation*
+

@@ -62,7 +62,7 @@ public class DetailFeesActivity extends AppCompatActivity implements View.OnClic
 
             Cursor cursor = dbHendler.getFeesToList(id);
             if (cursor == null) {
-                textview.setText("Unable to generate cursor.");
+                Log.d(TAG, "displayFeeDeatail: cursor is null");
                 return;
             }
 
@@ -71,14 +71,18 @@ public class DetailFeesActivity extends AppCompatActivity implements View.OnClic
                     //  DbHendler.KEY_NAME,
                     //  DbHendler.KEY_PHONE_NO,
 
-                    DbHendler.KEY_RECIEPT,
+
                     DbHendler.KEY_DATE,
+                    DbHendler.KEY_RECIEPT,
+                    "lBalance",
+                    "curBalance",
                     DbHendler.KEY_REMARK
             };
             int[] boundTo = new int[]{
-
-                    R.id.feesInList,
                     R.id.dateInList,
+                    R.id.feesInList,
+                    R.id.lastbalInList,
+                    R.id.curBalInList,
                     R.id.remarkInList
             };
             simpleCursorAdapter = new SimpleCursorAdapter(this,
@@ -90,7 +94,7 @@ public class DetailFeesActivity extends AppCompatActivity implements View.OnClic
             listViewFees.setAdapter(simpleCursorAdapter);
 
         } catch (Exception ex) {
-            Log.d(TAG, "error");
+            Log.d(TAG, "displayFeeDeatail: "+ex.toString());
             //  textview.setText("There was an error!");
         }
     }
@@ -108,11 +112,11 @@ public class DetailFeesActivity extends AppCompatActivity implements View.OnClic
 
             for (Fees fees : detail) {
 
-                String x = "Rs." + fees.getFees() + " " + fees.getDate() + ", ";
+                String x = "Rs." + fees.getFees() + "/- " + fees.getDate() + ",\n";
                 //    Log.d("single entry ", x);
                 y = y.concat(x);
             }
-            String z = "Payment due Rs. " + balance + ", " + y;
+            String z = "Payment due Rs. " + balance + ",\nLast Payments:\n" + y;
             sendSMS(z, mobNo);
             //  send(y, mobNo);
 

@@ -1,6 +1,7 @@
 package com.example.saggu.myapplication;
 
 import android.app.DialogFragment;
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -8,6 +9,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -21,6 +24,9 @@ public class BtwTwoDates extends AppCompatActivity implements Communicator {
     DbHendler dbHendler;
     String tag = "BtwTwoDates";
     String newDate = "";
+    ListView listView;
+    SimpleCursorAdapter simpleCursorAdapter;
+    String TAG = "btwTwoDates";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,21 +42,8 @@ public class BtwTwoDates extends AppCompatActivity implements Communicator {
         getDate();
         dateFrom.clearFocus();
         dateTo.clearFocus();
-
-       /* dateFrom.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                pickDateFrom();
-                return true;
-            }
-        });
-        dateTo.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                pickDateTo();
-                return true;
-            }
-        });*/
+        listView = findViewById(R.id.listViewBtwTwoDates);
+        listforBtwDates();
 
         dateFrom.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -81,7 +74,54 @@ public class BtwTwoDates extends AppCompatActivity implements Communicator {
         to = dateTo.getText().toString();
         int total = dbHendler.colectionBwtwoDates(from, to);
         from_to_textview.setText("" + total);
+        listforBtwDates();
 
+    }
+
+
+    public void listforBtwDates() {
+        String from, to;
+        from = dateFrom.getText().toString();
+        to = dateTo.getText().toString();
+        try {
+
+            Cursor cursor = dbHendler.listforBtwtwoDates(from, to);
+            if (cursor == null) {
+                Log.d(TAG, "listforBtwDates: cursor is null");
+                return;
+            }
+
+            String[] columns = new String[]{
+
+                    //  DbHendler.KEY_NAME,
+                    //  DbHendler.KEY_PHONE_NO,
+
+                    DbHendler.KEY_NAME,
+                    DbHendler.KEY_DATE,
+                    DbHendler.KEY_RECIEPT,
+                    //  "lBalance",
+                    "curBalance",
+                    DbHendler.KEY_REMARK
+            };
+            int[] boundTo = new int[]{
+                    R.id.btwTwoDatesName,
+                    R.id.btwTwoDatesDate,
+                    R.id.btwTwodatesAmount,
+                    R.id.btwTwoDatesBalance
+                    //R.id.remarkInList
+            };
+            simpleCursorAdapter = new SimpleCursorAdapter(this,
+                    R.layout.list_item_btw_two_dates,
+                    cursor,
+                    columns,
+                    boundTo,
+                    0);
+            listView.setAdapter(simpleCursorAdapter);
+
+        } catch (Exception ex) {
+            Log.d(TAG, "displayFeeDeatail: " + ex.toString());
+            //  textview.setText("There was an error!");
+        }
     }
 
 

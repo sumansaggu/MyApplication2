@@ -56,6 +56,75 @@
         android:layout_below="@+id/strt_date_in_dailog"
         android:background="#a40404" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/view"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="-1dp">
+
+
+        <TextView
+            android:id="@+id/textView34"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="17dp"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:text="Date" />
+
+        <TextView
+            android:id="@+id/textView36"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="0dp"
+            android:layout_toEndOf="@+id/textView34"
+            android:text="   LBal"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:id="@+id/textView37"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="3dp"
+            android:layout_marginTop="0dp"
+            android:layout_toEndOf="@+id/textView36"
+            android:text="Reciept" />
+
+        <TextView
+            android:id="@+id/textView38"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="121dp"
+            android:layout_marginRight="121dp"
+            android:text="Balance" />
+
+        <TextView
+            android:id="@+id/textView39"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="0dp"
+
+            android:layout_marginEnd="54dp"
+            android:layout_marginRight="54dp"
+            android:text="Remark" />
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/confees_tv"
         android:layout_width="wrap_content"
@@ -81,10 +150,13 @@
     <ListView
         android:id="@+id/fees_list"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
-        android:layout_alignParentLeft="true"
+        android:layout_height="400dip"
+        android:layout_below="@+id/view"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/view" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="21dp" />
 
     <ImageButton
         android:id="@+id/whatsApp"

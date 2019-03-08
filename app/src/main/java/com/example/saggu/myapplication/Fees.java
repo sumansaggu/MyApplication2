@@ -7,8 +7,13 @@ package com.example.saggu.myapplication;
 public class Fees {
     private int _id;
     private int _no;
-    private int _fees;
     private String _date;
+    private int _reciept;
+    private int _lBalance;
+    private int _curBalance;
+
+
+
     private String _remark;
 
     //empty cunstuctor
@@ -20,24 +25,27 @@ public class Fees {
 
         this._no = no;
         this._id = id;
-        this._fees = fees;
+        this._reciept = fees;
         this._date = date;
     }
 
     public Fees(int id, int fees, String date) {
 
         this._id = id;
-        this._fees = fees;
+        this._reciept = fees;
         this._date = date;
     }
 
-    public Fees(int id, int fees, String datefromEditText, String remark) {
-        this._id = id;
-        this._fees = fees;
-        this._date = datefromEditText;
-        this._remark = remark;
-    }
 
+
+    public Fees(int _id, String _date, int _reciept, int _lBalance, int _curBalance, String _remark) {
+        this._id = _id;
+        this._date = _date;
+        this._reciept = _reciept;
+        this._lBalance = _lBalance;
+        this._curBalance = _curBalance;
+        this._remark = _remark;
+    }
 
     //getters
     public int getNo() {
@@ -49,11 +57,18 @@ public class Fees {
     }
 
     public int getFees() {
-        return this._fees;
+        return this._reciept;
     }
 
     public String getDate() {
         return this._date;
+    }
+    public int get_lBalance() {
+        return _lBalance;
+    }
+
+    public int get_curBalance() {
+        return _curBalance;
     }
 
     public String getRemark() {
@@ -71,12 +86,18 @@ public class Fees {
     }
 
     public void setFees(int fees) {
-        this._fees = fees;
+        this._reciept = fees;
     }
 
     public void setDate(String date) {
         this._date = date;
     }
 
+    public void set_lBalance(int _lBalance) {
+        this._lBalance = _lBalance;
+    }
 
+    public void set_curBalance(int _curBalance) {
+        this._curBalance = _curBalance;
+    }
 }

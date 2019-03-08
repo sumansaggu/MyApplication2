@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,6 +50,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             Log.d(TAG, "flag changed to " + fl);
             Log.d(TAG, "balance will be updated");
           // Balance will be updated
+
+
             dbHendler.endOfMonth(context);
 
         }
@@ -60,11 +63,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         }
 
-
-
-
-
-        /*//Canceling the repeating alarm
+ /*//Canceling the repeating alarm
         Intent intentAlarm = new Intent(context, AlarmReceiver.class);
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         pendingIntent = PendingIntent.getBroadcast(context, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT);

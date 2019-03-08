@@ -1,5 +1,6 @@
 package com.example.saggu.myapplication;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,10 +33,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
-    static final Integer Storage = 0x3;
-    static final Integer CALL = 0x2;
+
     String TAG = "MainActivity";
     EditText pinEnter;
     String oldp;
@@ -83,7 +86,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
         if (checkApi() >= 23) {
-            permission();
+            //  permission();
+            checkAndRequestPermissions();
         }
         loadShardPref();
 
@@ -178,77 +182,60 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             finish();
-        } else
-            Toast.makeText(this, "Wrong Password", Toast.LENGTH_SHORT).show();
-    }
-
-
-    public void permission() {
-        askForPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Storage);
-    }
-
-    private void askForPermission(String permission, Integer requestCode) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission)) {
-
-                //This is called if user has denied the permission before
-                //In this case I am just asking the permission again
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
-
-            } else {
-
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
-            }
         } else {
-            // Toast.makeText(this, "" + permission + " is already granted.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Wrong Password", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private static final int MY_PERMISSIONS_REQUEST = 1;
+
+    private boolean checkAndRequestPermissions() {
+
+        int permissionWriteExternalStorage = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permissionReadPhoneState = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_PHONE_STATE);
+        int permissionSendSMS = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SEND_SMS);
+
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+
+        if (permissionWriteExternalStorage != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (permissionReadPhoneState != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if (permissionSendSMS != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.SEND_SMS);
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MY_PERMISSIONS_REQUEST);
+            return false;
+        }
+
+        return true;
+    }
+
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (ActivityCompat.checkSelfPermission(this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
-            switch (requestCode) {
-                //Location
-                case 1:
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
-                    break;
-                //Call
-                case 2:
-                    Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    callIntent.setData(Uri.parse("tel:" + "{This is a telephone number}"));
-                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                        startActivity(callIntent);
-                    }
-                    break;
+        Log.d(TAG, "onRequestPermissionsResult: " + requestCode);
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                //Write external Storage
-                case 3:
-                    break;
-                //Read External Storage
-                case 4:
-                    Intent imageIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(imageIntent, 11);
-                    break;
-                //Camera
-                case 5:
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(takePictureIntent, 12);
-                    }
-                    break;
-
-            }
-
-            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-            finish();
+                } else {
+                     checkAndRequestPermissions();
+                }
+                break;
         }
 
     }
+
 
     public void loadShardPref() {
         SharedPreferences sharedPreferences = getSharedPreferences("Data", Context.MODE_PRIVATE);

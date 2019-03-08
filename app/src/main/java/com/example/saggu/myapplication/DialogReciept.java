@@ -4,13 +4,16 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +38,8 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
     TextView date;
     EditText remark;
     Button Ok, Cancel;
+    CheckBox smsCheckbox,printCheckbox;
+    String phoneno;
 
 
     int id;
@@ -60,11 +65,17 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         date.setOnClickListener(this);
 
         remark = (EditText) view.findViewById(R.id.remarksEditText);
+        smsCheckbox = view.findViewById(R.id.sendSMScheckBox);
+        smsCheckbox.setOnClickListener(this);
+        printCheckbox= view.findViewById(R.id.printcheckBox);
+        printCheckbox.setOnClickListener(this);
+
 
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         Bundle bundle = getArguments();
         id = bundle.getInt("ID");
-        //  setCancelable(false); //preventing from cancel when clicking on background
+        // setCancelable(false);
+        // preventing from cancel when clicking on background
         dbHendler = new DbHendler(getActivity(), null, null, 1);
         getinformation();
         getDate();
@@ -87,10 +98,23 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             pickDate();
         }
         if (v.getId() == R.id.buttonYes) {
-            updateReciept();
-            getinformation();
-            viewfeestable();
-            dismiss();
+            if (reciept_dialog.getText().toString().equals("")) {
+                Toast.makeText(this.getActivity(), "Enter the correct amount", Toast.LENGTH_SHORT).show();
+            } else {
+                updateReciept();
+                getinformation();
+                //viewfeestable();
+
+                dismiss();
+            }
+        }
+        if (v.getId() == R.id.printcheckBox) {
+
+            if (printCheckbox.isChecked()) {
+                Toast.makeText(this.getActivity(), "Print option is not working yet", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this.getActivity(), "Print option will be added soon", Toast.LENGTH_SHORT).show();
+            }
         }
         if (v.getId() == R.id.buttonNo) {
             dismiss();
@@ -102,20 +126,22 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
         PersonInfo personInfo = dbHendler.getCustInfo(id);
         String name = personInfo.getName().toString().trim();
         title_dialog.setText(name);
+        phoneno = personInfo.getPhoneNumber().toString().trim();
+
         int fees = personInfo.get_fees();
-        String fEES = Integer.toString(fees);
+
         int balance = personInfo.get_balance();
-        String bALANCE = Integer.toString(balance);
-        fees_dailog.setText(fEES);
-        balance_dialog.setText(bALANCE);
+
+        fees_dailog.setText(Integer.toString(fees));
+        balance_dialog.setText(Integer.toString(balance));
         //getDialog().setTitle(name);
     }
 
 
     public void updateReciept() {
         PersonInfo personInfo = dbHendler.getCustInfo(id);
-        int balance = personInfo.get_balance();
-        Log.d(TAG, "" + balance);
+        int lbalance = personInfo.get_balance();
+        Log.d(TAG, "" + lbalance);
 
         String Reciept = reciept_dialog.getText().toString().trim();
         if (Reciept.equals("")) {
@@ -125,14 +151,19 @@ public class DialogReciept extends DialogFragment implements View.OnClickListene
             int id = this.id;
             int reciept = Integer.parseInt(Reciept);
             String datefromEditText = date.getText().toString().trim();
-            Log.d(TAG, "" + (balance - reciept));
-            int newbalance = balance - reciept;
+            Log.d(TAG, "" + (lbalance - reciept));
+            int curBalance = lbalance - reciept;
             String name = personInfo.getName();
             String remark = this.remark.getText().toString();
 
-            dbHendler.updateBalance(new PersonInfo(id, newbalance));  //new balance to customer table
-            dbHendler.addFees(new Fees(id, reciept, datefromEditText, remark));//fees recieved and date to fees table
+            dbHendler.updateBalance(new PersonInfo(id, curBalance));  //new balance to customer table
+            dbHendler.addFees(new Fees(id, datefromEditText, reciept,lbalance,curBalance,  remark));//fees recieved and date to fees table
 
+            if (smsCheckbox.isChecked()) {
+                Log.d(TAG, "checkbox checked");
+                String smsBody="Dear Customer.\nYour Last CableTV Balance was " + lbalance+ ".\nRecived: "+reciept+". Current Balance is "+curBalance+"\nThank you";
+                SmsManager.getDefault().sendTextMessage(phoneno,null,smsBody,null,null);
+            }
             ViewAll activity = (ViewAll) getActivity();
             activity.refreshListView();
             Toast.makeText(this.getActivity(), "Added Rs. " + reciept + " to " + name, Toast.LENGTH_SHORT).show();

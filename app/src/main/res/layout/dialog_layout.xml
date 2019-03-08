@@ -6,102 +6,91 @@
     android:id="@+id/dailog_fees">
 
     <TextView
-        android:text="Enter the fees"
+        android:id="@+id/title_dialog"
         android:layout_width="116dp"
         android:layout_height="37dp"
-        android:id="@+id/title_dialog"
-        android:textSize="20sp"
-        android:layout_weight="0.00"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:textAlignment="center" />
-
-    <TextView
-        android:text="8888"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/textView9"
-        android:layout_alignRight="@+id/fees_dialog"
-        android:layout_alignEnd="@+id/fees_dialog"
-        android:id="@+id/balance_dialog" />
-
-    <TextView
-        android:text="Balance:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView9"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/textView8"
-        android:layout_alignLeft="@+id/textView8"
-        android:layout_alignStart="@+id/textView8" />
-
-    <TextView
-        android:text="Enter Payment:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView7"
-        android:layout_below="@+id/textView9"
-        android:layout_alignLeft="@+id/textView9"
-        android:layout_alignStart="@+id/textView9"
-        android:layout_marginTop="12dp" />
-
-    <TextView
-        android:text="Fees:"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp"
-        android:layout_marginStart="24dp"
-        android:id="@+id/textView8"
-        android:layout_below="@+id/title_dialog"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_weight="0.00"
+        android:text="Enter the fees"
+        android:textAlignment="center"
+        android:textSize="12sp" />
 
     <TextView
-        android:text="8888"
+        android:id="@+id/balance_dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/fees_dialog"
+        android:layout_alignParentEnd="true"
         android:layout_below="@+id/title_dialog"
-        android:layout_toRightOf="@+id/textView7"
-        android:layout_toEndOf="@+id/textView7" />
+        android:layout_marginEnd="23dp"
+        android:text="8888" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/title_dialog"
+        android:layout_marginEnd="65dp"
+        android:text="Balance:" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/reciept_dialog"
+        android:layout_toStartOf="@+id/fees_dialog"
+        android:text="Reciept:" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title_dialog"
+        android:layout_toEndOf="@+id/date_diaglog"
+        android:text="Fees:" />
+
+    <TextView
+        android:id="@+id/fees_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/date"
+        android:layout_below="@+id/title_dialog"
+        android:text="8888" />
 
     <EditText
-        android:layout_height="wrap_content"
-        android:inputType="numberSigned|numberDecimal"
-        android:ems="10"
         android:id="@+id/reciept_dialog"
-        android:textSize="15sp"
-        android:layout_width="60dp"
-        android:hint="Rupees"
-        android:layout_alignBaseline="@+id/textView7"
-        android:layout_alignBottom="@+id/textView7"
-        android:layout_toRightOf="@+id/balance_dialog"
-        android:layout_toEndOf="@+id/balance_dialog"
-        />
-
-    <TextView
-        android:text="Date:"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:id="@+id/date_diaglog"
-        android:layout_alignBaseline="@+id/date"
-        android:layout_alignBottom="@+id/date"
-        android:layout_alignRight="@+id/textView8"
-        android:layout_alignEnd="@+id/textView8" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="date"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="71dp"
+        android:layout_marginTop="67dp"
         android:ems="10"
+        android:hint="Rupees"
+        android:inputType="numberSigned|numberDecimal"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/date_diaglog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/date"
+        android:text="Date:" />
+
+    <TextView
         android:id="@+id/date"
-        android:textSize="15sp"
-        android:layout_below="@+id/reciept_dialog"
-        android:layout_toRightOf="@+id/textView7"
-        android:layout_toEndOf="@+id/textView7"
-        android:layout_marginTop="13dp" />
+        android:layout_width="115dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/reciept_dialog"
+        android:layout_marginTop="145dp"
+        android:ems="10"
+        android:inputType="date"
+        android:textSize="15sp" />
 
     <EditText
         android:layout_width="match_parent"
@@ -134,5 +123,23 @@
         android:layout_below="@+id/buttonYes"
         android:layout_centerVertical="true"
         android:text="Cancel" />
+
+    <CheckBox
+        android:id="@+id/sendSMScheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/date_diaglog"
+        android:layout_marginEnd="15dp"
+        android:checked="true"
+        android:text="Send SMS" />
+
+    <CheckBox
+        android:id="@+id/printcheckBox"
+        android:layout_width="94dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/sendSMScheckBox"
+        android:layout_below="@+id/textView7"
+        android:text="Print" />
 
 </RelativeLayout>

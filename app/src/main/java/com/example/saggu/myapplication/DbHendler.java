@@ -428,6 +428,9 @@ public class DbHendler extends SQLiteOpenHelper {
         }
     }
 
+
+
+
     //region serarch person to list
     public Cursor searchSTBToList(String STBsearch) {
         SQLiteDatabase db = getWritableDatabase();
@@ -446,7 +449,11 @@ public class DbHendler extends SQLiteOpenHelper {
     public Cursor getLargerBalance() {
         SQLiteDatabase db = getWritableDatabase();
 
-        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus,fees,balance, " + KEY_NICKNAME + ", serialNo FROM " + TABLE_PERSON_INFO + " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID ORDER BY " + KEY_BALANCE + " DESC ;";
+        String query = "SELECT personinfo._id,name,phone_no,cust_no,constatus,fees,balance, " + KEY_NICKNAME + ", serialNo " +
+                "FROM " + TABLE_PERSON_INFO +
+                " LEFT JOIN " + TABLE_STB + " ON STBRECORD._ID = PERSONINFO.STBID " +
+                "ORDER BY " + KEY_BALANCE + " DESC ;";
+
         Log.d(TAG, "getLargerBalance: " + query);
         Cursor cursor = db.rawQuery(query, null);
         if (cursor != null) {
@@ -457,6 +464,25 @@ public class DbHendler extends SQLiteOpenHelper {
         }
     }
     //endregion
+    public Cursor listforBtwtwoDates(String from, String to) {
+        String selectQuery = "SELECT "+TABLE_FEES+"."+KEY_ID+", "+KEY_RECIEPT+",curBalance, "+KEY_DATE+", "+KEY_REMARK+", "+KEY_NAME+", "+TABLE_PERSON_INFO+"._id"+
+                " FROM " + TABLE_FEES +
+                " LEFT JOIN " + TABLE_PERSON_INFO + " ON " + TABLE_PERSON_INFO + "._id =" + TABLE_FEES + "._id" +
+                " WHERE " + KEY_DATE + " BETWEEN '" + from + "' AND '" + to+"'" ;
+        Log.d(TAG, "listforBtwtwoDates: " + selectQuery);                                                                                                                           //   LEFT JOIN STBRECORD ON STBRECORD._ID = PERSONINFO.STBID ORDER BY cust_no ASC ";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor;
+
+        } else {
+            return null;
+        }
+
+
+    }
 
 
     //region serarch person
@@ -485,9 +511,9 @@ public class DbHendler extends SQLiteOpenHelper {
     //region getFeesToList
     public Cursor getFeesToList(int id) {
         String custmor = "" + id;
-        //  Log.d(TAG, custmor);
+        Log.d(TAG, custmor);
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {KEY_NO, KEY_ID, KEY_RECIEPT, KEY_DATE, KEY_REMARK};
+        String[] columns = {KEY_NO, KEY_ID, KEY_DATE, KEY_RECIEPT, "lBalance", "curBalance", KEY_REMARK};
         // String[] selArgs = {custmor};
 
         Cursor cursor = db.query(TABLE_FEES, columns, KEY_ID + " = '" + custmor + "'", null, null, null, KEY_DATE + " ASC");
@@ -504,7 +530,7 @@ public class DbHendler extends SQLiteOpenHelper {
     public List<Fees> getFeesForMsg(int id) {
         List<Fees> feesDetail = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {KEY_NO, KEY_ID, KEY_RECIEPT, KEY_DATE, KEY_REMARK};
+        String[] columns = {KEY_NO, KEY_ID, KEY_DATE, KEY_RECIEPT, "lBalance", "curBalance", KEY_REMARK};
         Cursor cursor = db.query(TABLE_FEES, columns, KEY_ID + " = '" + id + "'", null, null, null, KEY_DATE + " ASC");
 
         if (cursor.moveToFirst()) {
@@ -636,8 +662,10 @@ public class DbHendler extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_ID, fees.getId());
-        values.put(KEY_RECIEPT, fees.getFees());
         values.put(KEY_DATE, fees.getDate());
+        values.put(KEY_RECIEPT, fees.getFees());
+        values.put("lBalance", fees.get_lBalance());
+        values.put("curBalance", fees.get_curBalance());
         values.put(KEY_REMARK, fees.getRemark());
         db.insert(TABLE_FEES, null, values);
         db.close();
@@ -940,6 +968,8 @@ public class DbHendler extends SQLiteOpenHelper {
 
 
     //region end of month
+
+
     public void endOfMonth(Context context) {
         String selectQuery = "SELECT  * FROM " + TABLE_PERSON_INFO + " WHERE " + KEY_CONSTATUS + " = 'ACTIVE'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -1185,8 +1215,9 @@ public class DbHendler extends SQLiteOpenHelper {
                 Fees fees = new Fees();
                 fees.setNo(Integer.parseInt(cursor.getString(0)));
                 fees.setID(Integer.parseInt(cursor.getString(1)));
-                fees.setFees(Integer.parseInt(cursor.getString(2)));
-                fees.setDate(cursor.getString(3));
+                fees.setFees(Integer.parseInt(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_FEES))));
+                fees.setDate(cursor.getString(cursor.getColumnIndex(DbHendler.KEY_DATE)));
+
                 // Adding fees to list
                 feeslist.add(fees);
             } while (cursor.moveToNext());
@@ -1251,5 +1282,7 @@ public class DbHendler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         onCreate(db);
     }
+
+
 }
 
